@@ -1,0 +1,2747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>moo.cash — live</title>
+<meta name="theme-color" content="#FFFDF6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --milk:#FFFDF6; --milk-2:#FFF8E7; --cream:#FBF0D6; --cream-2:#F5E6C4;
+  --grass:#3E9B4F; --grass-d:#2C7139; --grass-dd:#1F5228; --grass-lt:#CBE9A9; --grass-pale:#E4F5D2; --lime:#9DD44F;
+  --hide:#1C1A17; --hide-70:rgba(28,26,23,.70); --hide-50:rgba(28,26,23,.50); --hide-30:rgba(28,26,23,.30);
+  --muzzle:#FFB8C6; --butter:#FFCC4D; --barn:#E8613C; --white:#FFFFFF;
+  --ok:#2C7139; --warn:#C98A10; --warn-bg:#FFEFC7; --stop:#B5372B; --stop-bg:#FCE3DE; --live:#D92D20;
+  --bd:2.5px solid var(--hide); --sh:4px 4px 0 var(--hide); --sh-sm:2.5px 2.5px 0 var(--hide); --sh-lg:6px 6px 0 var(--hide);
+  --r:24px; --r-sm:15px; --pill:999px;
+  --disp:'Baloo 2',system-ui,sans-serif; --body:'Nunito',system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:var(--body);background:var(--milk);color:var(--hide);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--disp);font-weight:800;letter-spacing:-.01em;margin:0}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+#grassband{position:fixed;left:0;right:0;bottom:0;height:110px;pointer-events:none;z-index:0;opacity:.45}
+#app{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:0 16px 140px;min-height:100vh}
+.screen{display:none;animation:up .26s cubic-bezier(.2,.8,.3,1)}
+.screen.on{display:block}
+@keyframes up{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+/* live banner */
+#liveBar{position:sticky;top:0;z-index:50;margin:0 -16px 12px;padding:9px 16px;background:var(--live);color:#fff;
+  font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;justify-content:center;letter-spacing:.03em}
+#liveBar .dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:14px 0 16px}
+.brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.brand .mk{width:38px;height:38px;flex:none}
+.wordmark{font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:-.03em}
+.hdr h1{font-size:26px}
+.ib{width:44px;height:44px;border-radius:var(--pill);border:var(--bd);box-shadow:var(--sh-sm);display:grid;place-items:center;background:var(--white);flex:none;transition:.12s}
+.ib:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.ib svg{width:19px;height:19px;stroke:var(--hide);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ib.g{background:var(--grass)} .ib.g svg{stroke:#fff}
+
+.card{background:var(--white);border:var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:19px;margin-bottom:16px;position:relative;overflow:hidden}
+.card.grass{background:var(--grass);color:#fff;box-shadow:var(--sh-lg)}
+.card.pale{background:var(--grass-pale)} .card.cream{background:var(--cream)} .card.butter{background:var(--butter)}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;opacity:.62;margin-bottom:7px}
+.big{font-family:var(--disp);font-weight:800;font-size:54px;line-height:.95;letter-spacing:-.03em}
+.big .dec{font-size:26px;opacity:.6}
+.sub{font-size:14px;opacity:.72;margin-top:7px;font-weight:700}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:var(--pill);background:var(--cream);border:1.8px solid var(--hide)}
+.card.grass .chip{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff}
+.chip.ok{background:var(--grass-lt)} .chip.warn{background:var(--warn-bg)} .chip.stop{background:var(--stop-bg)} .chip.pink{background:var(--muzzle)}
+.chip.dim{opacity:.55}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--disp);font-weight:700;font-size:16px;
+  padding:12px 18px;border-radius:var(--pill);border:var(--bd);box-shadow:var(--sh-sm);background:var(--white);color:var(--hide);width:100%;transition:.12s}
+.btn:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.btn:disabled{opacity:.42;pointer-events:none}
+.btn.grass{background:var(--grass);color:#fff} .btn.lime{background:var(--lime)} .btn.butter{background:var(--butter)}
+.btn.pink{background:var(--muzzle)} .btn.barn{background:var(--barn);color:#fff} .btn.dark{background:var(--hide);color:#fff}
+.btn.ghost{background:transparent;box-shadow:none;border-color:transparent}
+.btn.sm{font-size:13.5px;padding:9px 14px;width:auto}
+.row{display:flex;gap:11px} .row>*{flex:1}
+
+.sect{display:flex;align-items:baseline;justify-content:space-between;margin:24px 2px 13px}
+.sect h2{font-size:20px}
+.sect a{font-size:13px;color:var(--grass-d);font-weight:800;cursor:pointer}
+
+.li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:2px dashed rgba(28,26,23,.13)}
+.li:last-child{border-bottom:none}
+.li .av{width:42px;height:42px;border-radius:var(--pill);border:2.5px solid var(--hide);display:grid;place-items:center;font-size:17px;font-weight:800;flex:none;font-family:var(--disp)}
+.li .mid{flex:1;min-width:0}
+.li .t{font-weight:800;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .s{font-size:12px;opacity:.6;font-weight:700;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .r{text-align:right;flex:none}
+.li .r .v{font-family:var(--disp);font-weight:800;font-size:15px}
+.li .r .u{font-size:11px;opacity:.55;font-weight:700}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.stat{background:var(--cream);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:13px}
+.stat .k{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+.stat .v{font-family:var(--disp);font-size:23px;font-weight:800;margin-top:3px;line-height:1}
+.stat .d{font-size:11px;opacity:.6;font-weight:700;margin-top:2px}
+
+.navwrap{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-content:center;padding:0 16px 16px;pointer-events:none}
+.nav{pointer-events:auto;display:flex;align-items:center;background:var(--hide);border:var(--bd);border-radius:var(--pill);box-shadow:var(--sh);padding:6px;max-width:440px;width:100%}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:var(--pill);color:rgba(255,255,255,.55);font-size:9.5px;font-weight:800;transition:.15s}
+.nav button.on{background:var(--milk);color:var(--hide)}
+.nav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nav .payb{flex:none;width:62px;height:50px;background:var(--lime);border:2.5px solid var(--hide);border-radius:var(--pill);color:var(--hide);margin:0 3px;display:grid;place-items:center}
+.nav .payb svg{width:24px;height:24px}
+
+.sheet{position:fixed;inset:0;z-index:70;display:none}
+.sheet.on{display:block}
+.sheet .bg{position:absolute;inset:0;background:rgba(28,26,23,.48);animation:fd .2s}
+@keyframes fd{from{opacity:0}to{opacity:1}}
+.sheet .pn{position:absolute;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;background:var(--milk);border:var(--bd);border-bottom:none;
+  border-radius:28px 28px 0 0;padding:11px 18px 30px;max-height:93vh;overflow-y:auto;animation:sl .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes sl{from{transform:translateY(100%)}to{transform:none}}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--hide-30);margin:0 auto 15px}
+.sheet h3{font-size:23px;margin-bottom:5px}
+.sheet .lede{font-size:13.5px;opacity:.65;font-weight:700;margin-bottom:17px;line-height:1.5}
+
+.f{margin-bottom:14px}
+.f label{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:6px}
+.inp{width:100%;padding:12px 14px;border:var(--bd);border-radius:var(--r-sm);background:var(--white);font-size:15px;font-weight:700;box-shadow:var(--sh-sm)}
+.inp:focus{outline:none;box-shadow:2.5px 2.5px 0 var(--grass)}
+.inp.mono{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.inp.err{box-shadow:2.5px 2.5px 0 var(--stop);border-color:var(--stop)}
+.amtbox{background:var(--white);border:var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:18px;text-align:center;margin-bottom:13px}
+.amtbox input{border:none;background:none;font-family:var(--disp);font-size:42px;font-weight:800;text-align:center;width:100%;letter-spacing:-.03em;color:var(--hide)}
+.amtbox input:focus{outline:none}
+.quick{display:flex;gap:7px;margin-bottom:14px}
+.quick button{flex:1;padding:9px;border:var(--bd);border-radius:var(--pill);box-shadow:var(--sh-sm);background:var(--white);font-weight:800;font-size:13px;transition:.12s}
+.quick button.on{background:var(--lime)}
+
+.brk{background:var(--grass-pale);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:14px 16px;margin-bottom:14px}
+.brw{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;font-weight:700;padding:5px 0}
+.brw .k{opacity:.65}
+.brw .v{text-align:right}
+.brw.tot{border-top:2px dashed rgba(28,26,23,.25);margin-top:5px;padding-top:10px;font-family:var(--disp);font-size:16.5px;font-weight:800}
+.brw.neg .v{color:var(--stop)}
+.brw.pos .v{color:var(--ok)}
+
+.segs{display:flex;gap:6px;margin-bottom:16px;background:rgba(28,26,23,.07);padding:5px;border-radius:var(--pill);border:2px solid var(--hide)}
+.segs button{flex:1;padding:9px;border-radius:var(--pill);font-weight:800;font-size:13px;transition:.15s}
+.segs button.on{background:var(--white);border:2px solid var(--hide);box-shadow:var(--sh-sm)}
+
+.note{border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:13px 15px;font-size:12.5px;font-weight:700;line-height:1.55;margin-bottom:14px}
+.note.info{background:var(--grass-pale)} .note.warn{background:var(--warn-bg)} .note.stop{background:var(--stop-bg)}
+.note.risk{background:var(--white);border-left:7px solid var(--barn)}
+.note.live{background:var(--stop-bg);border-left:7px solid var(--live)}
+.note b{font-weight:800}
+.fine{font-size:11.5px;opacity:.6;font-weight:700;line-height:1.5;text-align:center;margin-top:12px}
+
+#reader{position:relative;aspect-ratio:1;border:var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;background:var(--grass-dd);margin-bottom:14px}
+#reader video{width:100%;height:100%;object-fit:cover;display:block}
+#reader canvas{display:none}
+#reader .ov{position:absolute;inset:0;pointer-events:none}
+#reader .fr{position:absolute;inset:17%}
+#reader .c{position:absolute;width:34px;height:34px;border:4px solid var(--lime)}
+#reader .c1{top:0;left:0;border-right:none;border-bottom:none;border-radius:13px 0 0 0}
+#reader .c2{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 13px 0 0}
+#reader .c3{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 13px}
+#reader .c4{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 13px 0}
+#reader .cap{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.8);font-size:12px;font-weight:700}
+#reader .idle{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:rgba(255,255,255,.85);font-weight:700;font-size:13.5px;line-height:1.6}
+
+.cty{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:2px dashed rgba(28,26,23,.13);cursor:pointer}
+.cty:last-child{border-bottom:none}
+.cty.off{opacity:.45}
+.cty .fl{width:38px;height:30px;border-radius:8px;background:var(--cream);border:2px solid var(--hide);display:grid;place-items:center;font-size:16px;flex:none}
+.cty .mid{flex:1;min-width:0}
+.cty .n{font-weight:800;font-size:14.5px}
+.cty .rail{font-size:11.5px;opacity:.6;font-weight:700;margin-top:1px}
+
+.ok{text-align:center;padding:8px 0}
+.ok .rg{width:90px;height:90px;border-radius:50%;background:var(--lime);border:var(--bd);box-shadow:var(--sh);display:grid;place-items:center;margin:0 auto 16px;animation:pop .4s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.ok h2{font-size:26px;margin-bottom:6px}
+.ok .p{font-size:14.5px;opacity:.68;font-weight:700;margin-bottom:18px}
+
+.sp{width:16px;height:16px;border:2.5px solid rgba(28,26,23,.25);border-top-color:var(--hide);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:-3px}
+.sp.w{border-color:rgba(255,255,255,.3);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.code{background:var(--hide);color:var(--lime);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:13px;
+  font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:220px;overflow-y:auto}
+#toast{position:fixed;bottom:106px;left:50%;transform:translateX(-50%) translateY(18px);background:var(--hide);color:#fff;padding:12px 20px;
+  border-radius:var(--pill);border:2.5px solid var(--hide);box-shadow:var(--sh-sm);font-weight:800;font-size:13px;z-index:95;opacity:0;transition:.26s;pointer-events:none;max-width:88vw;text-align:center}
+
+.srow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-sm);background:var(--white);
+  border:var(--bd);box-shadow:var(--sh-sm);margin-bottom:10px;cursor:pointer;transition:.12s}
+.srow:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.srow .ic{width:36px;height:36px;border-radius:var(--pill);background:var(--grass-lt);border:2.5px solid var(--hide);display:grid;place-items:center;flex:none;font-size:16px}
+.srow .lb{flex:1;font-size:14.5px;font-weight:800}
+.srow .val{font-size:13px;opacity:.55;font-weight:800;text-align:right;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .ch{opacity:.35;font-size:16px}
+.tog{width:48px;height:28px;border-radius:var(--pill);background:var(--cream-2);border:2.5px solid var(--hide);position:relative;transition:.2s;flex:none}
+.tog.on{background:var(--lime)}
+.tog i{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--white);border:2px solid var(--hide);transition:.2s}
+.tog.on i{left:22px}
+
+.csearch{position:relative;margin-bottom:13px}
+.csearch input{width:100%;padding:12px 14px 12px 40px;border:var(--bd);border-radius:var(--pill);background:var(--white);font-size:14.5px;font-weight:700;box-shadow:var(--sh-sm)}
+.csearch input:focus{outline:none;box-shadow:2.5px 2.5px 0 var(--grass)}
+.csearch svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--hide-50);fill:none;stroke-width:2.6}
+.cgrp{font-size:11px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;opacity:.5;margin:16px 2px 8px}
+.crow{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--r-sm);background:var(--white);
+  border:var(--bd);box-shadow:var(--sh-sm);margin-bottom:9px;cursor:pointer;transition:.12s}
+.crow:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.crow.sel{background:var(--lime)} .crow.dis{opacity:.42;cursor:not-allowed}
+.crow .fl{width:38px;height:38px;border-radius:50%;background:var(--cream);border:2.5px solid var(--hide);display:grid;place-items:center;font-size:17px;flex:none}
+.crow .mid{flex:1;min-width:0}
+.crow .cc{font-family:var(--disp);font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.crow .nn{font-size:11px;opacity:.6;font-weight:700;margin-top:1px}
+.crow .rd{width:24px;height:24px;border-radius:50%;border:2.5px solid var(--hide);flex:none;display:grid;place-items:center;background:var(--white)}
+.crow.sel .rd{background:var(--hide)}
+.crow.sel .rd svg{width:13px;height:13px;stroke:var(--lime);fill:none;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+.tagx{font-size:9px;font-weight:800;padding:2px 7px;border-radius:var(--pill);border:1.8px solid var(--hide);text-transform:uppercase}
+.tagx.a{background:var(--muzzle)} .tagx.n{background:var(--grass-lt)} .tagx.t{background:var(--warn-bg)} .tagx.b{background:var(--stop-bg)}
+
+#drawer{position:fixed;inset:0;z-index:80;display:none}
+#drawer.on{display:block}
+#drawer .bg{position:absolute;inset:0;background:rgba(28,26,23,.48);animation:fd .2s}
+#drawer .pn{position:absolute;top:0;bottom:0;left:0;width:302px;max-width:86vw;background:var(--milk);border-right:var(--bd);
+  display:flex;flex-direction:column;padding:18px 15px;animation:sr .28s cubic-bezier(.2,.9,.3,1);overflow-y:auto}
+@keyframes sr{from{transform:translateX(-100%)}to{transform:none}}
+#drawer .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.dnav{display:flex;flex-direction:column;gap:9px}
+.dnav button{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:var(--r-sm);background:var(--white);
+  border:var(--bd);box-shadow:var(--sh-sm);font-size:14px;font-weight:800;text-align:left;transition:.12s}
+.dnav button:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.dnav button .ic{width:34px;height:34px;border-radius:10px;background:var(--grass);border:2px solid var(--hide);display:grid;place-items:center;flex:none}
+.dnav button .ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dnav button .lb{flex:1} .dnav button .ch{opacity:.35;font-size:17px}
+#drawer .foot{margin-top:auto;padding-top:20px}
+.daddr{padding:11px 12px;border-radius:var(--r-sm);background:var(--white);border:var(--bd);box-shadow:var(--sh-sm);margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.daddr .mid{flex:1;min-width:0}
+.daddr .k{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;opacity:.55}
+.daddr .v{font-family:ui-monospace,monospace;font-size:12px;font-weight:800;margin-top:2px}
+.daddr .cp{width:32px;height:32px;border-radius:9px;background:var(--grass-lt);border:2px solid var(--hide);display:grid;place-items:center;flex:none}
+.daddr .cp svg{width:15px;height:15px;stroke:var(--hide);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── settlement progress ── */
+.steps{margin:6px 0 16px}
+.stp{display:flex;align-items:flex-start;gap:13px;padding:11px 0;opacity:.4;transition:opacity .25s}
+.stp.active,.stp.done{opacity:1}
+.stp .dot{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--hide);background:var(--white);
+  display:grid;place-items:center;flex:none;font-size:12px;font-weight:800;position:relative}
+.stp.done .dot{background:var(--lime)}
+.stp.active .dot{background:var(--butter)}
+.stp .dot .spin{width:12px;height:12px;border:2.5px solid rgba(28,26,23,.25);border-top-color:var(--hide);
+  border-radius:50%;animation:spin .7s linear infinite}
+.stp .mid{flex:1;min-width:0;padding-top:2px}
+.stp .lb{font-weight:800;font-size:14.5px}
+.stp .nt{font-size:11.5px;font-weight:700;opacity:.6;margin-top:2px;line-height:1.4}
+.stp .ms{font-family:var(--disp);font-size:12px;font-weight:800;opacity:.45;flex:none;padding-top:3px}
+.stp .rail{position:absolute;left:11px;top:26px;bottom:-11px;width:2.5px;background:rgba(28,26,23,.15)}
+.modebadge{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:var(--pill);
+  border:2.5px solid var(--hide);font-weight:800;font-size:12.5px;margin-bottom:11px}
+.modebadge.instant{background:var(--lime)}
+.modebadge.finality{background:var(--butter)}
+.modebadge.matched{background:var(--muzzle)}
+.floatbar{height:9px;border-radius:var(--pill);background:var(--cream-2);border:2px solid var(--hide);overflow:hidden;margin:9px 0 5px}
+.floatbar i{display:block;height:100%;background:var(--lime)}
+.floatbar i.low{background:var(--barn)}
+
+/* ── greeting + sell price ── */
+.greetline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.greet{font-family:var(--disp);font-size:25px;font-weight:800;letter-spacing:-.02em}
+.greet span{font-family:ui-monospace,Menlo,monospace;font-size:20px}
+.sellchip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--pill);
+  background:rgba(255,255,255,.18);border:1.8px solid rgba(255,255,255,.42);color:#fff;
+  font-weight:800;font-size:13px;transition:.12s;cursor:pointer}
+.sellchip:active{transform:scale(.97)}
+.sellchip .prem{background:var(--butter);color:var(--hide);border-radius:var(--pill);padding:1px 7px;font-size:10.5px}
+
+/* ── drawn flags (emoji flags don't render on Windows) ── */
+.flagwrap{display:inline-block;border-radius:50%;overflow:hidden;border:2.5px solid var(--hide);flex:none;line-height:0;vertical-align:middle}
+.flagwrap svg{width:100%;height:100%;display:block}
+.card.grass .flagwrap{border-color:rgba(255,255,255,.5)}
+#ctyChip{display:inline-flex;align-items:center;gap:6px}
+#ctyChip .flagwrap{border-width:1.5px}
+
+/* ── onboarding: login + region ── */
+#onboard{position:fixed;inset:0;z-index:100;overflow-y:auto;display:none}
+#onboard.on{display:block}
+.ob{min-height:100vh;display:none;flex-direction:column;padding:34px 20px 30px}
+.ob.on{display:flex}
+#obLogin{background:var(--grass)}
+#obRegion{background:var(--milk)}
+.ob .inner{max-width:440px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column}
+.hero{font-family:var(--disp);font-weight:800;font-size:52px;line-height:.92;letter-spacing:-.045em;color:var(--hide)}
+.hero .it{font-style:italic;font-size:38px;letter-spacing:-.03em;display:block;margin-top:2px}
+.hero .pop{display:inline-block;color:var(--milk);text-shadow:3px 3px 0 var(--hide);margin-top:4px}
+.herosub{font-size:14.5px;font-weight:700;line-height:1.5;color:rgba(28,26,23,.72);margin-top:16px;max-width:330px}
+.heroart{flex:1;display:grid;place-items:center;padding:18px 0;min-height:180px}
+.heroart svg{width:100%;max-width:300px;height:auto}
+.trustrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.trustrow .chip{background:rgba(255,255,255,.55);border-color:var(--hide)}
+.ob .cta{margin-top:auto;padding-top:18px}
+.regionlist{margin:16px 0 4px;max-height:none}
+.rgrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border:var(--bd);border-radius:var(--r-sm);
+  box-shadow:var(--sh);background:var(--white);margin-bottom:11px;cursor:pointer;transition:.12s}
+.rgrow:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hide)}
+.rgrow.sel{background:var(--lime)}
+.rgrow.dis{opacity:.4;cursor:not-allowed}
+.rgrow .mid{flex:1;min-width:0}
+.rgrow .n{font-family:var(--disp);font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rgrow .c{font-size:12.5px;font-weight:700;opacity:.6;margin-top:1px}
+.rgrow .rd{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--hide);flex:none;
+  display:grid;place-items:center;background:var(--white)}
+.rgrow.sel .rd{background:var(--hide)}
+.rgrow.sel .rd svg{width:14px;height:14px;stroke:var(--lime);fill:none;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+.tnc{font-size:12px;font-weight:700;opacity:.65;text-align:center;margin-top:12px;line-height:1.5}
+.tnc a{color:var(--hide);text-decoration:underline;font-weight:800}
+
+/* ── keypad pay ── */
+.hintbar{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--white);border:var(--bd);
+  border-radius:var(--r-sm);box-shadow:var(--sh-sm);cursor:pointer;font-size:13px;font-weight:700;line-height:1.45}
+.hintbar .dot{width:20px;height:20px;border-radius:50%;background:var(--barn);border:2.5px solid var(--hide);flex:none;
+  box-shadow:inset 0 0 0 3px var(--milk)}
+.hintbar span:nth-child(2){flex:1;opacity:.75}
+.hintbar .ch{opacity:.35;font-size:17px}
+.payamt{text-align:center;font-family:var(--disp);font-weight:800;font-size:66px;line-height:1;letter-spacing:-.04em;
+  color:var(--grass);display:flex;align-items:baseline;justify-content:center;gap:2px}
+.payamt.zero{color:#A9C4A2}
+.payamt .cur{font-size:38px;opacity:.85}
+.flipchip{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border:var(--bd);border-radius:var(--pill);
+  background:var(--white);box-shadow:var(--sh-sm);font-weight:800;font-size:13.5px;transition:.12s}
+.flipchip:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.flipchip svg{width:15px;height:15px;stroke:var(--hide);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{padding:17px 0;border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh);background:var(--white);
+  font-family:var(--disp);font-weight:700;font-size:23px;transition:.1s}
+.pad button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hide)}
+.pad button.back{background:#C9BDF5}
+.pad button svg{width:22px;height:22px;stroke:var(--hide);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+.btn.pale2{background:var(--grass-pale)}
+.orderchip{display:flex;align-items:center;gap:9px;padding:11px 14px;background:var(--butter);border:var(--bd);
+  border-radius:var(--r-sm);box-shadow:var(--sh-sm);margin-bottom:13px;font-weight:800;font-size:14px}
+</style>
+</head>
+<body>
+
+<svg id="grassband" viewBox="0 0 440 120" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 120 V86 q9-26 18 0 q10-32 20 0 q9-24 18 0 q11-34 22 0 q9-22 18 0 q10-30 20 0 q9-25 18 0 q11-33 22 0 q9-23 18 0 q10-31 20 0 q9-26 18 0 q11-30 22 0 q9-24 18 0 q10-32 20 0 q9-22 18 0 q11-28 22 0 q9-26 18 0 q10-30 20 0 q9-24 18 0 q11-30 22 0 q9-22 18 0 V120z" fill="#CBE9A9"/>
+  <path d="M0 120 V98 q11-20 22 0 q10-24 20 0 q11-18 22 0 q10-26 20 0 q11-19 22 0 q10-23 20 0 q11-20 22 0 q10-25 20 0 q11-18 22 0 q10-24 20 0 q11-21 22 0 q10-22 20 0 q11-19 22 0 q10-26 20 0 q11-18 22 0 q10-23 20 0 q11-20 22 0 q10-24 20 0 V120z" fill="#9DD44F"/>
+</svg>
+
+<!-- ══════════ ONBOARDING ══════════ -->
+<div id="onboard" class="on">
+
+  <!-- login -->
+  <section class="ob on" id="obLogin"><div class="inner">
+    <div class="hero">SCAN.<br>PAY.<span class="it">ANONYMOUSLY.</span><span class="pop">LEGENDAIRY.</span></div>
+    <div class="herosub">Scan any local payment QR and pay instantly in USDC. No account, no paperwork — the shop just gets paid.</div>
+    <div class="trustrow">
+      <span class="chip">No signup</span>
+      <span class="chip">Shop never sees you</span>
+      <span class="chip">Works in 19 countries</span>
+    </div>
+
+    <div class="heroart">
+      <svg viewBox="0 0 300 230" aria-label="Cow riding a rocket">
+        <g stroke="#1C1A17" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+          <!-- clouds -->
+          <path d="M34 62c0-7 6-11 12-9 2-7 13-8 16-1 6-1 10 3 10 8 0 5-4 8-9 8H44c-6 0-10-3-10-6z" fill="#FFFDF6"/>
+          <path d="M232 42c0-6 5-9 10-8 2-6 11-6 13 0 5-1 8 3 8 7 0 4-3 6-7 6h-17c-5 0-7-2-7-5z" fill="#FFFDF6"/>
+          <path d="M248 186c0-5 4-7 8-6 1-5 9-5 11 0 4-1 7 2 7 5 0 4-3 5-6 5h-14c-4 0-6-2-6-4z" fill="#FFFDF6"/>
+          <!-- sparkles -->
+          <path d="M64 150l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#FFCC4D"/>
+          <path d="M258 108l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#FFCC4D"/>
+          <path d="M212 32l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#FFB8C6"/>
+          <!-- flames -->
+          <path d="M86 168c-14 4-22 12-26 22 12 2 22 0 30-6z" fill="#E8613C"/>
+          <path d="M96 182c-10 6-15 14-15 24 10-2 18-8 22-16z" fill="#FFCC4D"/>
+          <!-- rocket body -->
+          <path d="M104 176c-6-30 10-62 44-82 30-18 62-22 84-18 4 22 0 54-18 84-20 34-52 50-82 44-14-3-24-14-28-28z" fill="#9DD44F"/>
+          <!-- fins -->
+          <path d="M108 148c-16-4-30 2-38 16 12 8 26 10 38 6z" fill="#FFB8C6"/>
+          <path d="M150 200c-4 16 2 30 16 38 8-12 10-26 6-38z" fill="#FFB8C6"/>
+          <!-- window -->
+          <circle cx="150" cy="150" r="17" fill="#FFFDF6"/>
+          <!-- cow -->
+          <path d="M162 74c-6-8-3-17 3-16s9 6 9 12" fill="#1C1A17"/>
+          <path d="M206 66c7-6 14-2 12 5s-8 8-13 7" fill="#1C1A17"/>
+          <ellipse cx="186" cy="88" rx="30" ry="26" fill="#FFFDF6"/>
+          <ellipse cx="169" cy="76" rx="9" ry="7" fill="#1C1A17" stroke="none"/>
+          <ellipse cx="205" cy="79" rx="6" ry="5" fill="#1C1A17" stroke="none"/>
+          <circle cx="176" cy="88" r="3.4" fill="#1C1A17" stroke="none"/>
+          <circle cx="197" cy="88" r="3.4" fill="#1C1A17" stroke="none"/>
+          <ellipse cx="187" cy="103" rx="15" ry="11" fill="#FFB8C6"/>
+          <circle cx="182" cy="102" r="2.4" fill="#1C1A17" stroke="none"/>
+          <circle cx="192" cy="102" r="2.4" fill="#1C1A17" stroke="none"/>
+          <!-- body + scarf -->
+          <path d="M172 112c-8 10-10 24-4 34 14 8 32 6 42-6 6-8 6-20 0-28z" fill="#FFFDF6"/>
+          <path d="M168 118c10 8 30 10 44 2" fill="none" stroke="#E8613C" stroke-width="7"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="cta">
+      <button class="btn" style="background:var(--milk)" onclick="obNext()">Log in →</button>
+      <div class="tnc" style="opacity:.75">Non-custodial. Your key never leaves your device.</div>
+    </div>
+  </div></section>
+
+  <!-- region -->
+  <section class="ob" id="obRegion"><div class="inner">
+    <h1 style="font-size:32px;letter-spacing:-.03em">Where do we pay out?</h1>
+    <div style="font-size:14.5px;font-weight:700;opacity:.65;margin-top:7px">Pick where your merchant gets local cash.</div>
+    <div class="regionlist" id="regionList"></div>
+    <div class="cta">
+      <button class="btn dark" id="obGo" onclick="obFinish()">Continue →</button>
+      <div class="tnc">By continuing, you agree to our
+        <a href="https://www.p2p.lol/tnc" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</div>
+    </div>
+  </div></section>
+</div>
+
+<div id="app">
+<div id="liveBar" style="display:none"><span class="dot"></span><span id="liveTxt">MAINNET · LIVE FUNDS</span></div>
+
+<!-- ══════ HOME ══════ -->
+<section class="screen on" id="s-home">
+  <div class="hdr">
+    <button class="ib" onclick="op('drawer')" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="brand">
+      <svg class="mk" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><path d="M9 17c-3-4-1.5-8 1.5-8s4.5 3 4.5 6" fill="#1C1A17"/><path d="M39 17c3-4 1.5-8-1.5-8s-4.5 3-4.5 6" fill="#1C1A17"/><ellipse cx="24" cy="26" rx="14" ry="12" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><ellipse cx="15" cy="19" rx="4.5" ry="3.6" fill="#1C1A17"/><ellipse cx="33.5" cy="20" rx="3.4" ry="2.8" fill="#1C1A17"/><circle cx="18.5" cy="25" r="2" fill="#1C1A17"/><circle cx="29.5" cy="25" r="2" fill="#1C1A17"/><ellipse cx="24" cy="32.5" rx="7.5" ry="5.5" fill="#FFB8C6" stroke="#1C1A17" stroke-width="2.2"/><circle cx="21.3" cy="32" r="1.3" fill="#1C1A17"/><circle cx="26.7" cy="32" r="1.3" fill="#1C1A17"/></svg>
+      <span class="wordmark">moo.cash</span>
+    </div>
+    <button class="ib g" onclick="op('sh-recv')" title="Receive"><svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4.5-4.5M12 16l4.5-4.5M4 20h16"/></svg></button>
+  </div>
+
+  <!-- not connected -->
+  <div id="connectCard" class="card cream" style="text-align:center">
+    <div style="font-size:40px;margin-bottom:6px">🐄</div>
+    <h2 style="font-size:21px;margin-bottom:5px">Get started</h2>
+    <div style="font-size:13.5px;opacity:.7;font-weight:700;line-height:1.55;margin-bottom:16px">
+      Create a wallet with your email, or connect one you already have.</div>
+    <button class="btn butter" onclick="op('sh-email')" style="margin-bottom:9px">✉️ Continue with email</button>
+    <button class="btn" onclick="connect()" id="connBtn">Connect existing wallet</button>
+    <div id="noWallet" style="display:none;margin-top:12px"></div>
+    <div class="fine">Non-custodial either way. Your key stays on your device.</div>
+  </div>
+
+  <!-- connected -->
+  <div id="walletCard" style="display:none">
+    <div class="greetline">
+      <span class="greet">Moo! <span id="greetAddr">&mdash;</span></span>
+      <span class="chip" id="ctyChip" onclick="go('s-world')" style="cursor:pointer"></span>
+    </div>
+
+    <div class="card grass">
+      <button class="sellchip" onclick="op('sh-rate')" id="sellChip">Sell price: &mdash;</button>
+      <div class="lbl" style="color:rgba(255,255,255,.7);margin-top:15px">USDC balance</div>
+      <div class="big">$<span id="bW">&mdash;</span><span class="dec">.<span id="bC">--</span></span></div>
+      <div class="sub" id="bLocal">&asymp; &mdash;</div>
+      <div class="row" style="margin-top:17px">
+        <button class="btn butter" onclick="op('sh-add')">&#8601; Deposit</button>
+        <button class="btn pink" onclick="op('sh-send')">&#8599; Withdraw</button>
+      </div>
+    </div>
+
+    <div class="card pale">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div class="lbl">Your limits</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <span style="font-family:var(--disp);font-size:38px;font-weight:800;color:var(--grass-d);line-height:1" id="limitNum">200</span>
+            <span style="font-size:14px;font-weight:800;opacity:.6">USDC</span>
+          </div>
+          <div style="font-size:13px;font-weight:700;opacity:.65;margin-top:4px">Verify to unlock higher limits</div>
+        </div>
+        <button class="btn butter sm" onclick="op('sh-kyc')">Increase &rarr;</button>
+      </div>
+    </div>
+
+    <div class="card cream" style="box-shadow:var(--sh-sm);cursor:pointer" onclick="op('sh-float')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div class="lbl" style="margin:0">Instant capacity</div>
+        <span class="chip" id="floatVal">&mdash;</span>
+      </div>
+      <div class="floatbar"><i id="floatFill" style="width:100%"></i></div>
+      <div style="font-size:12px;font-weight:700;opacity:.7" id="floatTxt">Instant payments available</div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="k">SOL for gas</div><div class="v" id="solBal">&mdash;</div><div class="d" id="solWarn">needed for fees</div></div>
+      <div class="stat"><div class="k">Rate source</div><div class="v" style="font-size:16px" id="fxV">&mdash;</div><div class="d" id="fxSrc">loading&hellip;</div></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="cmpBadges"></div>
+    <div class="card cream" id="cmpCard" style="display:none"></div>
+    <div class="sect"><h2>My orders</h2><a onclick="refresh()">Refresh</a></div>
+    <div class="card" style="padding:4px 19px" id="txs"><div class="fine" style="padding:18px 0">Loading…</div></div>
+  </div>
+</section>
+
+<!-- ══════ PAY ══════ -->
+<section class="screen" id="s-pay">
+  <div class="hdr">
+    <button class="ib" onclick="stopCam();go('s-home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <h1 style="flex:1" id="payTitle">Scan &amp; Pay</h1>
+    <button class="ib" onclick="op('sh-payhelp')" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-4M12 8.2v.01"/></svg></button>
+  </div>
+
+  <!-- India gets a second mode -->
+  <div class="segs" id="payModes" style="display:none">
+    <button class="on" id="pm1" onclick="setPayMode('scan')">Scan &amp; Pay</button>
+    <button id="pm2" onclick="setPayMode('card')">Card bill</button>
+  </div>
+
+  <!-- ── amount keypad ── -->
+  <div id="payKeypad">
+    <div class="hintbar" onclick="op('sh-payhelp')">
+      <span class="dot"></span>
+      <span id="hintTxt">Ask the vendor for the bill amount only. Don't ask for a QR yet.</span>
+      <span class="ch">›</span>
+    </div>
+    <div style="text-align:center;margin:18px 0 4px;font-weight:800;font-size:14.5px">You're paying</div>
+    <div class="payamt" id="payAmtBig"><span class="cur">₹</span><span id="payAmtTxt">0</span></div>
+    <div style="text-align:center;margin-bottom:16px">
+      <button class="flipchip" onclick="flipUnit()">
+        <svg viewBox="0 0 24 24"><path d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l3 3m-3-3l-3 3"/></svg>
+        <span id="payAlt">≈ 0 USDC</span></button>
+    </div>
+    <div class="pad" id="pad"></div>
+    <div class="row" style="margin:10px 0 14px">
+      <button class="btn barn" onclick="padMax()">Max</button>
+      <button class="btn pale2" onclick="padKey('clear')">Clear</button>
+    </div>
+    <button class="btn dark" id="placeBtn" onclick="placeOrder()" disabled>Place Order →</button>
+    <div id="payQuote"></div>
+  </div>
+
+  <!-- ── card bill (India) ── -->
+  <div id="payCard" style="display:none">
+    <div class="note info">Pay a credit card bill from your USDC. The issuer is paid in rupees — they never see crypto.</div>
+    <div class="f"><label>Card issuer</label><select class="inp" id="ccIssuer" onchange="ccQuote()"></select></div>
+    <div class="f"><label>Last 4 digits of the card</label>
+      <input class="inp" id="ccLast4" maxlength="4" inputmode="numeric" placeholder="4242" oninput="ccQuote()">
+      <div class="fine" style="text-align:left;margin-top:5px">Only the last four. We never ask for a full card number — the biller network routes on issuer plus last four.</div></div>
+    <div class="f"><label>Bill amount (₹)</label><input class="inp" id="ccAmt" inputmode="decimal" placeholder="5000" oninput="ccQuote()"></div>
+    <div id="ccOut"></div>
+    <button class="btn dark" id="ccBtn" onclick="payCardBill()" disabled>Pay bill →</button>
+  </div>
+
+  <!-- ── scanner (revealed after Place Order) ── -->
+  <div id="payScan" style="display:none">
+    <div class="note info" id="scanFor"></div>
+    <div id="reader">
+      <video id="vid" playsinline muted></video><canvas id="cvs"></canvas>
+      <div class="ov"><div class="fr"><div class="c c1"></div><div class="c c2"></div><div class="c c3"></div><div class="c c4"></div></div>
+        <div class="cap" id="camCap">Now scan the vendor's QR</div></div>
+      <div class="idle" id="camIdle">Camera off.<br>Tap below to scan, or paste the code.</div>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn lime" id="camBtn" onclick="toggleCam()">Start camera</button>
+      <button class="btn" onclick="op('sh-paste')">Paste code</button>
+    </div>
+    <button class="btn ghost" onclick="cancelOrder()">← Change amount</button>
+    <div class="sect"><h2>Try a sample QR</h2></div>
+    <div class="card" style="padding:4px 19px" id="samples"></div>
+  </div>
+</section>
+
+<!-- ══════ EARN ══════ -->
+<section class="screen" id="s-earn">
+  <div class="hdr"><h1>The pasture</h1><button class="ib" onclick="op('sh-howpool')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-5M12 8.2v.01"/></svg></button></div>
+  <div class="note live"><b>Not live.</b> Staking moves other people's money and is almost certainly a regulated product where you'd operate. The screen below is a model, wired to real numbers, so you can see the economics — it does not accept deposits.</div>
+  <div class="card grass">
+    <div class="lbl" style="color:rgba(255,255,255,.7)">Modelled position</div>
+    <div class="big">$<span id="pStake">10,200</span><span class="dec">.00</span></div>
+    <div class="sub">= <span id="pShare">0.4113</span>% of the pasture</div>
+  </div>
+  <div class="grid2">
+    <div class="stat"><div class="k">Pasture size</div><div class="v">$2.48M</div><div class="d">total staked</div></div>
+    <div class="stat"><div class="k">30d volume</div><div class="v">$14.6M</div><div class="d">ramped</div></div>
+    <div class="stat"><div class="k">Milk 30d</div><div class="v">$18,250</div><div class="d">to the herd</div></div>
+    <div class="stat"><div class="k">Trailing</div><div class="v">8.95%</div><div class="d">not a promise</div></div>
+  </div>
+  <div class="note risk"><b>Risks.</b> Returns vary and can be zero. Principal is not protected. Withdrawals queue behind capital mid-settlement. This is not a deposit and is not insured.</div>
+</section>
+
+<!-- ══════ WORLD ══════ -->
+<section class="screen" id="s-world">
+  <div class="hdr"><h1>Grazing grounds</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="grid2">
+    <div class="stat"><div class="k">Live markets</div><div class="v" id="wLive">15</div><div class="d">modelled</div></div>
+    <div class="stat"><div class="k">Rails</div><div class="v" id="wRails">12</div><div class="d">QR + mobile money</div></div>
+  </div>
+  <div class="sect"><h2>Asia</h2></div><div class="card" style="padding:4px 19px" id="ctyAsia"></div>
+  <div class="sect"><h2>Africa</h2></div><div class="card" style="padding:4px 19px" id="ctyAfr"></div>
+  <div class="sect"><h2>Latin America</h2></div><div class="card" style="padding:4px 19px" id="ctyLat"></div>
+</section>
+
+<!-- ══════ INDIA ══════ -->
+<section class="screen" id="s-india">
+  <div class="hdr"><h1 id="indiaTitle">India</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="note stop"><b>Your exact flow is the hardest version.</b> Holding and trading crypto in India is legal. Using it as a <i>payment instrument</i> is the specific thing the RBI has said should not happen. That distinction is the whole problem — see below.</div>
+
+  <div class="sect"><h2>The flow, hop by hop</h2></div>
+  <div class="segs">
+    <button class="on" id="ar1" onclick="setArch('pooled')">One tap (pooled)</button>
+    <button id="ar2" onclick="setArch('direct')">Two step (direct)</button>
+  </div>
+  <div id="flowOut"></div>
+  <div id="archVerdict"></div>
+
+  <div class="sect"><h2>What you must hold</h2></div>
+  <div class="card" style="padding:4px 19px" id="indiaReq"></div>
+
+  <div class="sect"><h2>TDS impact — live</h2></div>
+  <div class="card cream">
+    <div class="lbl">Model a payment</div>
+    <div class="f"><label>Merchant amount (₹)</label><input class="inp" id="tdsAmt" value="1000" inputmode="decimal" oninput="drawTDS()"></div>
+    <div class="f"><label>Your fee rate (%)</label><input class="inp" id="tdsFee" value="0.4" inputmode="decimal" oninput="drawTDS()"></div>
+    <div class="segs"><button class="on" id="tm1" onclick="setTdsMode('absorb')">You absorb TDS</button><button id="tm2" onclick="setTdsMode('pass')">User pays TDS</button></div>
+    <div id="tdsOut"></div>
+  </div>
+  <div id="tdsVerdict"></div>
+</section>
+
+<!-- ══════ SETTINGS ══════ -->
+<section class="screen" id="s-set">
+  <div class="hdr"><h1>Settings</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="srow" onclick="op('sh-cur')"><div class="ic">💱</div><div class="lb">Currency</div><div class="val" id="setCur">INR</div><div class="ch">›</div></div>
+  <div class="srow" onclick="op('sh-rpc')"><div class="ic">🔗</div><div class="lb">Solana RPC</div><div class="val" id="setRpc">public</div><div class="ch">›</div></div>
+  <div class="srow" onclick="op('sh-cap')"><div class="ic">🛡</div><div class="lb">Send cap</div><div class="val" id="setCap">25 USDC</div><div class="ch">›</div></div>
+  <div class="srow" onclick="tog('tHide')"><div class="ic">👁</div><div class="lb">Hide balances</div><div class="tog" id="tHide"><i></i></div></div>
+  <div class="srow" onclick="tog('tSim')"><div class="ic">🧪</div><div class="lb">Simulate before send</div><div class="tog on" id="tSim"><i></i></div></div>
+  <div class="srow" onclick="exportKey()"><div class="ic">🔑</div><div class="lb">Export secret key</div><div class="val">email wallets</div><div class="ch">›</div></div>
+  <div class="srow" onclick="obReset()"><div class="ic">🌍</div><div class="lb">Change payout region</div><div class="ch">›</div></div>
+  <div class="sect"><h2>Privacy</h2></div>
+  <div class="card cream" style="box-shadow:var(--sh-sm)">
+    <div class="lbl">What the shop sees</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.6">Nothing about you. They receive an ordinary local-currency
+      credit into their existing account, exactly as if a neighbour had paid them.</div>
+    <div class="lbl" style="margin-top:14px">What we need</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.6">An email, up to <b id="capTxt">200 USDC</b> a month. Above that,
+      identity verification is required — that part isn't optional anywhere we operate, and any service telling you
+      otherwise is one enforcement action from disappearing with your balance.</div>
+  </div>
+  <div id="rowIndia" style="display:none">
+    <div class="sect"><h2>India</h2></div>
+    <div class="srow" onclick="go('s-india')"><div class="ic" id="indiaIcon"></div><div class="lb">TDS &amp; compliance</div><div class="ch">›</div></div>
+  </div>
+  <div class="sect"><h2>Not yet live</h2></div>
+  <div class="srow" onclick="op('sh-partners')"><div class="ic">🧩</div><div class="lb">Card, payouts, KYC</div><div class="val">needs partners</div><div class="ch">›</div></div>
+  <div class="fine">moo.cash live build · core logic unit-tested</div>
+</section>
+</div>
+
+<div class="navwrap"><nav class="nav">
+  <button class="on" data-s="s-home" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19z"/></svg>Home</button>
+  <button data-s="s-earn" onclick="go('s-earn')"><svg viewBox="0 0 24 24"><path d="M5 20V13M12 20V7M19 20v-9M5 13c0-3 2-4 3.5-4M12 7c0-3 2-4 3.5-4"/></svg>Graze</button>
+  <button class="payb" onclick="go('s-pay')"><svg viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 015.5 4H8M16 4h2.5A1.5 1.5 0 0120 5.5V8M20 16v2.5a1.5 1.5 0 01-1.5 1.5H16M8 20H5.5A1.5 1.5 0 014 18.5V16M7.5 7.5h3v3h-3zM13.5 7.5h3v3h-3zM7.5 13.5h3v3h-3zM13.5 13.5h3v3h-3z"/></svg></button>
+  <button data-s="s-world" onclick="go('s-world')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.2 2.4 3.4 5.4 3.4 8.5s-1.2 6.1-3.4 8.5c-2.2-2.4-3.4-5.4-3.4-8.5S9.8 5.9 12 3.5z"/></svg>World</button>
+  <button data-s="s-set" onclick="go('s-set')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3"/></svg>Settings</button>
+</nav></div>
+
+<!-- DRAWER -->
+<div id="drawer"><div class="bg" onclick="cl('drawer')"></div><div class="pn">
+  <div class="top">
+    <div class="brand"><svg class="mk" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><path d="M9 17c-3-4-1.5-8 1.5-8s4.5 3 4.5 6" fill="#1C1A17"/><path d="M39 17c3-4 1.5-8-1.5-8s-4.5 3-4.5 6" fill="#1C1A17"/><ellipse cx="24" cy="26" rx="14" ry="12" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><ellipse cx="15" cy="19" rx="4.5" ry="3.6" fill="#1C1A17"/><ellipse cx="33.5" cy="20" rx="3.4" ry="2.8" fill="#1C1A17"/><circle cx="18.5" cy="25" r="2" fill="#1C1A17"/><circle cx="29.5" cy="25" r="2" fill="#1C1A17"/><ellipse cx="24" cy="32.5" rx="7.5" ry="5.5" fill="#FFB8C6" stroke="#1C1A17" stroke-width="2.2"/><circle cx="21.3" cy="32" r="1.3" fill="#1C1A17"/><circle cx="26.7" cy="32" r="1.3" fill="#1C1A17"/></svg>
+      <span class="wordmark">moo.cash</span></div>
+    <button class="ib" onclick="cl('drawer')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="dnav">
+    <button onclick="dgo('s-home')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/></svg></span><span class="lb">Wallet</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-pay')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M7.5 7.5h3v3h-3zM13.5 7.5h3v3h-3zM7.5 13.5h3v3h-3zM13.5 13.5h3v3h-3z"/></svg></span><span class="lb">Scan &amp; pay</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-earn')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 20V13M12 20V7M19 20v-9"/></svg></span><span class="lb">Pasture</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-world')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/></svg></span><span class="lb">Grazing grounds</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-india')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span><span class="lb">India &amp; TDS</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-set')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3"/></svg></span><span class="lb">Settings</span><span class="ch">›</span></button>
+  </div>
+  <div class="foot">
+    <div class="daddr"><div class="mid"><div class="k">Logged in via</div><div class="v" id="dEmail" style="font-family:var(--body)">not signed in</div></div></div>
+    <div class="daddr"><div class="mid"><div class="k">Wallet</div><div class="v" id="dAddr">not connected</div></div>
+      <button class="cp" onclick="copyAddr()"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1"/></svg></button></div>
+    <button class="btn" id="discBtn" onclick="disconnect()">Disconnect</button>
+  </div>
+</div></div>
+
+<!-- SHEETS -->
+<div class="sheet" id="sh-send"><div class="bg" onclick="cl('sh-send')"></div><div class="pn"><div class="grab"></div>
+  <h3>Send USDC</h3><div class="lede">Real transfer on Solana mainnet.</div>
+  <div class="note live"><b>Live funds.</b> This moves real money and cannot be undone. Use a burner wallet while you test.</div>
+  <div class="f"><label>Recipient address</label><input class="inp mono" id="sendTo" placeholder="Solana address" oninput="valTo()"><div id="toErr" class="fine" style="text-align:left;color:var(--stop);display:none"></div></div>
+  <div class="f"><label>Amount (USDC)</label><input class="inp" id="sendAmt" value="1" inputmode="decimal" oninput="valAmt()"></div>
+  <div class="brk" id="sendBrk"></div>
+  <div id="simOut"></div>
+  <button class="btn barn" id="sendBtn" onclick="doSend()" disabled>Review &amp; send</button>
+  <div class="fine">You'll approve the exact transaction in your wallet.</div>
+</div></div>
+
+<div class="sheet" id="sh-confirm"><div class="bg" onclick="cl('sh-confirm')"></div><div class="pn"><div class="grab"></div>
+  <h3>Confirm</h3><div class="lede">Last check before this leaves your wallet.</div>
+  <div class="brk" id="confBrk"></div>
+  <div class="note live">Type <b>SEND</b> to enable the button.</div>
+  <div class="f"><input class="inp" id="confWord" placeholder="Type SEND" oninput="valConf()"></div>
+  <button class="btn barn" id="confBtn" onclick="reallySend()" disabled>Send it</button>
+  <button class="btn ghost" style="margin-top:6px" onclick="cl('sh-confirm')">Cancel</button>
+</div></div>
+
+<div class="sheet" id="sh-paste"><div class="bg" onclick="cl('sh-paste')"></div><div class="pn"><div class="grab"></div>
+  <h3>Paste a QR payload</h3><div class="lede">A <b>upi://pay?…</b> link or a raw EMVCo string.</div>
+  <div class="f"><textarea class="inp mono" id="pasteIn" rows="5" placeholder="upi://pay?pa=merchant@bank&am=340" style="resize:vertical"></textarea></div>
+  <button class="btn lime" onclick="handleQR($('pasteIn').value)">Decode</button>
+</div></div>
+
+<div class="sheet" id="sh-qr"><div class="bg" onclick="cl('sh-qr')"></div><div class="pn"><div class="grab"></div>
+  <div id="qrBody"></div></div></div>
+
+<div class="sheet" id="sh-add"><div class="bg" onclick="cl('sh-add')"></div><div class="pn"><div class="grab"></div>
+  <h3>Add USDC</h3><div class="lede">Top up from any exchange or wallet on Solana.</div>
+  <div class="card pale"><div class="lbl">✅ Works now — receive on-chain</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6;margin-bottom:12px">Send USDC on Solana from an exchange or another wallet to your address. In India, users already buy USDC on FIU-registered exchanges with UPI — they just withdraw it here.</div>
+    <button class="btn lime" onclick="cl('sh-add');op('sh-recv')">Show my address</button></div>
+  <div class="note info">No card needed. The product is spending USDC you already hold — not buying it.</div>
+</div></div>
+
+<div class="sheet" id="sh-recv"><div class="bg" onclick="cl('sh-recv')"></div><div class="pn"><div class="grab"></div>
+  <h3>Receive USDC</h3><div class="lede">Solana (SPL) only.</div>
+  <div class="card cream" style="text-align:center;box-shadow:none"><div id="qrRecv" style="width:190px;height:190px;margin:0 auto 12px"></div>
+    <div style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:700;word-break:break-all;line-height:1.6" id="recvAddr">—</div></div>
+  <div class="note stop">⚠️ <b>Solana SPL USDC only.</b> Tokens sent on Ethereum, Base, Tron or any other chain are unrecoverable.</div>
+  <button class="btn lime" onclick="copyAddr()">📋 Copy address</button>
+</div></div>
+
+<div class="sheet" id="sh-rpc"><div class="bg" onclick="cl('sh-rpc')"></div><div class="pn"><div class="grab"></div>
+  <h3>Solana RPC</h3><div class="lede">The public endpoint is heavily rate-limited and often blocks browsers. A free Helius or QuickNode key makes this reliable.</div>
+  <div class="f"><label>RPC URL</label><input class="inp mono" id="rpcIn" placeholder="https://mainnet.helius-rpc.com/?api-key=…"></div>
+  <button class="btn lime" onclick="saveRpc()">Save &amp; test</button>
+  <div id="rpcOut"></div>
+</div></div>
+
+<div class="sheet" id="sh-cap"><div class="bg" onclick="cl('sh-cap')"></div><div class="pn"><div class="grab"></div>
+  <h3>Send cap</h3><div class="lede">A hard ceiling on any single transfer. A prototype that can send funds is how people lose money — keep this low.</div>
+  <div class="f"><label>Max per transaction (USDC)</label><input class="inp" id="capIn" value="25" inputmode="decimal"></div>
+  <button class="btn lime" onclick="saveCap()">Save cap</button>
+</div></div>
+
+<div class="sheet" id="sh-partners"><div class="bg" onclick="cl('sh-partners')"></div><div class="pn"><div class="grab"></div>
+  <h3>What code can't do</h3>
+  <div class="lede">These three need a counterparty and a signed contract. I've left clean integration points for each.</div>
+  <div id="partnerList"></div>
+  <div class="note info">Every one of these gates on entity + licence first. Nobody will sign until you have both.</div>
+</div></div>
+
+<div class="sheet" id="sh-howpool"><div class="bg" onclick="cl('sh-howpool')"></div><div class="pn"><div class="grab"></div>
+  <h3>How grazing would work</h3><div class="lede">Modelled, not live.</div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">1 · Stake</div><div style="font-size:13.5px;font-weight:700;line-height:1.6">USDC joins a shared pool. You hold a pro-rata claim, tracked by share — not a promised rate.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">2 · It works</div><div style="font-size:13.5px;font-weight:700;line-height:1.6">The pool fronts settlement so ramps clear instantly instead of waiting on bank rails.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">3 · Fees split</div><div style="font-size:13.5px;font-weight:700;line-height:1.6">A defined slice of each ramp fee goes to the pool, divided by share.</div></div>
+  <div class="note risk"><b>Why it isn't switched on.</b> Taking deposits and paying returns is a regulated activity nearly everywhere. Get securities advice before this holds one real dollar.</div>
+  <button class="btn" onclick="cl('sh-howpool')">Got it</button>
+</div></div>
+
+<div class="sheet" id="sh-cur"><div class="bg" onclick="cl('sh-cur')"></div><div class="pn"><div class="grab"></div>
+  <h3>Select currency</h3><div class="lede">Drives the local-value display and payment quotes.</div>
+  <div class="csearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="curQ" placeholder="Search country or currency" oninput="drawCur()"></div>
+  <div id="curList"></div>
+</div></div>
+
+<div class="sheet" id="sh-cty"><div class="bg" onclick="cl('sh-cty')"></div><div class="pn"><div class="grab"></div>
+  <div id="ctyBody"></div><button class="btn" onclick="cl('sh-cty')">Close</button></div></div>
+
+<div class="sheet" id="sh-diag"><div class="bg" onclick="cl('sh-diag')"></div><div class="pn"><div class="grab"></div>
+  <h3>Wallet diagnostics</h3><div class="lede">What this page can and can't see.</div>
+  <div id="diagBody"></div></div></div>
+
+<div class="sheet" id="sh-settle"><div class="bg"></div><div class="pn"><div class="grab"></div>
+  <div id="settleHead"></div>
+  <div class="steps" id="settleSteps"></div>
+  <div id="settleFoot"></div>
+</div></div>
+
+<div class="sheet" id="sh-float"><div class="bg" onclick="cl('sh-float')"></div><div class="pn"><div class="grab"></div>
+  <h3>Why some payments are slower</h3>
+  <div class="lede">Three speeds, and which one you get depends on the amount.</div>
+  <div id="floatBody"></div>
+  <button class="btn" onclick="cl('sh-float')">Got it</button>
+</div></div>
+
+<div class="sheet" id="sh-kyc"><div class="bg" onclick="cl('sh-kyc')"></div><div class="pn"><div class="grab"></div>
+  <h3>Raise your limits</h3>
+  <div class="lede">Pay with just an email up to the first tier. Above that, verification is required.</div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><b>Tier 1</b> <span class="chip ok">current</span>
+        <div style="font-size:13px;font-weight:700;opacity:.65;margin-top:3px">Email only. No documents.</div></div>
+      <div style="text-align:right"><b style="font-size:17px">200</b>
+        <div style="font-size:12px;font-weight:700;opacity:.6">USDC / month</div></div>
+    </div>
+  </div>
+  <div class="card cream" style="box-shadow:var(--sh-sm)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><b>Tier 2</b>
+        <div style="font-size:13px;font-weight:700;opacity:.65;margin-top:3px">ID document and a selfie.</div></div>
+      <div style="text-align:right"><b style="font-size:17px">5,000</b>
+        <div style="font-size:12px;font-weight:700;opacity:.6">USDC / month</div></div>
+    </div>
+  </div>
+  <div class="card butter" style="box-shadow:var(--sh-sm)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><b>Tier 3</b>
+        <div style="font-size:13px;font-weight:700;opacity:.7;margin-top:3px">Address and source of funds.</div></div>
+      <div style="text-align:right"><b style="font-size:17px">50,000</b>
+        <div style="font-size:12px;font-weight:700;opacity:.7">USDC / month</div></div>
+    </div>
+  </div>
+  <div class="note info">The merchant never sees your identity at any tier — verification is between you and us,
+    and only above the first tier. It isn't optional anywhere we operate.</div>
+  <button class="btn butter" onclick="cl('sh-kyc');tt('Verification flow')">Start verification</button>
+</div></div>
+
+<div class="sheet" id="sh-rate"><div class="bg" onclick="cl('sh-rate')"></div><div class="pn"><div class="grab"></div>
+  <h3>Where this price comes from</h3>
+  <div class="lede">A stablecoin doesn't trade at the forex rate everywhere.</div>
+  <div id="rateBody"></div>
+  <button class="btn" onclick="cl('sh-rate')">Got it</button>
+</div></div>
+
+<!-- EMAIL WALLET -->
+<div class="sheet" id="sh-email"><div class="bg" onclick="cl('sh-email')"></div><div class="pn"><div class="grab"></div>
+  <h3 id="emTitle">Continue with email</h3>
+  <div class="lede" id="emLede">We'll create a Solana wallet on this device and lock it with a passphrase.</div>
+  <div class="f"><label>Email</label><input class="inp" id="emEmail" type="email" inputmode="email" placeholder="you@gmail.com" oninput="emVal()"></div>
+  <div class="srow" onclick="togglePass()" style="margin-bottom:13px">
+    <div class="ic">&#128273;</div>
+    <div class="lb" style="font-size:14px">Add a passphrase<div style="font-size:11.5px;font-weight:700;opacity:.6;margin-top:2px">Optional &mdash; lets you use this wallet on another device</div></div>
+    <div class="tog" id="tPass"><i></i></div>
+  </div>
+  <div id="passFields" style="display:none">
+    <div class="f"><label id="emPassLbl">Passphrase</label>
+      <input class="inp" id="emPass" type="password" placeholder="At least 8 characters" oninput="emVal()"></div>
+    <div class="f" id="emConfirmWrap"><label>Confirm passphrase</label>
+      <input class="inp" id="emPass2" type="password" placeholder="Type it again" oninput="emVal()"></div>
+  </div>
+  <div id="emErr"></div>
+  <div id="emNote"><div class="note info"><b>This device only.</b> Your key is generated here and stays here.
+    Anyone who can open this browser profile can use the wallet, exactly like staying signed in. Add a
+    passphrase to move it to another device.</div></div>
+  <button class="btn butter" id="emBtn" onclick="emSubmit()" disabled>Create wallet</button>
+  <button class="btn ghost" style="margin-top:6px" onclick="emToggleMode()"><span id="emSwitch">I already have one on this device</span></button>
+</div></div>
+
+<div class="sheet" id="sh-payhelp"><div class="bg" onclick="cl('sh-payhelp')"></div><div class="pn"><div class="grab"></div>
+  <h3>How paying works</h3>
+  <div class="lede">Amount first, QR second — and there's a reason for the order.</div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">1 · Ask for the amount</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6">Just the bill total. Don't ask for the QR yet.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">2 · Place the order</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6">This locks your exchange rate and reserves the fiat before you commit. If rates moved between scanning and paying, you'd get a nasty surprise — this removes that.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">3 · Now scan</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6">Point at the vendor's existing QR. They get local currency in their bank and never touch crypto.</div></div>
+  <div id="helpCompliance"></div>
+  <button class="btn" onclick="cl('sh-payhelp')">Got it</button>
+</div></div>
+
+<div id="toast"></div>
+
+<script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>/* ══════════════════════════════════════════════════════════════
+   moo.cash — core engine
+   Pure, dependency-free logic: QR parsing, fee/TDS math, FX.
+   Kept separate so it can be unit-tested without a browser.
+   ══════════════════════════════════════════════════════════════ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.MooCore = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+'use strict';
+
+/* ─────────────── CRC-16/CCITT-FALSE ───────────────
+   EMVCo QR uses this for the tag-63 checksum.
+   poly 0x1021, init 0xFFFF, no reflect, no final xor.       */
+function crc16(str) {
+  /* Must run over UTF-8 BYTES, not UTF-16 code units: real KHQR and
+     QRIS payloads carry non-ASCII merchant names, and charCodeAt
+     would silently produce the wrong checksum for those. */
+  const bytes = new TextEncoder().encode(str);
+  let crc = 0xFFFF;
+  for (let i = 0; i < bytes.length; i++) {
+    crc ^= bytes[i] << 8;
+    for (let b = 0; b < 8; b++) {
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+/* ─────────────── UPI deep link ───────────────
+   upi://pay?pa=vpa@bank&pn=Name&am=100.00&cu=INR&tn=note&mc=5411
+   Spec: NPCI UPI Linking Specification.                      */
+const VPA_RE = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z][a-zA-Z0-9.\-]{1,64}$/;
+
+function parseUPI(raw) {
+  if (typeof raw !== 'string') return null;
+  const s = raw.trim();
+  if (!/^upi:\/\//i.test(s)) return null;
+  const qi = s.indexOf('?');
+  if (qi === -1) return null;
+  const q = new URLSearchParams(s.slice(qi + 1));
+  const vpa = q.get('pa');
+  if (!vpa) return null;
+  const amt = q.get('am');
+  const out = {
+    scheme: 'UPI',
+    vpa: vpa,
+    name: q.get('pn') || null,
+    amount: amt != null && amt !== '' ? Number(amt) : null,
+    currency: q.get('cu') || 'INR',
+    note: q.get('tn') || null,
+    mcc: q.get('mc') || null,
+    ref: q.get('tr') || null,
+    valid: VPA_RE.test(vpa),
+    country: 'IN'
+  };
+  if (out.amount != null && !isFinite(out.amount)) out.amount = null;
+  return out;
+}
+
+/* ─────────────── EMVCo merchant QR ───────────────
+   TLV: 2-char tag, 2-digit length, value.
+   Used by KHQR (KH), QRIS (ID), PromptPay (TH), QR Ph, PIX…   */
+function tlv(s) {
+  const out = {};
+  let i = 0;
+  while (i + 4 <= s.length) {
+    const tag = s.substr(i, 2);
+    const lenStr = s.substr(i + 2, 2);
+    if (!/^\d{2}$/.test(lenStr)) break;
+    const len = parseInt(lenStr, 10);
+    if (i + 4 + len > s.length) break;
+    out[tag] = s.substr(i + 4, len);
+    i += 4 + len;
+  }
+  return out;
+}
+
+const EMV_COUNTRY = {
+  KH: { name: 'Cambodia',    rail: 'KHQR'      },
+  TH: { name: 'Thailand',    rail: 'PromptPay' },
+  ID: { name: 'Indonesia',   rail: 'QRIS'      },
+  PH: { name: 'Philippines', rail: 'QR Ph'     },
+  IN: { name: 'India',       rail: 'BharatQR'  },
+  SG: { name: 'Singapore',   rail: 'PayNow'    },
+  MY: { name: 'Malaysia',    rail: 'DuitNow'   },
+  VN: { name: 'Vietnam',     rail: 'VietQR'    },
+  BR: { name: 'Brazil',      rail: 'PIX'       }
+};
+/* ISO-4217 numeric → alpha, for the currencies we handle */
+const CUR_NUM = { '116':'KHR','764':'THB','360':'IDR','608':'PHP','356':'INR','702':'SGD',
+                  '458':'MYR','704':'VND','986':'BRL','840':'USD','404':'KES','936':'GHS',
+                  '566':'NGN','710':'ZAR','834':'TZS' };
+
+function parseEMV(raw) {
+  if (typeof raw !== 'string') return null;
+  const s = raw.trim();
+  if (s.length < 8) return null;
+  const t = tlv(s);
+  /* tag 00 = payload format indicator, always "01" for EMVCo */
+  if (t['00'] !== '01') return null;
+
+  /* CRC: tag 63, computed over everything up to and including "6304" */
+  let crcOk = false, given = null;
+  const ci = s.lastIndexOf('6304');
+  if (ci !== -1) {
+    given = s.substr(ci + 4, 4).toUpperCase();
+    crcOk = crc16(s.slice(0, ci + 4)) === given;
+  }
+
+  /* merchant account info lives in tags 26–51; grab the first populated one */
+  let acct = null, acctTag = null;
+  for (let n = 26; n <= 51; n++) {
+    const k = String(n).padStart(2, '0');
+    if (t[k]) { acct = tlv(t[k]); acctTag = k; break; }
+  }
+
+  const cc = (t['58'] || '').toUpperCase();
+  const curNum = t['53'] || null;
+  const amt = t['54'];
+
+  return {
+    scheme: 'EMVCO',
+    static: t['01'] === '11',            // 11 = static, 12 = dynamic
+    merchant: t['59'] || null,
+    city: t['60'] || null,
+    countryCode: cc || null,
+    country: EMV_COUNTRY[cc] ? EMV_COUNTRY[cc].name : null,
+    rail: EMV_COUNTRY[cc] ? EMV_COUNTRY[cc].rail : null,
+    currency: curNum ? (CUR_NUM[curNum] || curNum) : null,
+    amount: amt != null && amt !== '' && isFinite(Number(amt)) ? Number(amt) : null,
+    mcc: t['52'] || null,
+    acctTag: acctTag,
+    acct: acct,
+    crcGiven: given,
+    crcOk: crcOk,
+    /* EMVCo mandates tag 58 (country) and a merchant account tag.
+       Requiring both stops a malformed TLV chain from looking valid
+       just because the CRC happened to match. */
+    valid: crcOk && !!cc && !!acct && !!(t['59'] || t['60'])
+  };
+}
+
+/** Try UPI first, then EMVCo. Returns null if neither. */
+function parseQR(raw) {
+  return parseUPI(raw) || parseEMV(raw);
+}
+
+/* ─────────────── fees, TDS, quoting ───────────────
+   India levies 1% TDS (Income-Tax Act s.194S) on the transfer of a
+   virtual digital asset. It is a WITHHOLDING obligation — whoever
+   absorbs it commercially, it must still be deducted and remitted.  */
+const TDS_RATE = 0.01;
+const TDS_COUNTRIES = { IN: TDS_RATE };
+/* keypad helper: append a digit/dot to an amount string, safely */
+function keypadPush(cur, key, maxDp) {
+  const dp = maxDp === undefined ? 2 : maxDp;
+  let s = String(cur == null ? '' : cur);
+  if (key === 'back') return s.length <= 1 ? '' : s.slice(0, -1);
+  if (key === 'clear') return '';
+  if (key === '.') return s.includes('.') ? s : (s === '' ? '0.' : s + '.');
+  if (!/^\d$/.test(key)) return s;
+  if (s === '0') s = '';                       // no leading zeros
+  const next = s + key;
+  const parts = next.split('.');
+  if (parts[1] && parts[1].length > dp) return s;   // cap decimals
+  if (parts[0].replace(/^0+/, '').length > 12) return s;  // sane ceiling
+  return next;
+}
+
+/**
+ * Quote a merchant payment.
+ * @param {number} localAmount  amount in local currency
+ * @param {number} fx           local units per 1 USDC
+ * @param {number} feeRate      platform fee, e.g. 0.004
+ * @param {string} country      ISO-2, drives TDS
+ * @param {'absorb'|'pass'} tdsMode  who eats the TDS
+ */
+function quotePayment(localAmount, fx, feeRate, country, tdsMode) {
+  const amt = Number(localAmount) || 0;
+  const rate = Number(fx) || 0;
+  if (amt <= 0 || rate <= 0) return null;
+
+  const base = amt / rate;                 // USDC value of the goods
+  const fee  = base * feeRate;             // our revenue
+  const tdsRate = TDS_COUNTRIES[country] || 0;
+  const tds  = base * tdsRate;             // statutory withholding
+
+  const absorbed = tdsMode === 'absorb' && tdsRate > 0;
+  const userPays = absorbed ? base + fee : base + fee + tds;
+  const netRevenue = absorbed ? fee - tds : fee;
+
+  return {
+    base:  round6(base),
+    fee:   round6(fee),
+    tds:   round6(tds),
+    tdsRate: tdsRate,
+    absorbed: absorbed,
+    userPays: round6(userPays),
+    netRevenue: round6(netRevenue),
+    /** fee rate that would break even while absorbing TDS */
+    breakEvenFeeRate: tdsRate,
+    marginPct: base > 0 ? round6((netRevenue / base) * 100) : 0
+  };
+}
+
+function round6(v) { return Math.round(v * 1e6) / 1e6; }
+
+/** Off-ramp quote: USDC → local currency, minus desk spread. */
+function quoteOfframp(usdc, fx, spread, country, tdsMode) {
+  const a = Number(usdc) || 0, rate = Number(fx) || 0;
+  if (a <= 0 || rate <= 0) return null;
+  const tdsRate = TDS_COUNTRIES[country] || 0;
+  const tds = a * tdsRate;
+  const absorbed = tdsMode === 'absorb' && tdsRate > 0;
+  const sold = absorbed ? a : a - tds;
+  const gross = sold * rate;
+  const spreadAmt = gross * spread;
+  return {
+    gross: Math.round(gross * 100) / 100,
+    spread: Math.round(spreadAmt * 100) / 100,
+    tds: round6(tds),
+    absorbed: absorbed,
+    receives: Math.round((gross - spreadAmt) * 100) / 100,
+    netRevenue: round6(spreadAmt / rate - (absorbed ? tds : 0))
+  };
+}
+
+/* ─────────────── settlement flow ───────────────
+   The product is: user holds USDC, scans the shopkeeper's EXISTING
+   QR, shopkeeper receives local fiat in their bank. The shopkeeper
+   changes nothing and never touches crypto.
+
+   Nobody can do that in one hop. Something must sell the crypto and
+   something must push the fiat. Who does each leg — and whether the
+   money ever POOLS in your account — decides which licence you need.
+
+   architecture:
+     'pooled' → you hold fiat and pay the merchant out of it.
+                In India that is Payment Aggregator activity.
+     'direct' → a licensed venue sells and the fiat reaches the
+                merchant without resting with you.                 */
+
+const FLOWS = {
+  IN: {
+    country: 'India', rail: 'UPI', cur: 'INR',
+    pooled: [
+      { step:'User signs USDC transfer',      actor:'User wallet',        needs:null,
+        note:'Non-custodial. Fine.' },
+      { step:'USDC sold for INR',             actor:'FIU-registered VASP', needs:'FIU-IND registration (PMLA reporting entity)',
+        note:'This is a VDA transfer — 1% TDS under s.194S bites here.', tds:true },
+      { step:'INR pools in your account',     actor:'You',                 needs:'RBI Payment Aggregator authorisation + escrow with a scheduled commercial bank',
+        note:'Pooling customer funds and settling to merchants IS the definition of a PA.', blocker:true },
+      { step:'INR pushed to merchant VPA',    actor:'Sponsor bank / PSP',  needs:'NPCI membership via a sponsor bank',
+        note:'The merchant just sees a normal UPI credit.' }
+    ],
+    direct: [
+      { step:'User signs USDC transfer',      actor:'User wallet',        needs:null,
+        note:'Non-custodial. Fine.' },
+      { step:'USDC sold for INR',             actor:'FIU-registered VASP', needs:'FIU-IND registration',
+        note:'1% TDS under s.194S applies here.', tds:true },
+      { step:'INR lands in the USER\'s bank', actor:'VASP payout',         needs:'VASP\'s existing bank rails',
+        note:'No pooling at your entity — this is what keeps you out of PA territory.' },
+      { step:'User pays merchant on UPI',     actor:'User\'s own bank app',needs:null,
+        note:'An ordinary UPI payment. Legally unremarkable.', ux:'Breaks the one-tap experience — two steps, and settlement lag.' }
+    ]
+  }
+};
+
+/** Return the modelled hops for a country + architecture. */
+function settlementFlow(country, architecture) {
+  const f = FLOWS[country];
+  if (!f) return null;
+  return { meta: f, hops: f[architecture] || f.direct };
+}
+
+/* ─────────────── the sell price ───────────────
+   A stablecoin does NOT trade at the forex rate in a capital-controlled
+   market. Indian P2P books price USDT/USDC well above USD/INR because
+   getting dollars out through official channels is hard and local demand
+   structurally exceeds sell-side liquidity. Through 2026 that premium ran
+   7-10%, roughly double the usual 3-4%, after enforcement action squeezed
+   supply.
+
+   So a forex feed is the wrong input. Quoting spot in a market clearing
+   8% higher means every trade is mispriced by 8% — against you if you're
+   buying the USDC, against the user if you're selling it.
+
+   Preference order:
+     1. your own order book        — the only rate you actually have to honour
+     2. a local INR exchange/P2P quote for the token
+     3. spot forex x an observed premium, clearly labelled as an estimate  */
+
+function rateModel(opts) {
+  const o = opts || {};
+  const spot = Number(o.spot) || null;             // forex, e.g. USD/INR
+  const local = Number(o.local) || null;           // token price in local fiat
+  const spreadPct = o.spreadPct == null ? 0.005 : Number(o.spreadPct);
+  const assumedPremium = o.assumedPremium == null ? 0 : Number(o.assumedPremium);
+
+  let mid, source;
+  if (local)      { mid = local;                        source = 'orderbook'; }
+  else if (spot)  { mid = spot * (1 + assumedPremium);  source = assumedPremium ? 'estimated' : 'forex'; }
+  else return null;
+
+  const premium = (local && spot) ? (local / spot - 1) : (assumedPremium || null);
+  return {
+    mid:      round6(mid),
+    spot:     spot,
+    sell:     round6(mid * (1 - spreadPct)),   // what a user receives per USDC
+    buy:      round6(mid * (1 + spreadPct)),   // what a user pays per USDC
+    premium:  premium == null ? null : round6(premium),
+    premiumPct: premium == null ? null : round6(premium * 100),
+    spreadPct: spreadPct,
+    source:   source,
+    /* a premium this large is a market signal, not a glitch — surface it */
+    unusual:  premium != null && Math.abs(premium) > 0.05
+  };
+}
+
+/* ─────────────── settlement planning ───────────────
+   To feel as fast as UPI we pay the merchant from our own float BEFORE
+   the user's USDC is final. Confirmed is ~0.6s, finalised ~13s; in that
+   window we are extending credit.
+
+   At realistic ticket sizes the expected exposure in that window is a
+   few dollars, so it is worth taking — but only under a cap, and only
+   when there is float to pay from. Above the cap we wait for finality.
+   With no float we fall back to matching a counterparty, which is slow
+   and must be shown honestly rather than dressed up as instant.
+
+   Design rule for a shop counter: certainty beats speed. Never show a
+   fast state we might have to retract.                                */
+
+const TIMING = {
+  sign:        150,     // embedded wallet, no popup (external adds ~3000)
+  signExternal:3000,
+  confirmed:   600,     // Solana optimistic confirmation
+  finality:   13000,    // ~31 confirmations
+  risk:         50,
+  payout:     2200,     // UPI push via PSP — the real bottleneck
+  done:        200,
+  matching:  120000     // find a counterparty when float is dry
+};
+
+function settlementPlan(opts) {
+  const o = opts || {};
+  const amount    = Number(o.amount) || 0;
+  const floatAvail= o.floatAvail == null ? Infinity : Number(o.floatAvail);
+  const threshold = o.instantThreshold == null ? 200 : Number(o.instantThreshold);
+  const dailyUsed = Number(o.dailyUsed) || 0;
+  const dailyCap  = o.dailyCap == null ? Infinity : Number(o.dailyCap);
+  const external  = !!o.externalWallet;
+
+  if (amount <= 0) return { mode:'blocked', reason:'Enter an amount above zero.' };
+  if (dailyUsed + amount > dailyCap) {
+    return { mode:'blocked',
+      reason:'This would take you over your '+dailyCap+' USDC limit. Verify to raise it.' };
+  }
+
+  const signMs = external ? TIMING.signExternal : TIMING.sign;
+  const step = (k,label,ms,note) => ({ key:k, label:label, ms:ms, note:note||null });
+
+  let mode, steps, exposure = 0, note;
+  if (amount > floatAvail) {
+    mode = 'matched';
+    note = 'Not enough local currency on hand right now, so we\'ll match you with a counterparty first.';
+    steps = [
+      step('sign','Approving payment',signMs),
+      step('confirm','Confirming on Solana',TIMING.confirmed),
+      step('match','Finding a counterparty',TIMING.matching,'This is the slow part'),
+      step('payout','Paying the merchant',TIMING.payout),
+      step('done','Done',TIMING.done)
+    ];
+  } else if (amount <= threshold) {
+    mode = 'instant';
+    exposure = amount;                       // credit extended until finality
+    steps = [
+      step('sign','Approving payment',signMs),
+      step('confirm','Confirming on Solana',TIMING.confirmed),
+      step('risk','Checking limits',TIMING.risk),
+      step('payout','Paying the merchant',TIMING.payout,'We front this from our float'),
+      step('done','Done',TIMING.done)
+    ];
+  } else {
+    mode = 'finality';
+    note = 'Above '+threshold+' USDC we wait for full settlement before paying out. Adds about 13 seconds.';
+    steps = [
+      step('sign','Approving payment',signMs),
+      step('confirm','Confirming on Solana',TIMING.confirmed),
+      step('final','Waiting for final settlement',TIMING.finality,'Larger amount — we don\'t front this'),
+      step('payout','Paying the merchant',TIMING.payout),
+      step('done','Done',TIMING.done)
+    ];
+  }
+
+  const etaMs = steps.reduce((a,s) => a + s.ms, 0);
+  return {
+    mode: mode,
+    steps: steps,
+    etaMs: etaMs,
+    etaText: etaMs < 5000 ? (etaMs/1000).toFixed(1)+' seconds'
+           : etaMs < 60000 ? Math.round(etaMs/1000)+' seconds'
+           : 'about '+Math.round(etaMs/60000)+' minute'+(etaMs>=120000?'s':''),
+    exposure: exposure,
+    degraded: mode === 'matched',
+    note: note || null,
+    comparable: etaMs <= 5000        // UPI itself is 2-5s
+  };
+}
+
+/** Expected credit at risk across a day of instant payments. */
+function exposureModel(monthlyVolume, avgTicket, instantShare, finalityMs) {
+  const vol = Number(monthlyVolume)||0, avg = Number(avgTicket)||1;
+  const fMs = finalityMs == null ? TIMING.finality : finalityMs;
+  const txPerDay = (vol/avg)/30;
+  const activeSeconds = 12*3600;
+  const inFlight = (txPerDay/activeSeconds) * (fMs/1000) * (Number(instantShare)||1);
+  return {
+    txPerDay: Math.round(txPerDay),
+    expectedInFlight: round6(inFlight * avg),
+    windowSeconds: fMs/1000
+  };
+}
+
+/* ─────────────── country-scoped compliance ───────────────
+   Only ever surface the rules that apply to the market the user is
+   actually in. Showing India's TDS to someone paying in Cambodia is
+   noise at best and misleading at worst.                          */
+const COMPLIANCE = {
+  IN: {
+    tds: 0.01, tdsLabel: 'TDS 1% (s.194S)',
+    badges: ['1% TDS', 'FIU-IND', '30% gains tax'],
+    headline: 'Crypto is legal to hold and trade, but the RBI has said it should not be used for payments.',
+    rules: [
+      'FIU-IND registration required for the sell leg',
+      'PAN + Aadhaar KYC before any INR movement',
+      '1% TDS withheld on every VDA transfer',
+      'Pooling INR before the merchant triggers RBI Payment Aggregator licensing'
+    ],
+    modes: ['scan', 'card']            // India also gets card-bill payment
+  },
+  KH: {
+    tds: 0, badges: ['NBC recognised', 'Dollarised'],
+    headline: 'Prakas B7-024-735 recognises fully-backed stablecoins. KHQR is one national standard.',
+    rules: ['Operate under the NBC FinTech sandbox', 'Bakong membership for KHQR settlement'],
+    modes: ['scan']
+  },
+  TH: {
+    tds: 0, badges: ['Tourists only', 'Sandbox'],
+    headline: 'Paying merchants in crypto is banned. TouristDigiPay is the only legal route, and only for visitors.',
+    rules: ['Licensed digital asset operator required', 'BOT-regulated e-money partner', 'Cannot serve Thai residents'],
+    modes: ['scan']
+  },
+  ID: { tds:0, badges:['OJK supervised'], headline:'QRIS is universal and supervision sits with the OJK.',
+        rules:['Register with the OJK','QRIS acquirer partnership'], modes:['scan'] },
+  PH: { tds:0, badges:['BSP VASP'], headline:'BSP-licensed VASP regime with large remittance flow.',
+        rules:['BSP VASP licence','InstaPay / QR Ph membership'], modes:['scan'] },
+  NG: { tds:0, badges:['High adoption'], headline:'Stablecoins are roughly 40% of the crypto market here.',
+        rules:['SEC Nigeria registration','Bank partner for NIP transfers'], modes:['scan'] },
+  KE: { tds:0, badges:['Mobile money'], headline:'Settlement is M-Pesa, not QR — you integrate mobile money.',
+        rules:['CBK engagement','M-Pesa paybill/till integration via Safaricom'], modes:['scan'] },
+  GH: { tds:0, badges:['VASP Act'], headline:'The VASP Act created VARO as a dedicated licensing regulator.',
+        rules:['VARO licence','MTN MoMo integration'], modes:['scan'] },
+  BR: { tds:0, badges:['PIX'], headline:'PIX is universal and the central bank is comparatively tolerant.',
+        rules:['BCB payment institution authorisation','PIX participant via a bank'], modes:['scan'] },
+  CN: { tds:0, badges:['Blocked'], blocked:true,
+        headline:'All virtual-currency business is prohibited, including by offshore entities serving users in China.',
+        rules:['No compliant route exists'], modes:[] }
+};
+function complianceFor(cc){
+  return COMPLIANCE[cc] || { tds:0, badges:[], headline:null, rules:[], modes:['scan'] };
+}
+function tdsRateFor(cc){ return complianceFor(cc).tds || 0; }
+function modesFor(cc){ return complianceFor(cc).modes || ['scan']; }
+
+/* ─────────────── card bill payment ───────────────
+   We deliberately never take a full card number. Routing a bill
+   payment is done by the biller network from the last four digits
+   plus the issuer, so collecting a full PAN would add PCI scope for
+   no functional gain.                                              */
+const ISSUERS = {
+  IN: ['HDFC Bank','ICICI Bank','SBI Card','Axis Bank','Kotak','Amex India','IndusInd','RBL Bank','Yes Bank','IDFC First']
+};
+function validateCardBill(last4, issuer, amount, balanceUsdc, fx) {
+  const errs = [];
+  if (!/^\d{4}$/.test(String(last4 || ''))) errs.push('Enter the last 4 digits of the card.');
+  if (!issuer) errs.push('Choose the card issuer.');
+  const amt = Number(amount);
+  if (!isFinite(amt) || amt <= 0) errs.push('Enter a bill amount above zero.');
+  const usdcNeeded = (isFinite(amt) && fx > 0) ? amt / fx : null;
+  if (usdcNeeded != null && balanceUsdc != null && usdcNeeded > balanceUsdc)
+    errs.push('Not enough USDC — you need ' + usdcNeeded.toFixed(2) + '.');
+  return { ok: errs.length === 0, errors: errs, usdcNeeded: usdcNeeded == null ? null : round6(usdcNeeded) };
+}
+
+/* ─────────────── base58 (address validation) ─────────────── */
+const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function isValidSolanaAddress(a) {
+  if (typeof a !== 'string') return false;
+  if (a.length < 32 || a.length > 44) return false;
+  for (const ch of a) if (B58.indexOf(ch) === -1) return false;
+  return b58decode(a).length === 32;
+}
+function b58decode(s) {
+  if (typeof s !== 'string' || s.length === 0) return [];
+  const bytes = [];                       // must start empty, not [0]
+  for (const ch of s) {
+    const v = B58.indexOf(ch);
+    if (v === -1) return [];
+    let carry = v;
+    for (let j = 0; j < bytes.length; j++) {
+      carry += bytes[j] * 58;
+      bytes[j] = carry & 0xff;
+      carry >>= 8;
+    }
+    while (carry) { bytes.push(carry & 0xff); carry >>= 8; }
+  }
+  /* each leading '1' is one leading zero byte */
+  for (let k = 0; k < s.length && s[k] === '1'; k++) bytes.push(0);
+  return bytes.reverse();
+}
+
+/* ─────────────── amount formatting ─────────────── */
+function toBaseUnits(amount, decimals) {
+  /* string maths — avoids float drift on token amounts */
+  const s = String(amount);
+  if (!/^\d*\.?\d*$/.test(s) || s === '' || s === '.') return null;
+  const [i, f = ''] = s.split('.');
+  if (f.length > decimals) return null;              // too precise for the mint
+  const joined = (i || '0') + f.padEnd(decimals, '0');
+  const trimmed = joined.replace(/^0+(?=\d)/, '');
+  try { return BigInt(trimmed); } catch (e) { return null; }
+}
+function fromBaseUnits(units, decimals) {
+  const s = BigInt(units).toString().padStart(decimals + 1, '0');
+  const i = s.slice(0, -decimals) || '0';
+  const f = decimals ? s.slice(-decimals) : '';
+  return f ? (i + '.' + f).replace(/\.?0+$/, '') || '0' : i;
+}
+
+return {
+  crc16, parseUPI, parseEMV, parseQR, tlv,
+  quotePayment, quoteOfframp, settlementFlow, keypadPush, rateModel,
+  settlementPlan, exposureModel, TIMING,
+  complianceFor, tdsRateFor, modesFor, validateCardBill,
+  isValidSolanaAddress, b58decode,
+  toBaseUnits, fromBaseUnits,
+  TDS_RATE, EMV_COUNTRY, CUR_NUM, FLOWS, COMPLIANCE, ISSUERS
+};
+}));
+</script>
+<script>/* ══════════════════════════════════════════════════════════════
+   moo.cash — app layer (real Solana, real QR, real FX)
+   ══════════════════════════════════════════════════════════════ */
+'use strict';
+const C = MooCore;
+const W3 = window.solanaWeb3;
+const $ = id => document.getElementById(id);
+
+/* ── on-chain constants ── */
+const USDC_MINT   = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const USDC_DEC    = 6;
+const TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const ATA_PROG    = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+const SYS_PROG    = '11111111111111111111111111111111';
+const DEFAULT_RPC = 'https://api.mainnet-beta.solana.com';
+
+/* ── state ── */
+let conn = null, pubkey = null, provider = null;
+let usdc = 0, sol = 0;
+
+/* localStorage throws a SecurityError on opaque origins (file:// among
+   them). Reading it unguarded killed the whole script before any UI
+   rendered — which looked exactly like "the wallet won't connect". */
+const store = {
+  get(k, d){ try{ const v=localStorage.getItem(k); return v===null?d:v }catch(e){ return d } },
+  set(k, v){ try{ localStorage.setItem(k, v); return true }catch(e){ return false } }
+};
+let RPC = store.get('moo.rpc', DEFAULT_RPC);
+let CAP = parseFloat(store.get('moo.cap', '25')) || 25;
+let HIDE = false, SIM = true;
+let SEL = 'IN', TDS_MODE = 'absorb';
+let FX = {}, LOCAL = {}, fxSource = null, fxAt = 0;
+let pendingTx = null;
+
+/* ── nav / chrome ── */
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));
+  document.querySelectorAll('.nav button[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===id));
+  if(id!=='s-pay') stopCam();
+  window.scrollTo(0,0)}
+function op(id){$(id).classList.add('on');document.body.style.overflow='hidden'}
+function cl(id){$(id).classList.remove('on');document.body.style.overflow=''}
+function dgo(id){cl('drawer');go(id)}
+function tt(m){const t=$('toast');t.textContent=m;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._x);t._x=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(18px)'},2600)}
+function tog(id){const t=$(id);t.classList.toggle('on');
+  if(id==='tHide'){HIDE=t.classList.contains('on');renderBal()}
+  if(id==='tSim'){SIM=t.classList.contains('on')}}
+const fmt=(v,d=2)=>Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const short=a=>a?a.slice(0,4)+'…'+a.slice(-4):'—';
+
+/* ══════════ markets ══════════ */
+const MK=[
+ {n:'India',cc:'IN',cur:'INR',sym:'₹',fx:87.4,reg:'asia',r:'UPI',s:'restricted',tds:1,
+  w:'Legal but heavily taxed. FIU-IND registration is mandatory, 1% TDS applies to every VDA transfer and gains are taxed at 30% with no loss set-off. UPI works for on-ramp at FIU-registered platforms, though PhonePe, GPay and Paytm may block exchange payments.'},
+ {n:'Cambodia',cc:'KH',cur:'KHR',sym:'៛',fx:4035,reg:'asia',r:'KHQR · Bakong',s:'live',isNew:1,
+  w:'Heavily dollarised, and Prakas B7-024-735 recognises fully-backed stablecoins as a permitted asset class. Best-fit market.'},
+ {n:'Indonesia',cc:'ID',cur:'IDR',sym:'Rp ',fx:16250,reg:'asia',r:'QRIS',s:'live',w:'Huge QRIS merchant base; supervision moved to the OJK.'},
+ {n:'Philippines',cc:'PH',cur:'PHP',sym:'₱',fx:58.4,reg:'asia',r:'QR Ph',s:'live',alpha:1,w:'BSP-licensed VASP regime and enormous remittance flow.'},
+ {n:'Vietnam',cc:'VN',cur:'VND',sym:'₫',fx:26100,reg:'asia',r:'VietQR',s:'pilot',isNew:1,w:'High grassroots adoption; framework still being finalised.'},
+ {n:'Singapore',cc:'SG',cur:'SGD',sym:'S$',fx:1.29,reg:'asia',r:'PayNow',s:'live',isNew:1,w:'Clear MAS stablecoin framework. Sensible place to domicile.'},
+ {n:'Malaysia',cc:'MY',cur:'MYR',sym:'RM',fx:4.21,reg:'asia',r:'DuitNow',s:'live',isNew:1,w:'Securities Commission licenses digital asset exchanges.'},
+ {n:'Thailand',cc:'TH',cur:'THB',sym:'฿',fx:36.2,reg:'asia',r:'PromptPay',s:'tourist',isNew:1,
+  w:'Crypto payment to merchants is banned. The only legal route is the TouristDigiPay sandbox — foreign visitors, licensed operator, baht to the merchant. Not available to Thai residents.'},
+ {n:'China',cc:'CN',cur:'CNY',sym:'¥',fx:7.1,reg:'asia',r:'—',s:'blocked',
+  w:'The February 2026 PBOC circular bans all virtual-currency business, extends it to stablecoins, and explicitly prohibits overseas entities from serving people inside China.'},
+ {n:'Nigeria',cc:'NG',cur:'NGN',sym:'₦',fx:1580,reg:'africa',r:'NQR · NIP',s:'live',alpha:1,w:'Stablecoins are ~40% of the crypto market; second globally for adoption.'},
+ {n:'Kenya',cc:'KE',cur:'KES',sym:'KSh ',fx:129.2,reg:'africa',r:'M-Pesa',s:'live',isNew:1,w:'Fifth globally for stablecoin use. Integrate mobile money, not QR.'},
+ {n:'Ghana',cc:'GH',cur:'GHS',sym:'₵',fx:15.4,reg:'africa',r:'MTN MoMo',s:'live',isNew:1,w:'The VASP Act created VARO — among the clearest frameworks in Africa.'},
+ {n:'South Africa',cc:'ZA',cur:'ZAR',sym:'R',fx:17.8,reg:'africa',r:'PayShap',s:'live',isNew:1,w:'FSCA licenses crypto asset service providers.'},
+ {n:'Tanzania',cc:'TZ',cur:'TZS',sym:'TSh ',fx:2490,reg:'africa',r:'Airtel Money',s:'pilot',isNew:1,w:'Growing mobile money base, framework emerging.'},
+ {n:'Brazil',cc:'BR',cur:'BRL',sym:'R$',fx:5.42,reg:'latam',r:'PIX',s:'live',w:'PIX is universal and the central bank is comparatively tolerant.'},
+ {n:'Argentina',cc:'AR',cur:'ARS',sym:'$',fx:1465,reg:'latam',r:'Transferencias 3.0',s:'live',w:'Inflation makes dollar stablecoins a real savings product.'},
+ {n:'Venezuela',cc:'VE',cur:'VES',sym:'Bs',fx:238,reg:'latam',r:'Pago Móvil',s:'live',w:'Deep organic stablecoin usage.'},
+ {n:'Colombia',cc:'CO',cur:'COP',sym:'$',fx:3920,reg:'latam',r:'Bre-B',s:'live',alpha:1,w:'Bre-B is the new instant rail.'},
+ {n:'Ecuador',cc:'EC',cur:'USD',sym:'$',fx:1,reg:'latam',r:'Bank transfer',s:'live',alpha:1,label:'Ecuador USD',w:'Dollarised — no FX step at all.'},
+ {n:'Peru',cc:'PE',cur:'PEN',sym:'S/',fx:3.52,reg:'latam',r:'Yape · Plin',s:'live',alpha:1,w:'Yape and Plin dominate consumer payments.'}
+];
+const SB={live:['ok','Live'],pilot:['warn','Pilot'],tourist:['warn','Tourists only'],restricted:['warn','Restricted'],blocked:['stop','Not available']};
+const mkBy=cc=>MK.find(m=>m.cc===cc);
+const rate=m=>FX[m.cur]||m.fx;
+
+/* ══════════ FX ══════════ */
+async function loadFX(){
+  const sources=[
+    {name:'Coinbase', url:'https://api.coinbase.com/v2/exchange-rates?currency=USDC',
+     pick:j=>{const r=j&&j.data&&j.data.rates;if(!r)return null;const o={};
+       for(const k in r){const v=parseFloat(r[k]);if(isFinite(v)&&v>0)o[k]=v}return Object.keys(o).length?o:null}},
+    {name:'exchangerate-api', url:'https://open.er-api.com/v6/latest/USD',
+     pick:j=>j&&j.result==='success'&&j.rates?j.rates:null}
+  ];
+  for(const s of sources){
+    try{
+      const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),7000);
+      const r=await fetch(s.url,{signal:ctl.signal}); clearTimeout(t);
+      if(!r.ok) continue;
+      const got=s.pick(await r.json());
+      if(got){FX=got;fxSource=s.name;fxAt=Date.now();renderFX();renderBal();return}
+    }catch(e){/* try next */}
+  }
+  fxSource=null;renderFX();
+}
+/* Observed 2026 premium of USDT/USDC over USD/INR on Indian P2P books.
+   Used only as a labelled estimate when no local order-book quote is
+   available — never presented as a real quote. */
+const LOCAL_PREMIUM = { IN: 0.085 };
+
+function rateInfo(){
+  const m=mkBy(SEL);
+  const spot = FX[m.cur] || m.fx;
+  const local = LOCAL[m.cur] || null;                 // order-book quote, if we have one
+  return C.rateModel({ spot, local,
+    spreadPct: 0.005,
+    assumedPremium: local ? 0 : (LOCAL_PREMIUM[m.cc] || 0) });
+}
+function renderFX(){
+  const m=mkBy(SEL), r=rateInfo();
+  if(!r){ $('sellChip').textContent='Sell price: —'; return }
+
+  const showPrem = r.premiumPct != null && Math.abs(r.premiumPct) >= 1;
+  $('sellChip').innerHTML = 'Sell price: '+m.sym+fmt(r.sell, r.sell>100?2:2)
+    + (showPrem?`<span class="prem">+${r.premiumPct.toFixed(1)}%</span>`:'');
+
+  $('fxV').textContent = {orderbook:'Order book', estimated:'Estimated', forex:'Forex'}[r.source];
+  $('fxSrc').textContent = r.source==='estimated'
+    ? 'spot + assumed premium'
+    : (fxSource ? fxSource+' · '+new Date(fxAt).toLocaleTimeString() : 'offline — fallback');
+  $('fxSrc').style.color = r.source==='estimated' ? 'var(--warn)' : (fxSource?'':'var(--stop)');
+  renderRateSheet(r,m);
+}
+function renderRateSheet(r,m){
+  const rows=[
+    ['Spot forex (USD/'+m.cur+')', r.spot?m.sym+fmt(r.spot,2):'—'],
+    ['Local '+m.cur+' market for USDC', r.source==='orderbook'?m.sym+fmt(r.mid,2):'not connected'],
+    ['Premium over spot', r.premiumPct==null?'—':(r.premiumPct>0?'+':'')+r.premiumPct.toFixed(2)+'%'],
+    ['Our spread', (r.spreadPct*100).toFixed(1)+'%'],
+    ['You receive per USDC', m.sym+fmt(r.sell,2)],
+    ['You pay per USDC', m.sym+fmt(r.buy,2)]
+  ];
+  $('rateBody').innerHTML=
+    `<div class="brk">${rows.map(x=>`<div class="brw"><span class="k">${x[0]}</span><span class="v">${x[1]}</span></div>`).join('')}</div>`
+  + (r.source==='estimated'
+      ? `<div class="note warn"><b>This is an estimate, not a quote.</b> We're applying an assumed
+         ${(LOCAL_PREMIUM[m.cc]*100).toFixed(1)}% premium to the forex rate because no local order book is
+         connected. Before taking real orders you must price from a book you can actually fill against.</div>`
+      : '')
+  + (r.unusual
+      ? `<div class="note info"><b>Why it's above the forex rate.</b> In markets with capital controls,
+         dollar stablecoins trade at a premium because getting dollars out through official channels is hard
+         and local demand runs ahead of sell-side liquidity. Through 2026 India's premium ran roughly 7–10%,
+         about double its usual level, after enforcement action squeezed supply.<br><br>
+         Quote spot here and you misprice by that whole margin — against you when buying, against the user
+         when selling. The premium <i>is</i> the market.</div>`
+      : `<div class="note info">Local pricing tracks spot closely here, so a forex reference is safe.</div>`);
+}
+
+/* ══════════ wallet ══════════ */
+function detect(){
+  if(window.phantom&&window.phantom.solana) return window.phantom.solana;
+  if(window.solflare&&window.solflare.isSolflare) return window.solflare;
+  if(window.backpack) return window.backpack;
+  if(window.solana) return window.solana;
+  return null;
+}
+
+/* ── diagnostics ──
+   Browser extensions do NOT inject into file:// pages. Opening the
+   HTML straight from disk therefore looks identical to "no wallet
+   installed", which sends people off to reinstall Phantom they
+   already have. Tell them what's actually wrong.                  */
+function diagnose(){
+  const proto=location.protocol;
+  const host=location.hostname;
+  const isFile = proto==='file:';
+  const isLocal = host==='localhost'||host==='127.0.0.1'||host==='[::1]';
+  /* Don't trust isSecureContext alone — http://localhost IS a secure
+     context per spec, but some engines report it as false. */
+  const secure = window.isSecureContext===true || proto==='https:' || isLocal;
+  const found={
+    Phantom:  !!(window.phantom&&window.phantom.solana),
+    Solflare: !!(window.solflare),
+    Backpack: !!(window.backpack),
+    'window.solana': !!window.solana
+  };
+  const any=Object.values(found).some(Boolean);
+  let cause=null, fix=null;
+  if(isFile && !any){
+    cause='The page is open as a file, not a website.';
+    fix='file';
+  }else if(!any && !secure){
+    cause='This page is not a secure context, so extensions stay out.';
+    fix='serve';
+  }else if(!any){
+    cause='No Solana wallet extension is injecting into this page.';
+    fix='install';
+  }
+  return {proto,host,isFile,isLocal,secure,found,any,cause,fix,
+    mobile:/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)};
+}
+function renderDiag(){
+  const d=diagnose();
+  const row=(k,v,good)=>`<div class="brw"><span class="k">${k}</span><span class="v" style="color:${good===undefined?'':good?'var(--ok)':'var(--stop)'}">${v}</span></div>`;
+  let html=`<div class="brk">
+    ${row('Page origin', d.isFile?'file:// (opened from disk)':d.proto+'//'+(d.host||''), !d.isFile)}
+    ${row('Secure context', d.secure?'yes':'no', d.secure)}
+    ${Object.entries(d.found).map(([k,v])=>row(k, v?'detected':'not found', v)).join('')}
+  </div>`;
+
+  if(d.fix==='file'){
+    html+=`<div class="note stop"><b>This is the problem.</b> Browser wallet extensions refuse to inject into
+      <code>file://</code> pages for security reasons. Phantom is probably installed and working fine — it simply
+      cannot see this page. The camera scanner is blocked for the same reason.</div>
+      <div class="note info"><b>Fix in one click.</b> In the same folder as this file there's a launcher:<br>
+      · Windows — double-click <b>start-moocash.bat</b><br>
+      · Mac — double-click <b>start-moocash.command</b><br>
+      It serves the folder at <code>http://localhost:8765</code> and opens it. Wallets and camera both work there.</div>
+      <div class="note warn"><b>Or do it by hand.</b> Open a terminal in this folder and run:
+      <div class="code" style="margin-top:8px">python -m http.server 8765</div>
+      then visit <code>http://localhost:8765/moo-cash-live.html</code></div>`;
+  }else if(d.fix==='serve'){
+    html+=`<div class="note stop"><b>Not a secure context.</b> Wallets and camera need <code>https://</code> or
+      <code>localhost</code>. Serve the folder locally and reopen from <code>http://localhost:8765</code>.</div>`;
+  }else if(d.fix==='install'){
+    html+=`<div class="note warn"><b>No wallet extension detected.</b> Install
+      <b>Phantom</b> (phantom.app), <b>Solflare</b> or <b>Backpack</b>, then reload this page.
+      ${d.mobile?'<br><br>On mobile, open this URL inside your wallet app\'s built-in browser — extensions do not exist on mobile browsers.':''}</div>`;
+  }else{
+    html+=`<div class="note info">✅ A wallet is injecting correctly. If Connect still does nothing, unlock the
+      wallet, then check whether it has this site blocked under its Connected Sites / Trusted Apps list.</div>`;
+  }
+  html+=`<button class="btn" style="margin-top:6px" onclick="cl('sh-diag')">Close</button>`;
+  $('diagBody').innerHTML=html;
+}
+async function connect(){
+  provider=detect();
+  if(!provider){
+    const d=diagnose();
+    renderDiag(); op('sh-diag');
+    tt(d.isFile?'Opened as a file — wallets can\'t connect':'No wallet detected');
+    return;
+  }
+  const b=$('connBtn');b.innerHTML='<span class="sp w"></span> Connecting…';b.disabled=true;
+  try{
+    const res=await provider.connect();
+    const pk=res&&res.publicKey?res.publicKey:provider.publicKey;
+    if(!pk) throw new Error('Wallet returned no public key');
+    pubkey=new W3.PublicKey(pk.toString());
+    conn=new W3.Connection(RPC,'confirmed');
+    onConnected(null);
+  }catch(e){
+    const msg=String(e&&e.message||e);
+    if(/user rejected|declined|4001/i.test(msg)) tt('You declined the connection');
+    else if(/locked/i.test(msg)) tt('Wallet is locked — unlock it and retry');
+    else { renderDiag(); op('sh-diag'); tt('Connect failed: '+msg.slice(0,60)) }
+  }finally{ b.innerHTML='Connect wallet';b.disabled=false }
+}
+function disconnect(){
+  try{provider&&provider.disconnect&&provider.disconnect()}catch(e){}
+  pubkey=null;conn=null;
+  $('connectCard').style.display='';$('walletCard').style.display='none';
+  $('liveBar').style.display='none';$('dAddr').textContent='not connected';
+  cl('drawer');tt('Disconnected');
+}
+function copyAddr(){
+  if(!pubkey){tt('Not connected');return}
+  navigator.clipboard.writeText(pubkey.toBase58()).then(()=>tt('Address copied 🐄'),()=>tt('Copy failed'));
+}
+
+/* ── ATA derivation ── */
+function ataFor(owner,mint){
+  return W3.PublicKey.findProgramAddressSync(
+    [owner.toBytes(), new W3.PublicKey(TOKEN_PROG).toBytes(), new W3.PublicKey(mint).toBytes()],
+    new W3.PublicKey(ATA_PROG)
+  )[0];
+}
+
+async function refresh(){
+  if(!conn||!pubkey) return;
+  try{
+    sol=(await conn.getBalance(pubkey))/1e9;
+    $('solBal').textContent=sol.toFixed(4);
+    $('solWarn').textContent = sol<0.001 ? '⚠ too low to send' : 'ok for fees';
+    $('solWarn').style.color = sol<0.001 ? 'var(--stop)' : '';
+  }catch(e){ $('solBal').textContent='?';$('solWarn').textContent='RPC error' }
+  try{
+    const r=await conn.getParsedTokenAccountsByOwner(pubkey,{mint:new W3.PublicKey(USDC_MINT)});
+    usdc = r.value.length ? Number(r.value[0].account.data.parsed.info.tokenAmount.uiAmount||0) : 0;
+    renderBal();
+  }catch(e){
+    usdc=0;renderBal();
+    tt('Balance read failed — try a private RPC in Settings');
+  }
+  loadTxs();
+}
+function renderBal(){
+  if(HIDE){$('bW').textContent='•••';$('bC').textContent='••';$('bLocal').textContent='USDC · hidden';return}
+  const w=Math.floor(usdc),c=Math.round((usdc-w)*100).toString().padStart(2,'0');
+  $('bW').textContent=w.toLocaleString();$('bC').textContent=c;
+  const m=mkBy(SEL), r=rateInfo();
+  const px=r?r.sell:rate(m);
+  $('bLocal').textContent='≈ '+m.sym+Math.round(usdc*px).toLocaleString();
+}
+async function loadTxs(){
+  const box=$('txs');
+  try{
+    const sigs=await conn.getSignaturesForAddress(pubkey,{limit:8});
+    if(!sigs.length){box.innerHTML='<div class="fine" style="padding:18px 0">No transactions yet.</div>';return}
+    box.innerHTML=sigs.map(s=>{
+      const when=s.blockTime?new Date(s.blockTime*1000).toLocaleDateString():'pending';
+      const bad=!!s.err;
+      return `<div class="li"><div class="av" style="background:${bad?'var(--stop-bg)':'var(--grass-lt)'}">${bad?'✕':'◎'}</div>
+        <div class="mid"><div class="t">${bad?'Failed':'Confirmed'}</div><div class="s">${when} · slot ${s.slot.toLocaleString()}</div></div>
+        <div class="r"><a class="u" style="color:var(--grass-d);text-decoration:underline"
+          href="https://solscan.io/tx/${s.signature}" target="_blank" rel="noopener">${s.signature.slice(0,6)}…</a></div></div>`;
+    }).join('');
+  }catch(e){ box.innerHTML='<div class="fine" style="padding:18px 0">Could not load history — RPC limit.</div>' }
+}
+
+/* ══════════ send ══════════ */
+function valTo(){
+  const v=$('sendTo').value.trim(),el=$('sendTo'),err=$('toErr');
+  if(!v){el.classList.remove('err');err.style.display='none';return quoteSend()}
+  const okAddr=C.isValidSolanaAddress(v);
+  el.classList.toggle('err',!okAddr);
+  err.style.display=okAddr?'none':'';
+  err.textContent=okAddr?'':'Not a valid Solana address.';
+  quoteSend();
+}
+function valAmt(){ quoteSend() }
+function quoteSend(){
+  const to=$('sendTo').value.trim(), amtS=$('sendAmt').value.trim();
+  const units=C.toBaseUnits(amtS,USDC_DEC);
+  const amt=units!==null?Number(units)/1e6:NaN;
+  const rows=[];
+  let blocked=null;
+  if(units===null) blocked='Amount must be a number with at most 6 decimals.';
+  else if(amt<=0) blocked='Enter an amount above zero.';
+  else if(amt>usdc) blocked='More than your balance ('+fmt(usdc)+' USDC).';
+  else if(amt>CAP) blocked='Above your '+CAP+' USDC send cap. Raise it in Settings if you mean it.';
+  else if(!C.isValidSolanaAddress(to)) blocked='Enter a valid recipient address.';
+  else if(sol<0.001) blocked='Not enough SOL for the network fee.';
+
+  rows.push(['Amount', (isFinite(amt)?fmt(amt):'—')+' USDC']);
+  rows.push(['To', to?short(to):'—']);
+  rows.push(['Network fee','~0.000005 SOL']);
+  rows.push(['Send cap',CAP+' USDC']);
+  $('sendBrk').innerHTML=rows.map(r=>`<div class="brw"><span class="k">${r[0]}</span><span class="v">${r[1]}</span></div>`).join('')
+    + (blocked?`<div class="brw neg"><span class="k">Blocked</span><span class="v">${blocked}</span></div>`:'');
+  $('sendBtn').disabled=!!blocked;
+  return !blocked;
+}
+async function doSend(){
+  if(!quoteSend()) return;
+  const to=$('sendTo').value.trim();
+  const units=C.toBaseUnits($('sendAmt').value.trim(),USDC_DEC);
+  const b=$('sendBtn');b.innerHTML='<span class="sp"></span> Building…';b.disabled=true;
+  $('simOut').innerHTML='';
+  try{
+    const mint=new W3.PublicKey(USDC_MINT);
+    const toPk=new W3.PublicKey(to);
+    const src=ataFor(pubkey,USDC_MINT), dst=ataFor(toPk,USDC_MINT);
+    const tx=new W3.Transaction();
+
+    /* create recipient ATA if missing (idempotent instruction, payer = sender) */
+    const dstInfo=await conn.getAccountInfo(dst);
+    if(!dstInfo){
+      tx.add(new W3.TransactionInstruction({
+        keys:[{pubkey:pubkey,isSigner:true,isWritable:true},{pubkey:dst,isSigner:false,isWritable:true},
+              {pubkey:toPk,isSigner:false,isWritable:false},{pubkey:mint,isSigner:false,isWritable:false},
+              {pubkey:new W3.PublicKey(SYS_PROG),isSigner:false,isWritable:false},
+              {pubkey:new W3.PublicKey(TOKEN_PROG),isSigner:false,isWritable:false}],
+        programId:new W3.PublicKey(ATA_PROG), data:new Uint8Array([1])   // CreateIdempotent
+      }));
+    }
+    /* TransferChecked — safer than Transfer: the mint + decimals are verified on-chain */
+    const data=new Uint8Array(10); data[0]=12;
+    new DataView(data.buffer).setBigUint64(1,BigInt(units),true); data[9]=USDC_DEC;
+    tx.add(new W3.TransactionInstruction({
+      keys:[{pubkey:src,isSigner:false,isWritable:true},{pubkey:mint,isSigner:false,isWritable:false},
+            {pubkey:dst,isSigner:false,isWritable:true},{pubkey:pubkey,isSigner:true,isWritable:false}],
+      programId:new W3.PublicKey(TOKEN_PROG), data
+    }));
+
+    const {blockhash,lastValidBlockHeight}=await conn.getLatestBlockhash('confirmed');
+    tx.recentBlockhash=blockhash; tx.feePayer=pubkey;
+
+    if(SIM){
+      b.innerHTML='<span class="sp"></span> Simulating…';
+      const sim=await conn.simulateTransaction(tx);
+      if(sim.value.err){
+        $('simOut').innerHTML=`<div class="note stop"><b>Simulation failed — nothing was sent.</b><div class="code" style="margin-top:8px">${
+          escapeHtml(JSON.stringify(sim.value.err))+'\n\n'+escapeHtml((sim.value.logs||[]).slice(-8).join('\n'))}</div></div>`;
+        b.innerHTML='Review &amp; send';b.disabled=false;return;
+      }
+      $('simOut').innerHTML='<div class="note info">✅ Simulation passed — the transaction should succeed.</div>';
+    }
+    pendingTx={tx,lastValidBlockHeight,to,units,newAta:!dstInfo};
+    $('confBrk').innerHTML=[
+      ['Sending', fmt(Number(units)/1e6)+' USDC'],
+      ['To', to],
+      ['Creates token account', !dstInfo?'yes (~0.002 SOL rent)':'no'],
+      ['Network', 'Solana mainnet-beta']
+    ].map(r=>`<div class="brw"><span class="k">${r[0]}</span><span class="v" style="word-break:break-all">${r[1]}</span></div>`).join('');
+    $('confWord').value='';valConf();
+    cl('sh-send');op('sh-confirm');
+  }catch(e){
+    $('simOut').innerHTML=`<div class="note stop"><b>Could not build transaction.</b><br>${escapeHtml(e.message||String(e))}</div>`;
+  }finally{ b.innerHTML='Review &amp; send';b.disabled=false }
+}
+function valConf(){ $('confBtn').disabled = $('confWord').value.trim().toUpperCase()!=='SEND' }
+async function reallySend(){
+  if(!pendingTx) return;
+  const b=$('confBtn');b.innerHTML='<span class="sp w"></span> Awaiting wallet…';b.disabled=true;
+  try{
+    let sig;
+    if(provider.signAndSendTransaction){
+      sig=(await provider.signAndSendTransaction(pendingTx.tx)).signature;
+    }else{
+      const signed=await provider.signTransaction(pendingTx.tx);
+      sig=await conn.sendRawTransaction(signed.serialize());
+    }
+    b.innerHTML='<span class="sp w"></span> Confirming…';
+    await conn.confirmTransaction({signature:sig,blockhash:pendingTx.tx.recentBlockhash,
+      lastValidBlockHeight:pendingTx.lastValidBlockHeight},'confirmed');
+    cl('sh-confirm');
+    $('qrBody').innerHTML=`<div class="ok"><div class="rg"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#1C1A17" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2>Sent</h2><div class="p">${fmt(Number(pendingTx.units)/1e6)} USDC confirmed on Solana</div>
+      <div class="brk" style="text-align:left"><div class="brw"><span class="k">Signature</span>
+        <span class="v" style="font-family:ui-monospace,monospace;font-size:11px;word-break:break-all">${sig}</span></div></div>
+      <a class="btn lime" href="https://solscan.io/tx/${sig}" target="_blank" rel="noopener" style="text-decoration:none">View on Solscan ↗</a>
+      <button class="btn ghost" style="margin-top:6px" onclick="cl('sh-qr')">Close</button></div>`;
+    op('sh-qr');
+    pendingTx=null;refresh();
+  }catch(e){
+    tt('Send failed: '+(e.message||e).slice(0,80));
+    b.innerHTML='Send it';b.disabled=false;
+  }
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+/* ══════════════════════════════════════════════════════════
+   FLAGS — drawn, not emoji.
+
+   Windows has no glyphs for regional-indicator flag sequences, so
+   a flag sequence renders as its two letters (IN, KH) on most of our
+   users' machines. Inline SVG looks the same everywhere, and
+   it works offline. viewBox 0 0 60 40, cropped to a circle.
+   ══════════════════════════════════════════════════════════ */
+const FLAGS={
+ IN:'<rect width="60" height="13.3" fill="#FF9933"/><rect y="13.3" width="60" height="13.4" fill="#fff"/><rect y="26.7" width="60" height="13.3" fill="#138808"/><circle cx="30" cy="20" r="5.2" fill="none" stroke="#000088" stroke-width="1.3"/><circle cx="30" cy="20" r="1" fill="#000088"/>',
+ KH:'<rect width="60" height="40" fill="#032EA1"/><rect y="10" width="60" height="20" fill="#E00025"/><path d="M24 25h12v2.5H24zM26.5 17h7v8h-7zM30 12.5l4.5 4.5h-9z" fill="#fff"/>',
+ ID:'<rect width="60" height="20" fill="#CE1126"/><rect y="20" width="60" height="20" fill="#fff"/>',
+ PH:'<rect width="60" height="20" fill="#0038A8"/><rect y="20" width="60" height="20" fill="#CE1126"/><path d="M0 0l26 20L0 40z" fill="#fff"/><circle cx="8.5" cy="20" r="4.2" fill="#FCD116"/>',
+ VN:'<rect width="60" height="40" fill="#DA251D"/><path d="M30 9.5l3.9 12h12.6l-10.2 7.4 3.9 12L30 33.5l-10.2 7.4 3.9-12-10.2-7.4h12.6z" fill="#FFFF00"/>',
+ SG:'<rect width="60" height="20" fill="#ED2939"/><rect y="20" width="60" height="20" fill="#fff"/><circle cx="14" cy="10" r="7" fill="#fff"/><circle cx="17.5" cy="10" r="6" fill="#ED2939"/>',
+ MY:'<rect width="60" height="40" fill="#fff"/><rect width="60" height="5.7" fill="#CC0001"/><rect y="11.4" width="60" height="5.7" fill="#CC0001"/><rect y="22.8" width="60" height="5.7" fill="#CC0001"/><rect y="34.2" width="60" height="5.7" fill="#CC0001"/><rect width="30" height="22.8" fill="#010066"/><circle cx="12.5" cy="11" r="6" fill="#FFCC00"/><circle cx="15.5" cy="11" r="5" fill="#010066"/>',
+ TH:'<rect width="60" height="40" fill="#A51931"/><rect y="6.7" width="60" height="26.6" fill="#F4F5F8"/><rect y="13.3" width="60" height="13.4" fill="#2D2A4A"/>',
+ CN:'<rect width="60" height="40" fill="#DE2910"/><path d="M12 6.5l2.4 7.4h7.8l-6.3 4.6 2.4 7.4L12 21.3l-6.3 4.6 2.4-7.4-6.3-4.6h7.8z" fill="#FFDE00"/>',
+ NG:'<rect width="20" height="40" fill="#008751"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#008751"/>',
+ KE:'<rect width="60" height="40" fill="#fff"/><rect width="60" height="11" fill="#000"/><rect y="14" width="60" height="12" fill="#BB0000"/><rect y="29" width="60" height="11" fill="#006600"/><ellipse cx="30" cy="20" rx="5.5" ry="11" fill="#BB0000" stroke="#fff" stroke-width="1.6"/>',
+ GH:'<rect width="60" height="13.3" fill="#CE1126"/><rect y="13.3" width="60" height="13.4" fill="#FCD116"/><rect y="26.7" width="60" height="13.3" fill="#006B3F"/><path d="M30 14.5l2.2 6.6h7l-5.6 4.1 2.1 6.6-5.7-4-5.7 4 2.1-6.6-5.6-4.1h7z" fill="#000"/>',
+ ZA:'<rect width="60" height="20" fill="#002395"/><rect y="20" width="60" height="20" fill="#DE3831"/><path d="M0 0l30 20L0 40z" fill="#007A4D"/><path d="M0 6.5l20.5 13.5L0 33.5z" fill="#fff"/><path d="M0 12l12 8L0 28z" fill="#FFB612"/>',
+ TZ:'<rect width="60" height="40" fill="#1EB53A"/><path d="M60 4v36H14z" fill="#00A3DD"/><path d="M0 40L60 0h-9L0 34z" fill="#FCD116"/><path d="M0 34L51 0h-8L0 28z" fill="#000"/>',
+ BR:'<rect width="60" height="40" fill="#009C3B"/><path d="M30 5l24 15-24 15L6 20z" fill="#FFDF00"/><circle cx="30" cy="20" r="8.5" fill="#002776"/>',
+ AR:'<rect width="60" height="13.3" fill="#74ACDF"/><rect y="13.3" width="60" height="13.4" fill="#fff"/><rect y="26.7" width="60" height="13.3" fill="#74ACDF"/><circle cx="30" cy="20" r="4.2" fill="#F6B40E"/>',
+ VE:'<rect width="60" height="13.3" fill="#FFCC00"/><rect y="13.3" width="60" height="13.4" fill="#00247D"/><rect y="26.7" width="60" height="13.3" fill="#CF142B"/>',
+ CO:'<rect width="60" height="20" fill="#FCD116"/><rect y="20" width="60" height="10" fill="#003893"/><rect y="30" width="60" height="10" fill="#CE1126"/>',
+ EC:'<rect width="60" height="20" fill="#FFDD00"/><rect y="20" width="60" height="10" fill="#034EA2"/><rect y="30" width="60" height="10" fill="#ED1C24"/>',
+ PE:'<rect width="20" height="40" fill="#D91023"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#D91023"/>'
+};
+function flag(cc, size){
+  const s = size || 38;
+  return `<span class="flagwrap" style="width:${s}px;height:${s}px">`
+       + `<svg viewBox="0 0 60 40" preserveAspectRatio="xMidYMid slice" aria-hidden="true">`
+       + (FLAGS[cc] || '<rect width="60" height="40" fill="#D9D2C0"/>')
+       + `</svg></span>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ONBOARDING — login → choose payout region → app
+
+   The privacy model, stated plainly so nobody wires it up wrong:
+   below UNVERIFIED_CAP you transact with an email and nothing else,
+   and the merchant only ever sees an ordinary local-currency credit.
+   Above the cap, verification is required. That is what "anonymous"
+   honestly means here — no signup friction and a counterparty who
+   can't identify you — not exemption from AML obligations.
+   ══════════════════════════════════════════════════════════ */
+const UNVERIFIED_CAP = 200;                      // USDC/month before KYC
+
+function obNext(){
+  $('obLogin').classList.remove('on');
+  $('obRegion').classList.add('on');
+  drawRegions();
+  window.scrollTo(0,0);
+}
+/* One clean list, no status chrome. Every market here is one we pay out
+   in — the operating detail that differs per country lives on the
+   country sheet and in Settings, where it's actionable rather than
+   decorative. */
+function drawRegions(){
+  const rows=MK.filter(m=>m.s!=='blocked');
+  $('regionList').innerHTML=rows.map(m=>{
+    const sel=m.cc===SEL;
+    return `<div class="rgrow ${sel?'sel':''}" onclick="pickRegion('${m.cc}')">
+      ${flag(m.cc,42)}
+      <div class="mid"><div class="n">${m.n}</div>
+        <div class="c">${m.sym.trim()} · ${m.cur} · ${m.r}</div></div>
+      <div class="rd">${sel?'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>':''}</div></div>`;
+  }).join('');
+}
+function pickRegion(cc){
+  const m=mkBy(cc); if(!m||m.s==='blocked') return;
+  SEL=cc; drawRegions();
+}
+function obFinish(){
+  setMk(SEL);
+  store.set('moo.onboarded','1');
+  store.set('moo.region',SEL);
+  $('onboard').classList.remove('on');
+  document.body.style.overflow='';
+  tt(mkBy(SEL).f+' Paying out in '+mkBy(SEL).cur);
+}
+function obReset(){
+  store.set('moo.onboarded','');
+  $('onboard').classList.add('on');
+  $('obRegion').classList.remove('on');
+  $('obLogin').classList.add('on');
+}
+
+/* ══════════════════════════════════════════════════════════
+   EMBEDDED WALLET — email + passphrase
+   A real ed25519 keypair generated in-browser, encrypted with
+   PBKDF2-SHA256 (250k) → AES-GCM. Nothing leaves the device.
+   Production wants Privy / Web3Auth / Turnkey for real recovery.
+   ══════════════════════════════════════════════════════════ */
+let localKeypair=null, emMode='create';
+const enc=new TextEncoder(), dec=new TextDecoder();
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+
+async function deriveKey(pass,salt){
+  const base=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptSecret(secretBytes,pass){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,secretBytes);
+  return {v:1,salt:b64(salt),iv:b64(iv),ct:b64(ct)};
+}
+async function decryptSecret(blob,pass){
+  const key=await deriveKey(pass,unb64(blob.salt));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(blob.iv)},key,unb64(blob.ct));
+  return new Uint8Array(pt);
+}
+function deviceSecret(){
+  let k = store.get('moo.dk','');
+  if(!k){ k = b64(crypto.getRandomValues(new Uint8Array(32))); store.set('moo.dk',k) }
+  return k;
+}
+function emVault(){ try{ return JSON.parse(store.get('moo.vault','null')) }catch(e){ return null } }
+
+function emToggleMode(){
+  emMode = emMode==='create' ? 'unlock' : 'create';
+  const c=emMode==='create';
+  $('emTitle').textContent   = c?'Continue with email':'Welcome back';
+  $('emLede').textContent    = c?'We\'ll create a Solana wallet right here. No documents, no forms.'
+                                :'Sign back into the wallet saved on this device.';
+  $('emPassLbl').textContent = c?'Choose a passphrase':'Passphrase';
+  $('emConfirmWrap').style.display = c?'':'none';
+  $('emBtn').textContent     = c?'Create wallet':'Continue';
+  $('emSwitch').textContent  = c?'I already have one on this device':'Create a new wallet instead';
+  /* never carry a passphrase or a stale error across a mode switch */
+  $('emPass').value=''; $('emPass2').value=''; emSubmitErr=null;
+  emVal();
+}
+/* A failed submit (e.g. wrong passphrase) must survive the emVal()
+   re-render that runs in emSubmit's finally block — otherwise the
+   error flashes and vanishes and the user learns nothing. */
+let emSubmitErr=null;
+function emShowErr(msg){ emSubmitErr=msg; emVal() }
+function emVal(){
+  const email=$('emEmail').value.trim(), p1=$('emPass').value, p2=$('emPass2').value;
+  const okEmail=/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email);
+  const wantPass = usePassphrase();
+  let err=null;
+  if(email&&!okEmail) err='That doesn\'t look like an email address.';
+  else if(wantPass&&p1&&p1.length<8) err='Passphrase needs at least 8 characters.';
+  else if(wantPass&&emMode==='create'&&p2&&p1!==p2) err='The two passphrases don\'t match.';
+  const show = err || emSubmitErr;
+  $('emErr').innerHTML=show?`<div class="note stop" style="margin-bottom:12px">${show}</div>`:'';
+  const ready = okEmail && (!wantPass || (p1.length>=8 && (emMode==='unlock'||p1===p2)));
+  $('emBtn').disabled=!ready;
+  return ready;
+}
+function usePassphrase(){ const t=$('tPass'); return !!(t && t.classList.contains('on')) }
+function togglePass(){
+  const t=$('tPass'); t.classList.toggle('on');
+  const on=t.classList.contains('on');
+  $('passFields').style.display = on?'':'none';
+  $('emPass').value=''; $('emPass2').value=''; emSubmitErr=null;
+  $('emNote').innerHTML = on
+    ? `<div class="note warn"><b>Portable, but nothing recovers it.</b> Your passphrase encrypts the key,
+       so you can restore this wallet on another device — and if you forget it the funds are gone. No reset link.</div>`
+    : `<div class="note info"><b>This device only.</b> Your key is generated here and stays here. Anyone who can
+       open this browser profile can use the wallet, exactly like staying signed in. Add a passphrase to move
+       it to another device.</div>`;
+  emVal();
+}
+/* typing anywhere clears a stale submit error */
+['emEmail','emPass','emPass2'].forEach(id=>{
+  const el=$(id); if(el) el.addEventListener('input',()=>{ if(emSubmitErr){emSubmitErr=null;emVal()} });
+});
+async function emSubmit(){
+  if(!emVal()) return;
+  const email=$('emEmail').value.trim();
+  const pass = usePassphrase() ? $('emPass').value : deviceSecret();
+  const b=$('emBtn'), label=b.textContent;
+  b.innerHTML='<span class="sp"></span> Working…'; b.disabled=true;
+  try{
+    let kp;
+    if(emMode==='create'){
+      kp=W3.Keypair.generate();
+      const blob=await encryptSecret(kp.secretKey,pass);
+      blob.email=email; blob.pk=kp.publicKey.toBase58();
+      if(!store.set('moo.vault',JSON.stringify(blob)))
+        tt('Heads up — this browser blocks storage, so the wallet won\'t persist.');
+    }else{
+      const v=emVault();
+      if(!v){ throw new Error('No wallet saved on this device. Create one instead.') }
+      if(v.email && v.email!==email){ throw new Error('That email doesn\'t match the wallet saved here.') }
+      const secret=await decryptSecret(v,pass);           // throws if wrong passphrase
+      kp=W3.Keypair.fromSecretKey(secret);
+    }
+    localKeypair=kp;
+    provider={
+      isLocal:true, publicKey:kp.publicKey,
+      signAndSendTransaction:async(tx)=>{
+        tx.sign(kp);
+        const sig=await conn.sendRawTransaction(tx.serialize());
+        return {signature:sig};
+      }
+    };
+    pubkey=kp.publicKey;
+    conn=new W3.Connection(RPC,'confirmed');
+    cl('sh-email'); onConnected(email);
+    tt(emMode==='create'?'Wallet created 🐄':'Unlocked 🐄');
+    /* don't leave the passphrase sitting in the DOM */
+    $('emPass').value=''; $('emPass2').value=''; emSubmitErr=null;
+  }catch(e){
+    const m=String(e&&e.message||e);
+    emSubmitErr = /operation-specific reason|decrypt|OperationError/i.test(m)
+      ? 'Wrong passphrase.' : escapeHtml(m);
+  }finally{ b.textContent=label; emVal() }
+}
+function onConnected(email){
+  $('connectCard').style.display='none';
+  $('walletCard').style.display='';
+  $('liveBar').style.display='flex';
+  const addr=pubkey.toBase58();
+  $('liveTxt').textContent='MAINNET · LIVE FUNDS · '+short(addr);
+  $('dAddr').textContent=short(addr);
+  $('greetAddr').textContent=short(addr);
+  $('recvAddr').textContent=addr;
+  $('dEmail').textContent=email||(provider&&provider.isLocal?'this device':'external wallet');
+  drawQR($('qrRecv'),addr);
+  refresh();
+}
+function exportKey(){
+  if(!localKeypair){tt('Only for email wallets');return}
+  const b58=[...localKeypair.secretKey];
+  $('ctyBody').innerHTML=`<h3>Export your key</h3>
+    <div class="lede">Anyone with this can spend your funds. Never paste it into a website or share it.</div>
+    <div class="note stop"><b>Save it somewhere offline right now.</b> If you lose your passphrase this is the only way back in.</div>
+    <div class="code">[${b58.join(',')}]</div>
+    <button class="btn lime" style="margin-top:12px" onclick="navigator.clipboard.writeText('[${b58.join(',')}]').then(()=>tt('Copied — store it safely'))">Copy secret key</button>`;
+  op('sh-cty');
+}
+
+/* ══════════ camera + QR ══════════ */
+let camStream=null, camRAF=null;
+async function toggleCam(){ camStream?stopCam():startCam() }
+async function startCam(){
+  const v=$('vid'),cv=$('cvs');
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    v.srcObject=camStream; await v.play();
+    $('camIdle').style.display='none'; $('camBtn').textContent='Stop camera';
+    const ctx=cv.getContext('2d',{willReadFrequently:true});
+    const tick=()=>{
+      if(!camStream) return;
+      if(v.readyState===v.HAVE_ENOUGH_DATA){
+        cv.width=v.videoWidth; cv.height=v.videoHeight;
+        ctx.drawImage(v,0,0,cv.width,cv.height);
+        const img=ctx.getImageData(0,0,cv.width,cv.height);
+        const code=window.jsQR?jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'}):null;
+        if(code&&code.data){ stopCam(); handleQR(code.data); return }
+      }
+      camRAF=requestAnimationFrame(tick);
+    };
+    tick();
+  }catch(e){
+    $('camIdle').style.display='';
+    $('camIdle').innerHTML='Camera unavailable.<br><span style="opacity:.75;font-size:12px">'+escapeHtml(e.message||'')+
+      '<br>Camera needs HTTPS or localhost. Use “Paste code” instead.</span>';
+    tt('Camera blocked — use Paste code');
+  }
+}
+function stopCam(){
+  if(camRAF) cancelAnimationFrame(camRAF), camRAF=null;
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}
+  const v=$('vid'); if(v) v.srcObject=null;
+  const i=$('camIdle'); if(i) i.style.display='';
+  const b=$('camBtn'); if(b) b.textContent='Start camera';
+}
+function handleQR(raw){
+  cl('sh-paste');
+  const p=C.parseQR((raw||'').trim());
+  if(!p){
+    $('qrBody').innerHTML=`<h3>Not a payment code</h3>
+      <div class="lede">Didn't match a UPI link or an EMVCo payload.</div>
+      <div class="code">${escapeHtml((raw||'').slice(0,300))||'(empty)'}</div>
+      <button class="btn" style="margin-top:14px" onclick="cl('sh-qr')">Close</button>`;
+    op('sh-qr');return;
+  }
+  lastMerchant = p.scheme==='UPI' ? (p.name||p.vpa) : (p.merchant||'Merchant');
+  const isUPI=p.scheme==='UPI';
+  const cc=isUPI?'IN':(p.countryCode||null);
+  const m=cc?mkBy(cc):null;
+  const bad = isUPI ? !p.valid : !p.valid;
+  const cur = p.currency || (m?m.cur:null);
+  const fxr = m?rate(m):null;
+
+  let rows=[];
+  if(isUPI){
+    rows=[['Scheme','UPI (India)'],['Payee VPA',p.vpa],['Name',p.name||'—'],
+          ['Amount',p.amount!=null?'₹'+fmt(p.amount):'open — you choose'],
+          ['MCC',p.mcc||'—'],['VPA format',p.valid?'✅ valid':'❌ malformed']];
+  }else{
+    rows=[['Scheme','EMVCo '+(p.static?'(static)':'(dynamic)')],['Merchant',p.merchant||'—'],
+          ['City',p.city||'—'],['Country',(p.country||p.countryCode||'—')+(p.rail?' · '+p.rail:'')],
+          ['Currency',cur||'—'],['Amount',p.amount!=null?fmt(p.amount):'open — you choose'],
+          ['CRC',p.crcOk?'✅ valid ('+p.crcGiven+')':'❌ FAILED — do not pay']];
+  }
+
+  /* if an order was placed, the amount is already locked */
+  let quote='';
+  if(order){
+    quote=`<div class="orderchip">🔒 Order locked — you pay ${fmt(order.usdc)} USDC (${order.sym}${fmt(order.fiat, order.rate>100?0:2)})</div>`;
+    if(p.amount!=null && Math.abs(p.amount-order.fiat)>0.01){
+      quote+=`<div class="note warn"><b>Amount mismatch.</b> This QR asks for ${p.currency||''}${fmt(p.amount)},
+        but your order was for ${order.sym}${fmt(order.fiat)}. Go back and re-enter to match.</div>`;
+    }
+  }
+  if(!order && p.amount!=null && fxr){
+    const q=C.quotePayment(p.amount,fxr,0.004,cc,TDS_MODE);
+    if(q){
+      const cmp=C.complianceFor(cc);
+      quote=`<div class="brk"><div class="brw"><span class="k">Rate</span><span class="v">1 USDC = ${m.sym}${fmt(fxr,fxr>100?0:2)}</span></div>
+        <div class="brw"><span class="k">Goods value</span><span class="v">${fmt(q.base)} USDC</span></div>
+        <div class="brw"><span class="k">Fee (0.4%)</span><span class="v">${fmt(q.fee,4)} USDC</span></div>
+        ${cmp.tds?`<div class="brw"><span class="k">${cmp.tdsLabel}${q.absorbed?' — we absorb':''}</span><span class="v">${fmt(q.tds,4)} USDC</span></div>`:''}
+        <div class="brw tot"><span>You pay</span><span class="v">${fmt(q.userPays)} USDC</span></div></div>`;
+    }
+  }
+
+  /* settlement plan for this payment */
+  let payBlock='';
+  if(!bad && order){
+    const plan=planFor(order.usdc);
+    if(plan.mode==='blocked'){
+      payBlock=`<div class="note stop">${escapeHtml(plan.reason)}</div>`;
+    }else{
+      const [cls,label]=MODE_LABEL[plan.mode];
+      payBlock=`<div class="card ${plan.degraded?'cream':'pale'}" style="box-shadow:var(--sh-sm)">
+        <span class="modebadge ${cls}">${label} · ~${plan.etaText}</span>
+        <div style="font-size:12.5px;font-weight:700;line-height:1.5;opacity:.75">${
+          plan.degraded ? 'Our float is low, so this one gets matched first.'
+          : plan.mode==='finality' ? 'Above '+INSTANT_THRESHOLD+' USDC we wait for full settlement.'
+          : 'Paid from our float now, settled with you behind the scenes.'}</div></div>
+      <button class="btn lime" onclick="payNow()">Pay ${fmt(order.usdc)} USDC</button>`;
+    }
+  }
+  $('qrBody').innerHTML=`<h3>${bad?'⚠️ ':''}${isUPI?(p.name||p.vpa):(p.merchant||'Merchant')}</h3>
+    <div class="lede">Decoded from a real payment code.</div>
+    ${bad?'<div class="note stop"><b>This code failed validation.</b> A failed CRC or malformed VPA means it is corrupt or tampered with. Do not pay it.</div>':''}
+    <div class="brk">${rows.map(r=>`<div class="brw"><span class="k">${r[0]}</span><span class="v" style="word-break:break-all">${escapeHtml(String(r[1]))}</span></div>`).join('')}</div>
+    ${quote}
+    ${m&&m.s!=='live'?`<div class="note warn"><b>${m.n} — ${SB[m.s][1]}.</b> ${m.w}</div>`:''}
+    ${payBlock}
+    <div class="note info"><b>The payout leg isn't wired.</b> Decoding and settlement logic are real; actually
+      moving rupees needs a licensed partner on the ${m?m.r:'local'} rail.</div>
+    <button class="btn ghost" onclick="cl('sh-qr')">Close</button>`;
+  op('sh-qr');
+}
+
+/* ══════════════════════════════════════════════════════════
+   KEYPAD PAY — amount first, then scan
+   ══════════════════════════════════════════════════════════ */
+let padVal='', padUnit='fiat', order=null, payMode='scan', lastMerchant='';
+
+$('pad').innerHTML=['1','2','3','4','5','6','7','8','9','.','0','back']
+  .map(k=>k==='back'
+    ? `<button class="back" onclick="padKey('back')" aria-label="Delete"><svg viewBox="0 0 24 24"><path d="M20 5H9l-6 7 6 7h11a1 1 0 001-1V6a1 1 0 00-1-1zM13 9.5l5 5M18 9.5l-5 5"/></svg></button>`
+    : `<button onclick="padKey('${k}')">${k}</button>`).join('');
+
+function padKey(k){
+  const m=mkBy(SEL);
+  padVal=C.keypadPush(padVal,k, padUnit==='fiat' ? (m.fx>100?0:2) : 6);
+  renderPad();
+}
+function padMax(){
+  const m=mkBy(SEL);
+  if(!usdc){tt('No USDC balance yet');return}
+  padVal = padUnit==='fiat'
+    ? String(Math.floor(usdc*rate(m)))
+    : String(Math.floor(usdc*1e6)/1e6);
+  renderPad();
+}
+function flipUnit(){
+  const m=mkBy(SEL), r=rate(m), n=parseFloat(padVal||'0');
+  if(n>0) padVal = padUnit==='fiat' ? String(Math.round(n/r*1e6)/1e6) : String(Math.round(n*r));
+  padUnit = padUnit==='fiat'?'usdc':'fiat';
+  renderPad();
+}
+function renderPad(){
+  const m=mkBy(SEL), r=rate(m), n=parseFloat(padVal||'0')||0;
+  const isFiat=padUnit==='fiat';
+  $('payAmtBig').querySelector('.cur').textContent = isFiat ? m.sym.trim() : '$';
+  $('payAmtTxt').textContent = padVal===''?'0':padVal;
+  $('payAmtBig').classList.toggle('zero', n<=0);
+  $('payAlt').textContent = isFiat
+    ? '≈ '+(r?(n/r).toFixed(2):'0')+' USDC'
+    : '≈ '+m.sym+Math.round(n*r).toLocaleString();
+
+  const usdcAmt = isFiat ? (r? n/r : 0) : n;
+  const overBal = pubkey && usdcAmt>usdc;
+  $('placeBtn').disabled = !(n>0) || overBal;
+  $('placeBtn').textContent = overBal ? 'Not enough USDC' : 'Place Order →';
+
+  /* country-scoped quote — TDS only appears where it applies */
+  if(n>0){
+    const comp=C.complianceFor(SEL);
+    const q=C.quotePayment(isFiat?n:n*r, r, 0.004, SEL, TDS_MODE);
+    if(q){
+      $('payQuote').innerHTML=`<div class="brk" style="margin-top:14px">
+        <div class="brw"><span class="k">Rate</span><span class="v">1 USDC = ${m.sym}${fmt(r,r>100?0:2)}</span></div>
+        <div class="brw"><span class="k">Fee (0.4%)</span><span class="v">${fmt(q.fee,4)} USDC</span></div>
+        ${comp.tds?`<div class="brw"><span class="k">${comp.tdsLabel}${q.absorbed?' — we absorb':''}</span><span class="v">${fmt(q.tds,4)} USDC</span></div>`:''}
+        <div class="brw tot"><span>You pay</span><span class="v">${fmt(q.userPays)} USDC</span></div></div>`;
+    }
+  } else $('payQuote').innerHTML='';
+}
+function placeOrder(){
+  const m=mkBy(SEL), r=rate(m), n=parseFloat(padVal||'0')||0;
+  if(!(n>0)) return;
+  const fiat = padUnit==='fiat' ? n : n*r;
+  const q=C.quotePayment(fiat,r,0.004,SEL,TDS_MODE);
+  order={fiat,usdc:q.userPays,rate:r,cur:m.cur,sym:m.sym,at:Date.now(),cc:SEL};
+  $('payKeypad').style.display='none';
+  $('payScan').style.display='';
+  $('scanFor').innerHTML=`<b>Order placed — ${m.sym}${fmt(fiat, r>100?0:2)}</b> · rate locked at 1 USDC = ${m.sym}${fmt(r,r>100?0:2)}<br>
+    You'll pay ${fmt(order.usdc)} USDC. Now scan the vendor's QR.`;
+  tt('Rate locked — now scan');
+}
+function cancelOrder(){
+  stopCam(); order=null;
+  $('payScan').style.display='none';
+  $('payKeypad').style.display='';
+}
+
+/* ── pay mode (India gets card bill) ── */
+function setPayMode(mode){
+  payMode=mode;
+  const scan=mode==='scan';
+  $('pm1').classList.toggle('on',scan); $('pm2').classList.toggle('on',!scan);
+  $('payKeypad').style.display = scan?'':'none';
+  $('payScan').style.display='none';
+  $('payCard').style.display = scan?'none':'';
+  $('payTitle').textContent = scan?'Scan & Pay':'Card bill';
+  if(!scan) ccQuote(); else cancelOrder();
+}
+function syncPayModes(){
+  const modes=C.modesFor(SEL);
+  const showTabs=modes.length>1;
+  $('payModes').style.display = showTabs?'':'none';
+  if(!showTabs && payMode!=='scan') setPayMode('scan');
+  const m=mkBy(SEL);
+  $('hintTxt').textContent = `Ask the vendor for the bill amount only. Don't ask for a QR yet.`;
+  $('camCap').textContent = `Now scan the ${m.r==='—'?'':m.r.split(' · ')[0]+' '}QR`;
+  padVal=''; renderPad();
+}
+
+/* ── card bill (India only) ── */
+function ccQuote(){
+  const m=mkBy(SEL), r=rate(m);
+  const v=C.validateCardBill($('ccLast4').value,$('ccIssuer').value,$('ccAmt').value,pubkey?usdc:null,r);
+  const comp=C.complianceFor(SEL);
+  if(!v.usdcNeeded){ $('ccOut').innerHTML = v.errors.length
+      ? `<div class="note warn">${v.errors.map(escapeHtml).join('<br>')}</div>` : '';
+    $('ccBtn').disabled=true; return }
+  const q=C.quotePayment(parseFloat($('ccAmt').value)||0, r, 0.004, SEL, TDS_MODE);
+  $('ccOut').innerHTML=`<div class="brk">
+    <div class="brw"><span class="k">Bill</span><span class="v">${m.sym}${fmt(parseFloat($('ccAmt').value)||0)}</span></div>
+    <div class="brw"><span class="k">Rate</span><span class="v">1 USDC = ${m.sym}${fmt(r,2)}</span></div>
+    <div class="brw"><span class="k">Fee (0.4%)</span><span class="v">${fmt(q.fee,4)} USDC</span></div>
+    ${comp.tds?`<div class="brw"><span class="k">${comp.tdsLabel}${q.absorbed?' — we absorb':''}</span><span class="v">${fmt(q.tds,4)} USDC</span></div>`:''}
+    <div class="brw tot"><span>You pay</span><span class="v">${fmt(q.userPays)} USDC</span></div></div>
+    ${v.errors.length?`<div class="note warn">${v.errors.map(escapeHtml).join('<br>')}</div>`:''}
+    <div class="note info">Routed over <b>BBPS</b>, the NPCI bill-payment network. Your issuer receives rupees and never sees crypto.</div>
+    <div class="note stop"><b>Expect scrutiny on this one.</b> Paying down credit with crypto proceeds is a recognised
+      money-laundering pattern, so a licensed biller will apply tighter limits and source-of-funds checks than a normal merchant payment.</div>`;
+  $('ccBtn').disabled=!v.ok;
+}
+function payCardBill(){
+  const v=C.validateCardBill($('ccLast4').value,$('ccIssuer').value,$('ccAmt').value,pubkey?usdc:null,rate(mkBy(SEL)));
+  if(!v.ok){tt(v.errors[0]);return}
+  $('qrBody').innerHTML=`<h3>Not wired up</h3>
+    <div class="lede">The maths and validation are real. The payout isn't.</div>
+    <div class="brk">
+      <div class="brw"><span class="k">Issuer</span><span class="v">${escapeHtml($('ccIssuer').value)}</span></div>
+      <div class="brw"><span class="k">Card</span><span class="v">•••• ${escapeHtml($('ccLast4').value)}</span></div>
+      <div class="brw"><span class="k">USDC needed</span><span class="v">${fmt(v.usdcNeeded)}</span></div></div>
+    <div class="note warn">Paying a real card bill needs a <b>BBPS biller agent</b> licence or an agreement with one,
+      plus the same FIU-registered sell leg as any other rupee payout.</div>
+    <button class="btn" onclick="cl('sh-qr')">Close</button>`;
+  op('sh-qr');
+}
+
+/* ══════════════════════════════════════════════════════════
+   SETTLEMENT — instant / finality / matched
+   ══════════════════════════════════════════════════════════ */
+const INSTANT_THRESHOLD = 200;        // USDC
+let FLOAT_AVAIL = 5000;               // demo: local-currency float on hand
+let dailyUsed = 0;
+
+function planFor(amountUsdc){
+  return C.settlementPlan({
+    amount: amountUsdc,
+    floatAvail: FLOAT_AVAIL,
+    instantThreshold: INSTANT_THRESHOLD,
+    dailyUsed: dailyUsed,
+    dailyCap: UNVERIFIED_CAP,
+    externalWallet: !!(provider && !provider.isLocal)
+  });
+}
+const MODE_LABEL = {
+  instant:  ['instant','Instant'],
+  finality: ['finality','Full settlement'],
+  matched:  ['matched','Matched — slower']
+};
+function settleHead(plan, merchant, amountUsdc, localTxt){
+  const [cls,label]=MODE_LABEL[plan.mode]||['instant','Paying'];
+  return `<span class="modebadge ${cls}">${label} · ~${plan.etaText}</span>
+    <h3>${escapeHtml(merchant||'Merchant')}</h3>
+    <div class="lede" style="margin-bottom:12px">${localTxt} · ${fmt(amountUsdc)} USDC</div>
+    ${plan.note?`<div class="note ${plan.degraded?'warn':'info'}">${plan.note}</div>`:''}`;
+}
+function drawSteps(plan, idx){
+  $('settleSteps').innerHTML = plan.steps.map((s,i)=>{
+    const state = i<idx?'done' : i===idx?'active' : '';
+    const mark  = i<idx ? '✓' : (i===idx ? '<span class="spin"></span>' : i+1);
+    const last  = i===plan.steps.length-1;
+    return `<div class="stp ${state}">
+      <div class="dot">${mark}${last?'':'<span class="rail"></span>'}</div>
+      <div class="mid"><div class="lb">${s.label}</div>${s.note?`<div class="nt">${s.note}</div>`:''}</div>
+      <div class="ms">${s.ms<1000?s.ms+'ms':(s.ms/1000).toFixed(1)+'s'}</div></div>`;
+  }).join('');
+}
+
+/* Demo speed: real timings are in the plan, but nobody wants to watch a
+   two-minute matching step tick by in a prototype. Compress long waits
+   while keeping the ordering and the honest labels intact. */
+const demoMs = ms => Math.min(ms, 1800);
+
+async function runSettlement(plan, merchant, amountUsdc, localTxt, sym){
+  $('settleHead').innerHTML = settleHead(plan, merchant, amountUsdc, localTxt);
+  $('settleFoot').innerHTML = '';
+  drawSteps(plan, 0);
+  op('sh-settle');
+
+  for(let i=0;i<plan.steps.length;i++){
+    drawSteps(plan, i);
+    await new Promise(r=>setTimeout(r, demoMs(plan.steps[i].ms)));
+  }
+  drawSteps(plan, plan.steps.length);
+
+  /* float is consumed by the payout, released when we rebalance */
+  FLOAT_AVAIL = Math.max(0, FLOAT_AVAIL - amountUsdc);
+  dailyUsed += amountUsdc;
+  renderFloat();
+
+  $('settleFoot').innerHTML = `
+    <div class="ok" style="padding:4px 0 0">
+      <div class="rg" style="width:70px;height:70px;margin-bottom:12px">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1C1A17" stroke-width="3.2"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2 style="font-size:23px">Paid</h2>
+      <div class="p">${escapeHtml(merchant||'Merchant')} received ${localTxt}</div>
+    </div>
+    <div class="brk" style="text-align:left">
+      <div class="brw"><span class="k">You paid</span><span class="v">${fmt(amountUsdc)} USDC</span></div>
+      <div class="brw"><span class="k">Settlement</span><span class="v">${MODE_LABEL[plan.mode][1]}</span></div>
+      <div class="brw"><span class="k">Took</span><span class="v">~${plan.etaText}</span></div>
+      ${plan.exposure?`<div class="brw"><span class="k">We fronted</span><span class="v">${fmt(plan.exposure)} USDC</span></div>`:''}
+    </div>
+    <button class="btn lime" onclick="cl('sh-settle');cancelOrder();go('s-home')">Done</button>`;
+  order=null;
+}
+
+function payNow(){
+  if(!order){tt('No order');return}
+  const plan=planFor(order.usdc);
+  if(plan.mode==='blocked'){tt(plan.reason);return}
+  cl('sh-qr');
+  runSettlement(plan, lastMerchant, order.usdc,
+    order.sym+fmt(order.fiat, order.rate>100?0:2), order.sym);
+}
+function renderFloat(){
+  const pct = Math.max(0, Math.min(100, FLOAT_AVAIL/5000*100));
+  const low = pct < 25;
+  const el=$('floatFill'); if(el){ el.style.width=pct+'%'; el.className = low?'low':'' }
+  const t=$('floatTxt'); if(t){
+    t.textContent = low ? 'Running low — larger payments may be matched instead'
+                        : 'Instant payments available';
+    t.style.color = low ? 'var(--stop)' : '';
+  }
+  const v=$('floatVal'); if(v) v.textContent = '$'+fmt(FLOAT_AVAIL,0);
+}
+function drawFloatSheet(){
+  const m=mkBy(SEL);
+  const rows=[
+    ['instant','Under '+INSTANT_THRESHOLD+' USDC','~3.2 seconds',
+     'We pay the merchant from our own float immediately, then settle with you behind the scenes. Covers about 98% of everyday payments.'],
+    ['finality','Over '+INSTANT_THRESHOLD+' USDC','~16 seconds',
+     'We wait for the transfer to fully settle on Solana before paying out. Larger amounts aren\'t worth fronting.'],
+    ['matched','When our float is low','a couple of minutes',
+     'We match you with someone going the other way first. Slower, and we say so rather than pretending otherwise.']
+  ];
+  $('floatBody').innerHTML = rows.map(r=>
+    `<div class="card ${r[0]==='instant'?'pale':'cream'}" style="box-shadow:var(--sh-sm)">
+      <span class="modebadge ${r[0]}" style="margin-bottom:8px">${r[1]} · ${r[2]}</span>
+      <div style="font-size:13px;font-weight:700;line-height:1.55">${r[3]}</div></div>`).join('')
+    + `<div class="note info"><b>Why we front it at all.</b> Waiting for full settlement on every payment
+       would make you stand at the counter for 16 seconds. Below the threshold the amount we're briefly
+       exposed to is small enough to be worth the speed — at typical ticket sizes it's a few dollars
+       across the whole business at any moment.</div>`;
+}
+
+/* sample codes */
+const T=(t,v)=>t+String(new TextEncoder().encode(v).length).padStart(2,'0')+v;
+const seal=b=>{const s=b+'6304';return s+C.crc16(s)};
+const SAMPLES=[
+  {n:'Sharma Tea Stall',d:'UPI · India · ₹340',
+   q:'upi://pay?pa=sharmatea@paytm&pn=Sharma%20Tea%20Stall&am=340.00&cu=INR&tn=Chai&mc=5812'},
+  {n:'Noodle House',d:'KHQR · Cambodia · ៛17,500',
+   q:seal(T('00','01')+T('01','12')+T('29',T('00','khqr@devb')+T('01','ACC0012345'))+T('52','5812')+T('53','116')+T('54','17500')+T('58','KH')+T('59','Noodle House')+T('60','Phnom Penh'))},
+  {n:'Warung Ibu Sri',d:'QRIS · Indonesia · Rp82,000',
+   q:seal(T('00','01')+T('01','12')+T('26',T('00','ID.CO.QRIS.WWW')+T('01','9360091100012345'))+T('52','5411')+T('53','360')+T('54','82000')+T('58','ID')+T('59','Warung Ibu Sri')+T('60','Denpasar'))},
+  {n:'Cafe Amazon',d:'PromptPay · Thailand · ฿85',
+   q:seal(T('00','01')+T('01','12')+T('29',T('00','A000000677010111')+T('01','0066000000000'))+T('52','5812')+T('53','764')+T('54','85.00')+T('58','TH')+T('59','Cafe Amazon')+T('60','Bangkok'))},
+  {n:'Tampered code',d:'CRC deliberately broken — should be rejected',
+   q:seal(T('00','01')+T('01','12')+T('29',T('00','khqr@devb')+T('01','ACC0012345'))+T('53','116')+T('54','9999')+T('58','KH')+T('59','Bad Actor')).slice(0,-4)+'0000'}
+];
+$('samples').innerHTML=SAMPLES.map((s,i)=>`<div class="li" style="cursor:pointer" onclick="handleQR(SAMPLES[${i}].q)">
+  <div class="av" style="background:var(--grass-pale)">▦</div>
+  <div class="mid"><div class="t">${s.n}</div><div class="s">${s.d}</div></div>
+  <div class="r"><div class="u">›</div></div></div>`).join('');
+
+/* ══════════ India TDS model ══════════ */
+function setTdsMode(m){TDS_MODE=m;$('tm1').classList.toggle('on',m==='absorb');$('tm2').classList.toggle('on',m==='pass');drawTDS()}
+function drawTDS(){
+  const amt=parseFloat($('tdsAmt').value)||0;
+  const feeR=(parseFloat($('tdsFee').value)||0)/100;
+  const m=mkBy('IN'), fxr=rate(m);
+  const q=C.quotePayment(amt,fxr,feeR,'IN',TDS_MODE);
+  if(!q){$('tdsOut').innerHTML='';$('tdsVerdict').innerHTML='';return}
+  $('tdsOut').innerHTML=`<div class="brk">
+    <div class="brw"><span class="k">Rate</span><span class="v">1 USDC = ₹${fmt(fxr,2)}</span></div>
+    <div class="brw"><span class="k">Goods value</span><span class="v">${fmt(q.base,4)} USDC</span></div>
+    <div class="brw"><span class="k">Your fee (${(feeR*100).toFixed(2)}%)</span><span class="v">+${fmt(q.fee,4)}</span></div>
+    <div class="brw"><span class="k">TDS 1% (s.194S)</span><span class="v">−${fmt(q.tds,4)}</span></div>
+    <div class="brw tot"><span>User pays</span><span class="v">${fmt(q.userPays,4)} USDC</span></div>
+    <div class="brw ${q.netRevenue<0?'neg':'pos'}"><span class="k">Your net per txn</span>
+      <span class="v">${q.netRevenue<0?'−':'+'}${fmt(Math.abs(q.netRevenue),4)} USDC (${q.marginPct.toFixed(3)}%)</span></div></div>`;
+
+  const losing=q.netRevenue<0;
+  const need=(q.breakEvenFeeRate*100).toFixed(2);
+  const per10k=q.netRevenue*10000/ (q.base||1);
+  $('tdsVerdict').innerHTML = TDS_MODE==='absorb'
+    ? `<div class="note ${losing?'stop':'info'}"><b>${losing?'You lose money on every India transaction.':'This fee rate covers the TDS.'}</b><br>
+       Absorbing a 1% withholding on a ${(feeR*100).toFixed(2)}% fee means you net
+       <b>${q.marginPct.toFixed(3)}%</b> per payment. ${losing
+         ? `On ₹10,00,000 of monthly volume that is roughly <b>${fmt(Math.abs(per10k*1),2)} USDC</b> of loss per ₹10,000 processed —
+            the more you grow, the more you lose. Break-even needs a fee of at least <b>${need}%</b>, which is ~${(q.breakEvenFeeRate/0.004).toFixed(0)}× your current rate
+            and far above what users will pay for a payment app.`
+         : 'Watch it though — the whole of your margin above 1% is what you keep.'}</div>
+       <div class="note warn"><b>Absorbing is a commercial choice, not a legal one.</b> TDS is a withholding obligation under s.194S:
+       you must still deduct it and deposit it with the Income Tax Department, file quarterly returns and issue certificates.
+       Paying it yourself does not remove the duty — you need a TAN and the filing machinery either way.</div>`
+    : `<div class="note info"><b>User pays the TDS.</b> You keep your full ${(feeR*100).toFixed(2)}% fee, and the user sees a 1% line on every payment.
+       Honest, and the only version with viable unit economics — but it makes you visibly more expensive than a plain UPI payment, which is free.</div>`;
+}
+
+/* ══════════ settlement architecture ══════════ */
+let ARCH='pooled';
+function setArch(a){ARCH=a;$('ar1').classList.toggle('on',a==='pooled');$('ar2').classList.toggle('on',a==='direct');drawFlow()}
+function drawFlow(){
+  const f=C.settlementFlow('IN',ARCH);
+  if(!f){$('flowOut').innerHTML='';return}
+  $('flowOut').innerHTML=f.hops.map((h,i)=>{
+    const tone=h.blocker?'stop':h.needs?'warn':'pale';
+    const bg=h.blocker?'var(--stop-bg)':h.needs?'var(--warn-bg)':'var(--grass-lt)';
+    return `<div class="card ${tone==='pale'?'pale':''}" style="box-shadow:var(--sh-sm);${h.blocker?'border-left:7px solid var(--live)':''}">
+      <div style="display:flex;gap:11px;align-items:flex-start">
+        <div style="width:28px;height:28px;border-radius:50%;background:${bg};border:2.5px solid var(--hide);
+          display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:13px;flex:none">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--disp);font-size:15.5px;font-weight:800">${h.step}</div>
+          <div style="font-size:12px;opacity:.6;font-weight:700;margin-top:1px">${h.actor}</div>
+          ${h.needs?`<div class="chip ${h.blocker?'stop':'warn'}" style="margin-top:8px;white-space:normal;text-align:left;line-height:1.4">${h.needs}</div>`:''}
+          <div style="font-size:12.5px;font-weight:700;line-height:1.55;margin-top:8px;opacity:.85">${h.note}</div>
+          ${h.tds?'<div class="chip warn" style="margin-top:7px">← 1% TDS lands here</div>':''}
+          ${h.ux?`<div class="chip pink" style="margin-top:7px;white-space:normal;text-align:left;line-height:1.4">UX cost: ${h.ux}</div>`:''}
+        </div></div></div>`;
+  }).join('');
+
+  $('archVerdict').innerHTML = ARCH==='pooled'
+    ? `<div class="note stop"><b>This is the version you described — and it needs an RBI Payment Aggregator licence.</b><br>
+       The moment INR pools in your account before reaching the shopkeeper, you are doing by definition what a PA does:
+       collecting from customers and settling to merchants. That means RBI authorisation plus an escrow account with a
+       scheduled commercial bank.<br><br>
+       The catch is who grants it. RBI is the authority — and RBI's stated position is that crypto should not be used for
+       payments and that banks should stay away from crypto businesses. You would be asking the regulator for permission
+       to do the precise thing it has said shouldn't happen.</div>`
+    : `<div class="note warn"><b>Legally much safer, but it isn't one tap.</b><br>
+       Nothing pools at your entity, so you are not a Payment Aggregator. The user sells USDC on a registered venue,
+       INR arrives in their own bank, and they pay the shopkeeper with ordinary UPI.<br><br>
+       You become the app that makes those two steps fast and pleasant rather than the entity moving the money —
+       a thinner business, but one you can actually operate today.</div>`;
+}
+
+/* ══════════ India requirements ══════════ */
+const REQ=[
+  {t:'Crypto is not a payment instrument',s:'Stablecoins are unregulated as a means of payment. FIU registration covers AML — it does not make USDC valid for buying goods. The RBI Governor has said crypto should not be used for payments.',k:'blocker'},
+  {t:'RBI Payment Aggregator licence',s:'Required the moment you pool INR and settle to merchants. Granted by the same regulator that opposes crypto payments.',k:'blocker'},
+  {t:'FIU-IND registration',s:'Mandatory for the sell leg. You become a PMLA Reporting Entity — 49 platforms hold it, including 4 offshore.',k:'blocker'},
+  {t:'Sponsor bank for UPI',s:'NPCI access runs through a sponsor bank. RBI has told banks to avoid crypto businesses, so this is the hardest door.',k:'blocker'},
+  {t:'PAN + Aadhaar KYC',s:'Full KYC before any INR movement. Cannot be deferred.',k:'blocker'},
+  {t:'TAN + TDS machinery',s:'1% withheld on every VDA transfer under s.194S, deposited and filed quarterly.',k:'blocker'},
+  {t:'Two-factor auth',s:'RBI Authentication Directions require dynamic 2FA from April 2026.',k:'req'},
+  {t:'Push-only deposits',s:'NPCI removed recipient-initiated collect requests in Oct 2025. Everything must be user-initiated.',k:'req'},
+  {t:'Regulators disagree',s:'The Economic Survey and SEBI have leaned toward a stablecoin framework; RBI leans toward prohibition. Until that resolves, the rules can move under you.',k:'note'},
+  {t:'App-level blocking',s:'PhonePe, GPay and Paytm may block payments to crypto platforms on their own fraud models, even where legal.',k:'note'}
+];
+$('indiaReq').innerHTML=REQ.map(r=>`<div class="li">
+  <div class="av" style="background:${r.k==='blocker'?'var(--stop-bg)':r.k==='req'?'var(--warn-bg)':'var(--grass-lt)'}">${r.k==='blocker'?'!':r.k==='req'?'•':'i'}</div>
+  <div class="mid"><div class="t">${r.t}</div><div class="s" style="white-space:normal">${r.s}</div></div></div>`).join('');
+
+/* ══════════ partners ══════════ */
+const PARTNERS=[
+  {t:'The sell leg',s:'Someone licensed must convert the user\'s USDC into local fiat. In India that means an FIU-registered VASP, and the 1% TDS is withheld at this point.',who:'CoinDCX · ZebPay · CoinSwitch · Mudrex (all FIU-registered)'},
+  {t:'The payout leg',s:'Someone must push fiat to the shopkeeper\'s existing QR. On UPI that needs a sponsor bank under NPCI — and an RBI Payment Aggregator licence if the money pools with you first.',who:'A sponsor bank + PSP, per market'},
+  {t:'KYC / AML',s:'PAN and Aadhaar verification, sanctions and PEP screening, ongoing monitoring. Required before you onboard anyone.',who:'Signzy · HyperVerge (India) · Sumsub · Persona'}
+];
+$('partnerList').innerHTML=PARTNERS.map(p=>`<div class="card cream" style="box-shadow:var(--sh-sm)">
+  <div class="lbl">${p.t}</div>
+  <div style="font-size:13px;font-weight:700;line-height:1.55;margin-bottom:9px">${p.s}</div>
+  <div class="chip">${p.who}</div></div>`).join('');
+
+/* ══════════ coverage + currency ══════════ */
+function ctyRow(m){
+  return `<div class="cty ${m.s==='blocked'?'off':''}" onclick="ctyInfo('${m.cc}')">
+    ${flag(m.cc,34)}<div class="mid"><div class="n">${m.n}</div><div class="rail">${m.r} · ${m.cur}</div></div>
+    <span class="ch" style="opacity:.35;font-size:16px">›</span></div>`}
+$('ctyAsia').innerHTML=MK.filter(m=>m.reg==='asia').map(ctyRow).join('');
+$('ctyAfr').innerHTML=MK.filter(m=>m.reg==='africa').map(ctyRow).join('');
+$('ctyLat').innerHTML=MK.filter(m=>m.reg==='latam').map(ctyRow).join('');
+$('wLive').textContent=MK.filter(m=>m.s==='live').length;
+$('wRails').textContent=new Set(MK.filter(m=>m.r!=='—').flatMap(m=>m.r.split(' · '))).size;
+function ctyInfo(cc){const m=mkBy(cc),[cls,txt]=SB[m.s];
+  $('ctyBody').innerHTML=`<div style="display:flex;align-items:center;gap:11px;margin-bottom:4px">${flag(m.cc,40)}<h3 style="margin:0">${m.n}</h3></div>
+    <div style="margin:9px 0 15px;display:flex;gap:6px;flex-wrap:wrap"><span class="chip ${cls}">${txt}</span><span class="chip">${m.r}</span><span class="chip">${m.cur}</span></div>
+    <div class="note ${m.s==='blocked'?'stop':m.s==='live'?'info':'warn'}">${m.w}</div>
+    ${m.cc==='IN'?'<button class="btn butter" style="margin-bottom:8px" onclick="cl(\'sh-cty\');go(\'s-india\')">India detail →</button>':''}
+    ${m.s==='blocked'?'':`<button class="btn lime" onclick="setMk('${m.cc}');cl('sh-cty')">Use ${m.cur}</button>`}`;
+  op('sh-cty')}
+
+function curRow(m){
+  const dis=m.s==='blocked', sel=m.cc===SEL;
+  return `<div class="crow ${sel?'sel':''} ${dis?'dis':''}" ${dis?'onclick="tt(\'Not available\')"':`onclick="setMk('${m.cc}')"`}>
+    ${flag(m.cc,38)}<div class="mid"><div class="cc">${m.label||m.cur}</div>
+    <div class="nn">${m.cc} · ${m.n} · ${m.r}</div></div>
+    <div class="rd">${sel?'<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>':''}</div></div>`}
+function drawCur(){
+  const q=($('curQ').value||'').toLowerCase().trim();
+  const hit=m=>!q||[m.cur,m.n,m.cc,m.r,m.label||''].join(' ').toLowerCase().includes(q);
+  const grp=(t,rg)=>{const rows=MK.filter(m=>m.reg===rg&&hit(m));
+    return rows.length?`<div class="cgrp">${t}</div>`+rows.map(curRow).join(''):''};
+  $('curList').innerHTML=grp('Asia','asia')+grp('Africa','africa')+grp('Latin America','latam')
+    ||'<div class="fine" style="padding:22px 0">No match.</div>';
+}
+function setMk(cc){const m=mkBy(cc);if(!m||m.s==='blocked')return;
+  SEL=cc; applyCompliance(); cl('sh-cur'); tt(m.n+' · '+m.cur+' selected')}
+
+/* ══════════ country-scoped compliance ══════════
+   Everything regulatory keys off the selected market. Someone paying
+   in Cambodia should never see a word about India's TDS.            */
+/* Single owner of "make the whole UI match SEL". Every path that changes
+   the market — the picker, onboarding, and the boot restore — goes through
+   here, so none of them can update half the screen and leave the rest stale. */
+function applyCompliance(){
+  const m=mkBy(SEL), comp=C.complianceFor(SEL);
+
+  /* labels that follow the selected market */
+  $('setCur').textContent = m.label||m.cur;
+  $('ctyChip').innerHTML = flag(m.cc,16)+'<span>'+m.n+' · '+(m.r==='—'?m.cur:m.r.split(' · ')[0])+'</span>';
+  $('capTxt').textContent = UNVERIFIED_CAP+' USDC';
+  $('limitNum').textContent = UNVERIFIED_CAP;
+  const ind=mkBy('IN');
+  $('indiaIcon').innerHTML = flag('IN',30);
+  $('indiaTitle').innerHTML = flag('IN',26)+' <span style="vertical-align:middle">'+ind.n+'</span>';
+  renderBal(); renderFX(); drawCur();
+
+  syncPayModes();
+
+  /* settings row: India-only compliance entry */
+  const ir=$('rowIndia'); if(ir) ir.style.display = SEL==='IN' ? '' : 'none';
+  const nav=document.querySelector('[data-s="s-india"]'); if(nav) nav.style.display = SEL==='IN'?'':'none';
+
+  /* home badges */
+  $('cmpBadges').innerHTML = comp.badges.map(b=>
+    `<span class="chip ${/TDS|Blocked|Tourists/.test(b)?'warn':'ok'}">${b}</span>`).join('');
+
+  /* market card on home */
+  $('cmpCard').innerHTML = comp.headline
+    ? `<div class="lbl" style="display:flex;align-items:center;gap:8px">${flag(m.cc,22)}<span>${m.n} · ${m.r}</span></div>
+       <div style="font-size:13px;font-weight:700;line-height:1.55">${comp.headline}</div>
+       ${comp.rules.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">${
+         comp.rules.map(r=>`<div style="font-size:12px;font-weight:700;opacity:.75;display:flex;gap:7px">
+           <span style="opacity:.5">·</span><span>${r}</span></div>`).join('')}</div>`:''}`
+    : '';
+  $('cmpCard').style.display = comp.headline ? '' : 'none';
+
+  /* help sheet gets the same, scoped */
+  $('helpCompliance').innerHTML = comp.headline
+    ? `<div class="note ${comp.blocked?'stop':comp.tds?'warn':'info'}"><b>${m.n}.</b> ${comp.headline}</div>` : '';
+
+  /* card-bill issuer list */
+  const iss=(C.ISSUERS[SEL]||[]);
+  $('ccIssuer').innerHTML='<option value="">Select issuer…</option>'+iss.map(i=>`<option>${i}</option>`).join('');
+}
+
+/* ══════════ settings ══════════ */
+function saveRpc(){
+  const v=$('rpcIn').value.trim()||DEFAULT_RPC;
+  $('rpcOut').innerHTML='<div class="note info"><span class="sp"></span> Testing…</div>';
+  const c=new W3.Connection(v,'confirmed');
+  c.getLatestBlockhash('confirmed').then(()=>{
+    RPC=v;store.set('moo.rpc',v);
+    if(pubkey) conn=new W3.Connection(RPC,'confirmed');
+    $('setRpc').textContent=v===DEFAULT_RPC?'public':new URL(v).hostname;
+    $('rpcOut').innerHTML='<div class="note info">✅ RPC responded. Saved.</div>';
+    refresh();
+  }).catch(e=>{ $('rpcOut').innerHTML='<div class="note stop">❌ '+escapeHtml(e.message||'No response')+'</div>' });
+}
+function saveCap(){
+  const v=parseFloat($('capIn').value);
+  if(!isFinite(v)||v<=0){tt('Enter a positive number');return}
+  CAP=v;store.set('moo.cap',String(v));
+  $('setCap').textContent=v+' USDC';cl('sh-cap');quoteSend();
+  tt(v>100?'Cap raised to '+v+' — be careful':'Cap set to '+v+' USDC');
+}
+
+/* ══════════ QR draw (receive) ══════════ */
+function drawQR(el,text){
+  if(!el) return;
+  /* visual placeholder derived from the address — not a scannable code */
+  const n=25,c=document.createElement('canvas');c.width=c.height=n*8;
+  const x=c.getContext&&c.getContext('2d'); if(!x){el.textContent='▦';return}
+  x.fillStyle='#FFFDF6';x.fillRect(0,0,n*8,n*8);x.fillStyle='#1C1A17';
+  let s=0;for(let i=0;i<text.length;i++)s=(s*31+text.charCodeAt(i))>>>0;
+  const r=()=>((s=(s*1103515245+12345)&2147483647)/2147483647);
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){if((i<7&&j<7)||(i<7&&j>n-8)||(i>n-8&&j<7))continue;if(r()>.52)x.fillRect(i*8,j*8,8,8)}
+  const eye=(a,b)=>{x.fillRect(a,b,56,56);x.fillStyle='#FFFDF6';x.fillRect(a+8,b+8,40,40);x.fillStyle='#1C1A17';x.fillRect(a+16,b+16,24,24)};
+  eye(0,0);eye((n-7)*8,0);eye(0,(n-7)*8);
+  c.style.cssText='width:100%;height:100%;image-rendering:pixelated;border:2.5px solid #1C1A17;border-radius:14px';
+  el.innerHTML='';el.appendChild(c);
+  const cap=document.createElement('div');
+  cap.className='fine';cap.style.marginTop='6px';cap.textContent='Illustrative — copy the address below to receive.';
+  el.parentNode.insertBefore(cap,el.nextSibling);
+}
+
+/* ══════════ boot ══════════ */
+$('setRpc').textContent = RPC===DEFAULT_RPC?'public':(()=>{try{return new URL(RPC).hostname}catch(e){return 'custom'}})();
+$('setCap').textContent = CAP+' USDC';
+$('capIn').value=CAP; $('rpcIn').value=RPC===DEFAULT_RPC?'':RPC;
+
+/* surface the file:// problem immediately, before they even click */
+(function(){
+  const d=diagnose();
+  if(d.any) return;
+  const box=$('noWallet'); box.style.display='';
+  box.innerHTML = d.isFile
+    ? `<div class="note stop" style="margin-bottom:0;text-align:left"><b>Opened as a file — wallets can't connect.</b>
+       Extensions don't inject into <code>file://</code> pages, so Phantom can't see this even if it's installed.
+       Double-click <b>start-moocash.bat</b> (Windows) or <b>start-moocash.command</b> (Mac) in this folder,
+       then use the <code>localhost</code> address it opens.
+       <button class="btn sm" style="margin-top:10px" onclick="renderDiag();op('sh-diag')">Run diagnostics</button></div>`
+    : `<div class="note warn" style="margin-bottom:0;text-align:left">No Solana wallet detected. Install
+       <b>Phantom</b>, <b>Solflare</b> or <b>Backpack</b> and reload.
+       <button class="btn sm" style="margin-top:10px" onclick="renderDiag();op('sh-diag')">Run diagnostics</button></div>`;
+})();
+/* if an email wallet already exists on this device, default to unlock */
+(function(){
+  const v=emVault();
+  if(!v) return;
+  emMode='create'; emToggleMode();          // flips to 'unlock' and relabels
+  if(v.email) $('emEmail').value=v.email;
+})();
+
+/* returning users skip onboarding */
+(function(){
+  const done=store.get('moo.onboarded','')==='1';
+  const saved=store.get('moo.region','');
+  if(saved && mkBy(saved)) SEL=saved;
+  if(done){ $('onboard').classList.remove('on') }
+  else { document.body.style.overflow='hidden'; drawRegions() }
+})();
+
+drawCur(); drawTDS(); drawFlow(); applyCompliance(); renderPad(); renderFloat(); drawFloatSheet(); renderFX(); loadFX();
+setInterval(loadFX, 120000);
+</script>
+</body>
+</html>

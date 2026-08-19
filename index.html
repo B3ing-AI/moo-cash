@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>moo.cash — live</title>
+<meta name="theme-color" content="#FFFDF6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --milk:#FFFDF6; --milk-2:#FFF8E7; --cream:#FBF0D6; --cream-2:#F5E6C4;
+  --grass:#3E9B4F; --grass-d:#2C7139; --grass-dd:#1F5228; --grass-lt:#CBE9A9; --grass-pale:#E4F5D2; --lime:#9DD44F;
+  --hide:#1C1A17; --hide-70:rgba(28,26,23,.70); --hide-50:rgba(28,26,23,.50); --hide-30:rgba(28,26,23,.30);
+  --muzzle:#FFB8C6; --butter:#FFCC4D; --barn:#E8613C; --white:#FFFFFF;
+  --ok:#2C7139; --warn:#C98A10; --warn-bg:#FFEFC7; --stop:#B5372B; --stop-bg:#FCE3DE; --live:#D92D20;
+  --bd:2.5px solid var(--hide); --sh:4px 4px 0 var(--hide); --sh-sm:2.5px 2.5px 0 var(--hide); --sh-lg:6px 6px 0 var(--hide);
+  --r:24px; --r-sm:15px; --pill:999px;
+  --disp:'Baloo 2',system-ui,sans-serif; --body:'Nunito',system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:var(--body);background:var(--milk);color:var(--hide);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--disp);font-weight:800;letter-spacing:-.01em;margin:0}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+#grassband{position:fixed;left:0;right:0;bottom:0;height:110px;pointer-events:none;z-index:0;opacity:.45}
+#app{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:0 16px 140px;min-height:100vh}
+.screen{display:none;animation:up .26s cubic-bezier(.2,.8,.3,1)}
+.screen.on{display:block}
+@keyframes up{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+/* live banner */
+#liveBar{position:sticky;top:0;z-index:50;margin:0 -16px 12px;padding:9px 16px;background:var(--live);color:#fff;
+  font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;justify-content:center;letter-spacing:.03em}
+#liveBar .dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:14px 0 16px}
+.brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.brand .mk{width:38px;height:38px;flex:none}
+.wordmark{font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:-.03em}
+.hdr h1{font-size:26px}
+.ib{width:44px;height:44px;border-radius:var(--pill);border:var(--bd);box-shadow:var(--sh-sm);display:grid;place-items:center;background:var(--white);flex:none;transition:.12s}
+.ib:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.ib svg{width:19px;height:19px;stroke:var(--hide);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ib.g{background:var(--grass)} .ib.g svg{stroke:#fff}
+
+.card{background:var(--white);border:var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:19px;margin-bottom:16px;position:relative;overflow:hidden}
+.card.grass{background:var(--grass);color:#fff;box-shadow:var(--sh-lg)}
+.card.pale{background:var(--grass-pale)} .card.cream{background:var(--cream)} .card.butter{background:var(--butter)}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;opacity:.62;margin-bottom:7px}
+.big{font-family:var(--disp);font-weight:800;font-size:54px;line-height:.95;letter-spacing:-.03em}
+.big .dec{font-size:26px;opacity:.6}
+.sub{font-size:14px;opacity:.72;margin-top:7px;font-weight:700}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:var(--pill);background:var(--cream);border:1.8px solid var(--hide)}
+.card.grass .chip{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff}
+.chip.ok{background:var(--grass-lt)} .chip.warn{background:var(--warn-bg)} .chip.stop{background:var(--stop-bg)} .chip.pink{background:var(--muzzle)}
+.chip.dim{opacity:.55}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--disp);font-weight:700;font-size:16px;
+  padding:12px 18px;border-radius:var(--pill);border:var(--bd);box-shadow:var(--sh-sm);background:var(--white);color:var(--hide);width:100%;transition:.12s}
+.btn:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.btn:disabled{opacity:.42;pointer-events:none}
+.btn.grass{background:var(--grass);color:#fff} .btn.lime{background:var(--lime)} .btn.butter{background:var(--butter)}
+.btn.pink{background:var(--muzzle)} .btn.barn{background:var(--barn);color:#fff} .btn.dark{background:var(--hide);color:#fff}
+.btn.ghost{background:transparent;box-shadow:none;border-color:transparent}
+.btn.sm{font-size:13.5px;padding:9px 14px;width:auto}
+.row{display:flex;gap:11px} .row>*{flex:1}
+
+.sect{display:flex;align-items:baseline;justify-content:space-between;margin:24px 2px 13px}
+.sect h2{font-size:20px}
+.sect a{font-size:13px;color:var(--grass-d);font-weight:800;cursor:pointer}
+
+.li{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:2px dashed rgba(28,26,23,.13)}
+.li:last-child{border-bottom:none}
+.li .av{width:42px;height:42px;border-radius:var(--pill);border:2.5px solid var(--hide);display:grid;place-items:center;font-size:17px;font-weight:800;flex:none;font-family:var(--disp)}
+.li .mid{flex:1;min-width:0}
+.li .t{font-weight:800;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .s{font-size:12px;opacity:.6;font-weight:700;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .r{text-align:right;flex:none}
+.li .r .v{font-family:var(--disp);font-weight:800;font-size:15px}
+.li .r .u{font-size:11px;opacity:.55;font-weight:700}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.stat{background:var(--cream);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:13px}
+.stat .k{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+.stat .v{font-family:var(--disp);font-size:23px;font-weight:800;margin-top:3px;line-height:1}
+.stat .d{font-size:11px;opacity:.6;font-weight:700;margin-top:2px}
+
+.navwrap{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-content:center;padding:0 16px 16px;pointer-events:none}
+.nav{pointer-events:auto;display:flex;align-items:center;background:var(--hide);border:var(--bd);border-radius:var(--pill);box-shadow:var(--sh);padding:6px;max-width:440px;width:100%}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:var(--pill);color:rgba(255,255,255,.55);font-size:9.5px;font-weight:800;transition:.15s}
+.nav button.on{background:var(--milk);color:var(--hide)}
+.nav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nav .payb{flex:none;width:62px;height:50px;background:var(--lime);border:2.5px solid var(--hide);border-radius:var(--pill);color:var(--hide);margin:0 3px;display:grid;place-items:center}
+.nav .payb svg{width:24px;height:24px}
+
+.sheet{position:fixed;inset:0;z-index:70;display:none}
+.sheet.on{display:block}
+.sheet .bg{position:absolute;inset:0;background:rgba(28,26,23,.48);animation:fd .2s}
+@keyframes fd{from{opacity:0}to{opacity:1}}
+.sheet .pn{position:absolute;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;background:var(--milk);border:var(--bd);border-bottom:none;
+  border-radius:28px 28px 0 0;padding:11px 18px 30px;max-height:93vh;overflow-y:auto;animation:sl .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes sl{from{transform:translateY(100%)}to{transform:none}}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--hide-30);margin:0 auto 15px}
+.sheet h3{font-size:23px;margin-bottom:5px}
+.sheet .lede{font-size:13.5px;opacity:.65;font-weight:700;margin-bottom:17px;line-height:1.5}
+
+.f{margin-bottom:14px}
+.f label{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-bottom:6px}
+.inp{width:100%;padding:12px 14px;border:var(--bd);border-radius:var(--r-sm);background:var(--white);font-size:15px;font-weight:700;box-shadow:var(--sh-sm)}
+.inp:focus{outline:none;box-shadow:2.5px 2.5px 0 var(--grass)}
+.inp.mono{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.inp.err{box-shadow:2.5px 2.5px 0 var(--stop);border-color:var(--stop)}
+.amtbox{background:var(--white);border:var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:18px;text-align:center;margin-bottom:13px}
+.amtbox input{border:none;background:none;font-family:var(--disp);font-size:42px;font-weight:800;text-align:center;width:100%;letter-spacing:-.03em;color:var(--hide)}
+.amtbox input:focus{outline:none}
+.quick{display:flex;gap:7px;margin-bottom:14px}
+.quick button{flex:1;padding:9px;border:var(--bd);border-radius:var(--pill);box-shadow:var(--sh-sm);background:var(--white);font-weight:800;font-size:13px;transition:.12s}
+.quick button.on{background:var(--lime)}
+
+.brk{background:var(--grass-pale);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:14px 16px;margin-bottom:14px}
+.brw{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;font-weight:700;padding:5px 0}
+.brw .k{opacity:.65}
+.brw .v{text-align:right}
+.brw.tot{border-top:2px dashed rgba(28,26,23,.25);margin-top:5px;padding-top:10px;font-family:var(--disp);font-size:16.5px;font-weight:800}
+.brw.neg .v{color:var(--stop)}
+.brw.pos .v{color:var(--ok)}
+
+.segs{display:flex;gap:6px;margin-bottom:16px;background:rgba(28,26,23,.07);padding:5px;border-radius:var(--pill);border:2px solid var(--hide)}
+.segs button{flex:1;padding:9px;border-radius:var(--pill);font-weight:800;font-size:13px;transition:.15s}
+.segs button.on{background:var(--white);border:2px solid var(--hide);box-shadow:var(--sh-sm)}
+
+.note{border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:13px 15px;font-size:12.5px;font-weight:700;line-height:1.55;margin-bottom:14px}
+.note.info{background:var(--grass-pale)} .note.warn{background:var(--warn-bg)} .note.stop{background:var(--stop-bg)}
+.note.risk{background:var(--white);border-left:7px solid var(--barn)}
+.note.live{background:var(--stop-bg);border-left:7px solid var(--live)}
+.note b{font-weight:800}
+.fine{font-size:11.5px;opacity:.6;font-weight:700;line-height:1.5;text-align:center;margin-top:12px}
+
+#reader{position:relative;aspect-ratio:1;border:var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;background:var(--grass-dd);margin-bottom:14px}
+#reader video{width:100%;height:100%;object-fit:cover;display:block}
+#reader canvas{display:none}
+#reader .ov{position:absolute;inset:0;pointer-events:none}
+#reader .fr{position:absolute;inset:17%}
+#reader .c{position:absolute;width:34px;height:34px;border:4px solid var(--lime)}
+#reader .c1{top:0;left:0;border-right:none;border-bottom:none;border-radius:13px 0 0 0}
+#reader .c2{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 13px 0 0}
+#reader .c3{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 13px}
+#reader .c4{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 13px 0}
+#reader .cap{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.8);font-size:12px;font-weight:700}
+#reader .idle{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:rgba(255,255,255,.85);font-weight:700;font-size:13.5px;line-height:1.6}
+
+.cty{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:2px dashed rgba(28,26,23,.13);cursor:pointer}
+.cty:last-child{border-bottom:none}
+.cty.off{opacity:.45}
+.cty .fl{width:38px;height:30px;border-radius:8px;background:var(--cream);border:2px solid var(--hide);display:grid;place-items:center;font-size:16px;flex:none}
+.cty .mid{flex:1;min-width:0}
+.cty .n{font-weight:800;font-size:14.5px}
+.cty .rail{font-size:11.5px;opacity:.6;font-weight:700;margin-top:1px}
+
+.ok{text-align:center;padding:8px 0}
+.ok .rg{width:90px;height:90px;border-radius:50%;background:var(--lime);border:var(--bd);box-shadow:var(--sh);display:grid;place-items:center;margin:0 auto 16px;animation:pop .4s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.ok h2{font-size:26px;margin-bottom:6px}
+.ok .p{font-size:14.5px;opacity:.68;font-weight:700;margin-bottom:18px}
+
+.sp{width:16px;height:16px;border:2.5px solid rgba(28,26,23,.25);border-top-color:var(--hide);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:-3px}
+.sp.w{border-color:rgba(255,255,255,.3);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.code{background:var(--hide);color:var(--lime);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);padding:13px;
+  font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:220px;overflow-y:auto}
+#toast{position:fixed;bottom:106px;left:50%;transform:translateX(-50%) translateY(18px);background:var(--hide);color:#fff;padding:12px 20px;
+  border-radius:var(--pill);border:2.5px solid var(--hide);box-shadow:var(--sh-sm);font-weight:800;font-size:13px;z-index:95;opacity:0;transition:.26s;pointer-events:none;max-width:88vw;text-align:center}
+
+.srow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-sm);background:var(--white);
+  border:var(--bd);box-shadow:var(--sh-sm);margin-bottom:10px;cursor:pointer;transition:.12s}
+.srow:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.srow .ic{width:36px;height:36px;border-radius:var(--pill);background:var(--grass-lt);border:2.5px solid var(--hide);display:grid;place-items:center;flex:none;font-size:16px}
+.srow .lb{flex:1;font-size:14.5px;font-weight:800}
+.srow .val{font-size:13px;opacity:.55;font-weight:800;text-align:right;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .ch{opacity:.35;font-size:16px}
+.tog{width:48px;height:28px;border-radius:var(--pill);background:var(--cream-2);border:2.5px solid var(--hide);position:relative;transition:.2s;flex:none}
+.tog.on{background:var(--lime)}
+.tog i{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--white);border:2px solid var(--hide);transition:.2s}
+.tog.on i{left:22px}
+
+.csearch{position:relative;margin-bottom:13px}
+.csearch input{width:100%;padding:12px 14px 12px 40px;border:var(--bd);border-radius:var(--pill);background:var(--white);font-size:14.5px;font-weight:700;box-shadow:var(--sh-sm)}
+.csearch input:focus{outline:none;box-shadow:2.5px 2.5px 0 var(--grass)}
+.csearch svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--hide-50);fill:none;stroke-width:2.6}
+.cgrp{font-size:11px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;opacity:.5;margin:16px 2px 8px}
+.crow{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--r-sm);background:var(--white);
+  border:var(--bd);box-shadow:var(--sh-sm);margin-bottom:9px;cursor:pointer;transition:.12s}
+.crow:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.crow.sel{background:var(--lime)} .crow.dis{opacity:.42;cursor:not-allowed}
+.crow .fl{width:38px;height:38px;border-radius:50%;background:var(--cream);border:2.5px solid var(--hide);display:grid;place-items:center;font-size:17px;flex:none}
+.crow .mid{flex:1;min-width:0}
+.crow .cc{font-family:var(--disp);font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.crow .nn{font-size:11px;opacity:.6;font-weight:700;margin-top:1px}
+.crow .rd{width:24px;height:24px;border-radius:50%;border:2.5px solid var(--hide);flex:none;display:grid;place-items:center;background:var(--white)}
+.crow.sel .rd{background:var(--hide)}
+.crow.sel .rd svg{width:13px;height:13px;stroke:var(--lime);fill:none;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+.tagx{font-size:9px;font-weight:800;padding:2px 7px;border-radius:var(--pill);border:1.8px solid var(--hide);text-transform:uppercase}
+.tagx.a{background:var(--muzzle)} .tagx.n{background:var(--grass-lt)} .tagx.t{background:var(--warn-bg)} .tagx.b{background:var(--stop-bg)}
+
+#drawer{position:fixed;inset:0;z-index:80;display:none}
+#drawer.on{display:block}
+#drawer .bg{position:absolute;inset:0;background:rgba(28,26,23,.48);animation:fd .2s}
+#drawer .pn{position:absolute;top:0;bottom:0;left:0;width:302px;max-width:86vw;background:var(--milk);border-right:var(--bd);
+  display:flex;flex-direction:column;padding:18px 15px;animation:sr .28s cubic-bezier(.2,.9,.3,1);overflow-y:auto}
+@keyframes sr{from{transform:translateX(-100%)}to{transform:none}}
+#drawer .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.dnav{display:flex;flex-direction:column;gap:9px}
+.dnav button{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:var(--r-sm);background:var(--white);
+  border:var(--bd);box-shadow:var(--sh-sm);font-size:14px;font-weight:800;text-align:left;transition:.12s}
+.dnav button:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.dnav button .ic{width:34px;height:34px;border-radius:10px;background:var(--grass);border:2px solid var(--hide);display:grid;place-items:center;flex:none}
+.dnav button .ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dnav button .lb{flex:1} .dnav button .ch{opacity:.35;font-size:17px}
+#drawer .foot{margin-top:auto;padding-top:20px}
+.daddr{padding:11px 12px;border-radius:var(--r-sm);background:var(--white);border:var(--bd);box-shadow:var(--sh-sm);margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.daddr .mid{flex:1;min-width:0}
+.daddr .k{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;opacity:.55}
+.daddr .v{font-family:ui-monospace,monospace;font-size:12px;font-weight:800;margin-top:2px}
+.daddr .cp{width:32px;height:32px;border-radius:9px;background:var(--grass-lt);border:2px solid var(--hide);display:grid;place-items:center;flex:none}
+.daddr .cp svg{width:15px;height:15px;stroke:var(--hide);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── settlement progress ── */
+.steps{margin:6px 0 16px}
+.stp{display:flex;align-items:flex-start;gap:13px;padding:11px 0;opacity:.4;transition:opacity .25s}
+.stp.active,.stp.done{opacity:1}
+.stp .dot{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--hide);background:var(--white);
+  display:grid;place-items:center;flex:none;font-size:12px;font-weight:800;position:relative}
+.stp.done .dot{background:var(--lime)}
+.stp.active .dot{background:var(--butter)}
+.stp .dot .spin{width:12px;height:12px;border:2.5px solid rgba(28,26,23,.25);border-top-color:var(--hide);
+  border-radius:50%;animation:spin .7s linear infinite}
+.stp .mid{flex:1;min-width:0;padding-top:2px}
+.stp .lb{font-weight:800;font-size:14.5px}
+.stp .nt{font-size:11.5px;font-weight:700;opacity:.6;margin-top:2px;line-height:1.4}
+.stp .ms{font-family:var(--disp);font-size:12px;font-weight:800;opacity:.45;flex:none;padding-top:3px}
+.stp .rail{position:absolute;left:11px;top:26px;bottom:-11px;width:2.5px;background:rgba(28,26,23,.15)}
+.modebadge{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:var(--pill);
+  border:2.5px solid var(--hide);font-weight:800;font-size:12.5px;margin-bottom:11px}
+.modebadge.instant{background:var(--lime)}
+.modebadge.finality{background:var(--butter)}
+.modebadge.matched{background:var(--muzzle)}
+.floatbar{height:9px;border-radius:var(--pill);background:var(--cream-2);border:2px solid var(--hide);overflow:hidden;margin:9px 0 5px}
+.floatbar i{display:block;height:100%;background:var(--lime)}
+.floatbar i.low{background:var(--barn)}
+
+/* ── greeting + sell price ── */
+.greetline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.greet{font-family:var(--disp);font-size:25px;font-weight:800;letter-spacing:-.02em}
+.greet span{font-family:ui-monospace,Menlo,monospace;font-size:20px}
+.sellchip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--pill);
+  background:rgba(255,255,255,.18);border:1.8px solid rgba(255,255,255,.42);color:#fff;
+  font-weight:800;font-size:13px;transition:.12s;cursor:pointer}
+.sellchip:active{transform:scale(.97)}
+.sellchip .prem{background:var(--butter);color:var(--hide);border-radius:var(--pill);padding:1px 7px;font-size:10.5px}
+
+/* ── drawn flags (emoji flags don't render on Windows) ── */
+.flagwrap{display:inline-block;border-radius:50%;overflow:hidden;border:2.5px solid var(--hide);flex:none;line-height:0;vertical-align:middle}
+.flagwrap svg{width:100%;height:100%;display:block}
+.card.grass .flagwrap{border-color:rgba(255,255,255,.5)}
+#ctyChip{display:inline-flex;align-items:center;gap:6px}
+#ctyChip .flagwrap{border-width:1.5px}
+
+/* ── onboarding: login + region ── */
+#onboard{position:fixed;inset:0;z-index:100;overflow-y:auto;display:none}
+#onboard.on{display:block}
+.ob{min-height:100vh;display:none;flex-direction:column;padding:34px 20px 30px}
+.ob.on{display:flex}
+#obLogin{background:var(--grass)}
+#obRegion{background:var(--milk)}
+.ob .inner{max-width:440px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column}
+.hero{font-family:var(--disp);font-weight:800;font-size:52px;line-height:.92;letter-spacing:-.045em;color:var(--hide)}
+.hero .it{font-style:italic;font-size:38px;letter-spacing:-.03em;display:block;margin-top:2px}
+.hero .pop{display:inline-block;color:var(--milk);text-shadow:3px 3px 0 var(--hide);margin-top:4px}
+.herosub{font-size:14.5px;font-weight:700;line-height:1.5;color:rgba(28,26,23,.72);margin-top:16px;max-width:330px}
+.heroart{flex:1;display:grid;place-items:center;padding:18px 0;min-height:180px}
+.heroart svg{width:100%;max-width:300px;height:auto}
+.trustrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.trustrow .chip{background:rgba(255,255,255,.55);border-color:var(--hide)}
+.ob .cta{margin-top:auto;padding-top:18px}
+.regionlist{margin:16px 0 4px;max-height:none}
+.rgrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border:var(--bd);border-radius:var(--r-sm);
+  box-shadow:var(--sh);background:var(--white);margin-bottom:11px;cursor:pointer;transition:.12s}
+.rgrow:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hide)}
+.rgrow.sel{background:var(--lime)}
+.rgrow.dis{opacity:.4;cursor:not-allowed}
+.rgrow .mid{flex:1;min-width:0}
+.rgrow .n{font-family:var(--disp);font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rgrow .c{font-size:12.5px;font-weight:700;opacity:.6;margin-top:1px}
+.rgrow .rd{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--hide);flex:none;
+  display:grid;place-items:center;background:var(--white)}
+.rgrow.sel .rd{background:var(--hide)}
+.rgrow.sel .rd svg{width:14px;height:14px;stroke:var(--lime);fill:none;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+.tnc{font-size:12px;font-weight:700;opacity:.65;text-align:center;margin-top:12px;line-height:1.5}
+.tnc a{color:var(--hide);text-decoration:underline;font-weight:800}
+
+/* ── keypad pay ── */
+.hintbar{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--white);border:var(--bd);
+  border-radius:var(--r-sm);box-shadow:var(--sh-sm);cursor:pointer;font-size:13px;font-weight:700;line-height:1.45}
+.hintbar .dot{width:20px;height:20px;border-radius:50%;background:var(--barn);border:2.5px solid var(--hide);flex:none;
+  box-shadow:inset 0 0 0 3px var(--milk)}
+.hintbar span:nth-child(2){flex:1;opacity:.75}
+.hintbar .ch{opacity:.35;font-size:17px}
+.payamt{text-align:center;font-family:var(--disp);font-weight:800;font-size:66px;line-height:1;letter-spacing:-.04em;
+  color:var(--grass);display:flex;align-items:baseline;justify-content:center;gap:2px}
+.payamt.zero{color:#A9C4A2}
+.payamt .cur{font-size:38px;opacity:.85}
+.flipchip{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border:var(--bd);border-radius:var(--pill);
+  background:var(--white);box-shadow:var(--sh-sm);font-weight:800;font-size:13.5px;transition:.12s}
+.flipchip:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
+.flipchip svg{width:15px;height:15px;stroke:var(--hide);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{padding:17px 0;border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh);background:var(--white);
+  font-family:var(--disp);font-weight:700;font-size:23px;transition:.1s}
+.pad button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hide)}
+.pad button.back{background:#C9BDF5}
+.pad button svg{width:22px;height:22px;stroke:var(--hide);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+.btn.pale2{background:var(--grass-pale)}
+.orderchip{display:flex;align-items:center;gap:9px;padding:11px 14px;background:var(--butter);border:var(--bd);
+  border-radius:var(--r-sm);box-shadow:var(--sh-sm);margin-bottom:13px;font-weight:800;font-size:14px}
+</style>
+</head>
+<body>
+
+<svg id="grassband" viewBox="0 0 440 120" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 120 V86 q9-26 18 0 q10-32 20 0 q9-24 18 0 q11-34 22 0 q9-22 18 0 q10-30 20 0 q9-25 18 0 q11-33 22 0 q9-23 18 0 q10-31 20 0 q9-26 18 0 q11-30 22 0 q9-24 18 0 q10-32 20 0 q9-22 18 0 q11-28 22 0 q9-26 18 0 q10-30 20 0 q9-24 18 0 q11-30 22 0 q9-22 18 0 V120z" fill="#CBE9A9"/>
+  <path d="M0 120 V98 q11-20 22 0 q10-24 20 0 q11-18 22 0 q10-26 20 0 q11-19 22 0 q10-23 20 0 q11-20 22 0 q10-25 20 0 q11-18 22 0 q10-24 20 0 q11-21 22 0 q10-22 20 0 q11-19 22 0 q10-26 20 0 q11-18 22 0 q10-23 20 0 q11-20 22 0 q10-24 20 0 V120z" fill="#9DD44F"/>
+</svg>
+
+<!-- ══════════ ONBOARDING ══════════ -->
+<div id="onboard" class="on">
+
+  <!-- login -->
+  <section class="ob on" id="obLogin"><div class="inner">
+    <div class="hero">SCAN.<br>PAY.<span class="it">ANONYMOUSLY.</span><span class="pop">LEGENDAIRY.</span></div>
+    <div class="herosub">Scan any local payment QR and pay instantly in USDC. No account, no paperwork — the shop just gets paid.</div>
+    <div class="trustrow">
+      <span class="chip">No signup</span>
+      <span class="chip">Shop never sees you</span>
+      <span class="chip">Works in 19 countries</span>
+    </div>
+
+    <div class="heroart">
+      <svg viewBox="0 0 300 230" aria-label="Cow riding a rocket">
+        <g stroke="#1C1A17" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+          <!-- clouds -->
+          <path d="M34 62c0-7 6-11 12-9 2-7 13-8 16-1 6-1 10 3 10 8 0 5-4 8-9 8H44c-6 0-10-3-10-6z" fill="#FFFDF6"/>
+          <path d="M232 42c0-6 5-9 10-8 2-6 11-6 13 0 5-1 8 3 8 7 0 4-3 6-7 6h-17c-5 0-7-2-7-5z" fill="#FFFDF6"/>
+          <path d="M248 186c0-5 4-7 8-6 1-5 9-5 11 0 4-1 7 2 7 5 0 4-3 5-6 5h-14c-4 0-6-2-6-4z" fill="#FFFDF6"/>
+          <!-- sparkles -->
+          <path d="M64 150l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#FFCC4D"/>
+          <path d="M258 108l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#FFCC4D"/>
+          <path d="M212 32l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#FFB8C6"/>
+          <!-- flames -->
+          <path d="M86 168c-14 4-22 12-26 22 12 2 22 0 30-6z" fill="#E8613C"/>
+          <path d="M96 182c-10 6-15 14-15 24 10-2 18-8 22-16z" fill="#FFCC4D"/>
+          <!-- rocket body -->
+          <path d="M104 176c-6-30 10-62 44-82 30-18 62-22 84-18 4 22 0 54-18 84-20 34-52 50-82 44-14-3-24-14-28-28z" fill="#9DD44F"/>
+          <!-- fins -->
+          <path d="M108 148c-16-4-30 2-38 16 12 8 26 10 38 6z" fill="#FFB8C6"/>
+          <path d="M150 200c-4 16 2 30 16 38 8-12 10-26 6-38z" fill="#FFB8C6"/>
+          <!-- window -->
+          <circle cx="150" cy="150" r="17" fill="#FFFDF6"/>
+          <!-- cow -->
+          <path d="M162 74c-6-8-3-17 3-16s9 6 9 12" fill="#1C1A17"/>
+          <path d="M206 66c7-6 14-2 12 5s-8 8-13 7" fill="#1C1A17"/>
+          <ellipse cx="186" cy="88" rx="30" ry="26" fill="#FFFDF6"/>
+          <ellipse cx="169" cy="76" rx="9" ry="7" fill="#1C1A17" stroke="none"/>
+          <ellipse cx="205" cy="79" rx="6" ry="5" fill="#1C1A17" stroke="none"/>
+          <circle cx="176" cy="88" r="3.4" fill="#1C1A17" stroke="none"/>
+          <circle cx="197" cy="88" r="3.4" fill="#1C1A17" stroke="none"/>
+          <ellipse cx="187" cy="103" rx="15" ry="11" fill="#FFB8C6"/>
+          <circle cx="182" cy="102" r="2.4" fill="#1C1A17" stroke="none"/>
+          <circle cx="192" cy="102" r="2.4" fill="#1C1A17" stroke="none"/>
+          <!-- body + scarf -->
+          <path d="M172 112c-8 10-10 24-4 34 14 8 32 6 42-6 6-8 6-20 0-28z" fill="#FFFDF6"/>
+          <path d="M168 118c10 8 30 10 44 2" fill="none" stroke="#E8613C" stroke-width="7"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="cta">
+      <button class="btn" style="background:var(--milk)" onclick="obNext()">Log in →</button>
+      <div class="tnc" style="opacity:.75">Non-custodial. Your key never leaves your device.</div>
+    </div>
+  </div></section>
+
+  <!-- region -->
+  <section class="ob" id="obRegion"><div class="inner">
+    <h1 style="font-size:32px;letter-spacing:-.03em">Where do we pay out?</h1>
+    <div style="font-size:14.5px;font-weight:700;opacity:.65;margin-top:7px">Pick where your merchant gets local cash.</div>
+    <div class="regionlist" id="regionList"></div>
+    <div class="cta">
+      <button class="btn dark" id="obGo" onclick="obFinish()">Continue →</button>
+      <div class="tnc">By continuing, you agree to our
+        <a href="https://www.p2p.lol/tnc" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</div>
+    </div>
+  </div></section>
+</div>
+
+<div id="app">
+<div id="liveBar" style="display:none"><span class="dot"></span><span id="liveTxt">MAINNET · LIVE FUNDS</span></div>
+
+<!-- ══════ HOME ══════ -->
+<section class="screen on" id="s-home">
+  <div class="hdr">
+    <button class="ib" onclick="op('drawer')" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="brand">
+      <svg class="mk" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><path d="M9 17c-3-4-1.5-8 1.5-8s4.5 3 4.5 6" fill="#1C1A17"/><path d="M39 17c3-4 1.5-8-1.5-8s-4.5 3-4.5 6" fill="#1C1A17"/><ellipse cx="24" cy="26" rx="14" ry="12" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><ellipse cx="15" cy="19" rx="4.5" ry="3.6" fill="#1C1A17"/><ellipse cx="33.5" cy="20" rx="3.4" ry="2.8" fill="#1C1A17"/><circle cx="18.5" cy="25" r="2" fill="#1C1A17"/><circle cx="29.5" cy="25" r="2" fill="#1C1A17"/><ellipse cx="24" cy="32.5" rx="7.5" ry="5.5" fill="#FFB8C6" stroke="#1C1A17" stroke-width="2.2"/><circle cx="21.3" cy="32" r="1.3" fill="#1C1A17"/><circle cx="26.7" cy="32" r="1.3" fill="#1C1A17"/></svg>
+      <span class="wordmark">moo.cash</span>
+    </div>
+    <button class="ib g" onclick="op('sh-recv')" title="Receive"><svg viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4.5-4.5M12 16l4.5-4.5M4 20h16"/></svg></button>
+  </div>
+
+  <!-- not connected -->
+  <div id="connectCard" class="card cream" style="text-align:center">
+    <div style="font-size:40px;margin-bottom:6px">🐄</div>
+    <h2 style="font-size:21px;margin-bottom:5px">Get started</h2>
+    <div style="font-size:13.5px;opacity:.7;font-weight:700;line-height:1.55;margin-bottom:16px">
+      Create a wallet with your email, or connect one you already have.</div>
+    <button class="btn butter" onclick="op('sh-email')" style="margin-bottom:9px">✉️ Continue with email</button>
+    <button class="btn" onclick="connect()" id="connBtn">Connect existing wallet</button>
+    <div id="noWallet" style="display:none;margin-top:12px"></div>
+    <div class="fine">Non-custodial either way. Your key stays on your device.</div>
+  </div>
+
+  <!-- connected -->
+  <div id="walletCard" style="display:none">
+    <div class="greetline">
+      <span class="greet">Moo! <span id="greetAddr">&mdash;</span></span>
+      <span class="chip" id="ctyChip" onclick="go('s-world')" style="cursor:pointer"></span>
+    </div>
+
+    <div class="card grass">
+      <button class="sellchip" onclick="op('sh-rate')" id="sellChip">Sell price: &mdash;</button>
+      <div class="lbl" style="color:rgba(255,255,255,.7);margin-top:15px">USDC balance</div>
+      <div class="big">$<span id="bW">&mdash;</span><span class="dec">.<span id="bC">--</span></span></div>
+      <div class="sub" id="bLocal">&asymp; &mdash;</div>
+      <div class="row" style="margin-top:17px">
+        <button class="btn butter" onclick="op('sh-add')">&#8601; Deposit</button>
+        <button class="btn pink" onclick="op('sh-send')">&#8599; Withdraw</button>
+      </div>
+    </div>
+
+    <div class="card pale">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div class="lbl">Your limits</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <span style="font-family:var(--disp);font-size:38px;font-weight:800;color:var(--grass-d);line-height:1" id="limitNum">200</span>
+            <span style="font-size:14px;font-weight:800;opacity:.6">USDC</span>
+          </div>
+          <div style="font-size:13px;font-weight:700;opacity:.65;margin-top:4px">Verify to unlock higher limits</div>
+        </div>
+        <button class="btn butter sm" onclick="op('sh-kyc')">Increase &rarr;</button>
+      </div>
+    </div>
+
+    <div class="card cream" style="box-shadow:var(--sh-sm);cursor:pointer" onclick="op('sh-float')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div class="lbl" style="margin:0">Instant capacity</div>
+        <span class="chip" id="floatVal">&mdash;</span>
+      </div>
+      <div class="floatbar"><i id="floatFill" style="width:100%"></i></div>
+      <div style="font-size:12px;font-weight:700;opacity:.7" id="floatTxt">Instant payments available</div>
+    </div>
+
+    <div class="grid2">
+      <div class="stat"><div class="k">SOL for gas</div><div class="v" id="solBal">&mdash;</div><div class="d" id="solWarn">needed for fees</div></div>
+      <div class="stat"><div class="k">Rate source</div><div class="v" style="font-size:16px" id="fxV">&mdash;</div><div class="d" id="fxSrc">loading&hellip;</div></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="cmpBadges"></div>
+    <div class="card cream" id="cmpCard" style="display:none"></div>
+    <div class="sect"><h2>My orders</h2><a onclick="refresh()">Refresh</a></div>
+    <div class="card" style="padding:4px 19px" id="txs"><div class="fine" style="padding:18px 0">Loading…</div></div>
+  </div>
+</section>
+
+<!-- ══════ PAY ══════ -->
+<section class="screen" id="s-pay">
+  <div class="hdr">
+    <button class="ib" onclick="stopCam();go('s-home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <h1 style="flex:1" id="payTitle">Scan &amp; Pay</h1>
+    <button class="ib" onclick="op('sh-payhelp')" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-4M12 8.2v.01"/></svg></button>
+  </div>
+
+  <!-- India gets a second mode -->
+  <div class="segs" id="payModes" style="display:none">
+    <button class="on" id="pm1" onclick="setPayMode('scan')">Scan &amp; Pay</button>
+    <button id="pm2" onclick="setPayMode('card')">Card bill</button>
+  </div>
+
+  <!-- ── amount keypad ── -->
+  <div id="payKeypad">
+    <div class="hintbar" onclick="op('sh-payhelp')">
+      <span class="dot"></span>
+      <span id="hintTxt">Ask the vendor for the bill amount only. Don't ask for a QR yet.</span>
+      <span class="ch">›</span>
+    </div>
+    <div style="text-align:center;margin:18px 0 4px;font-weight:800;font-size:14.5px">You're paying</div>
+    <div class="payamt" id="payAmtBig"><span class="cur">₹</span><span id="payAmtTxt">0</span></div>
+    <div style="text-align:center;margin-bottom:16px">
+      <button class="flipchip" onclick="flipUnit()">
+        <svg viewBox="0 0 24 24"><path d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l3 3m-3-3l-3 3"/></svg>
+        <span id="payAlt">≈ 0 USDC</span></button>
+    </div>
+    <div class="pad" id="pad"></div>
+    <div class="row" style="margin:10px 0 14px">
+      <button class="btn barn" onclick="padMax()">Max</button>
+      <button class="btn pale2" onclick="padKey('clear')">Clear</button>
+    </div>
+    <button class="btn dark" id="placeBtn" onclick="placeOrder()" disabled>Place Order →</button>
+    <div id="payQuote"></div>
+  </div>
+
+  <!-- ── card bill (India) ── -->
+  <div id="payCard" style="display:none">
+    <div class="note info">Pay a credit card bill from your USDC. The issuer is paid in rupees — they never see crypto.</div>
+    <div class="f"><label>Card issuer</label><select class="inp" id="ccIssuer" onchange="ccQuote()"></select></div>
+    <div class="f"><label>Last 4 digits of the card</label>
+      <input class="inp" id="ccLast4" maxlength="4" inputmode="numeric" placeholder="4242" oninput="ccQuote()">
+      <div class="fine" style="text-align:left;margin-top:5px">Only the last four. We never ask for a full card number — the biller network routes on issuer plus last four.</div></div>
+    <div class="f"><label>Bill amount (₹)</label><input class="inp" id="ccAmt" inputmode="decimal" placeholder="5000" oninput="ccQuote()"></div>
+    <div id="ccOut"></div>
+    <button class="btn dark" id="ccBtn" onclick="payCardBill()" disabled>Pay bill →</button>
+  </div>
+
+  <!-- ── scanner (revealed after Place Order) ── -->
+  <div id="payScan" style="display:none">
+    <div class="note info" id="scanFor"></div>
+    <div id="reader">
+      <video id="vid" playsinline muted></video><canvas id="cvs"></canvas>
+      <div class="ov"><div class="fr"><div class="c c1"></div><div class="c c2"></div><div class="c c3"></div><div class="c c4"></div></div>
+        <div class="cap" id="camCap">Now scan the vendor's QR</div></div>
+      <div class="idle" id="camIdle">Camera off.<br>Tap below to scan, or paste the code.</div>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn lime" id="camBtn" onclick="toggleCam()">Start camera</button>
+      <button class="btn" onclick="op('sh-paste')">Paste code</button>
+    </div>
+    <button class="btn ghost" onclick="cancelOrder()">← Change amount</button>
+    <div class="sect"><h2>Try a sample QR</h2></div>
+    <div class="card" style="padding:4px 19px" id="samples"></div>
+  </div>
+</section>
+
+<!-- ══════ EARN ══════ -->
+<section class="screen" id="s-earn">
+  <div class="hdr"><h1>The pasture</h1><button class="ib" onclick="op('sh-howpool')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-5M12 8.2v.01"/></svg></button></div>
+  <div class="note live"><b>Not live.</b> Staking moves other people's money and is almost certainly a regulated product where you'd operate. The screen below is a model, wired to real numbers, so you can see the economics — it does not accept deposits.</div>
+  <div class="card grass">
+    <div class="lbl" style="color:rgba(255,255,255,.7)">Modelled position</div>
+    <div class="big">$<span id="pStake">10,200</span><span class="dec">.00</span></div>
+    <div class="sub">= <span id="pShare">0.4113</span>% of the pasture</div>
+  </div>
+  <div class="grid2">
+    <div class="stat"><div class="k">Pasture size</div><div class="v">$2.48M</div><div class="d">total staked</div></div>
+    <div class="stat"><div class="k">30d volume</div><div class="v">$14.6M</div><div class="d">ramped</div></div>
+    <div class="stat"><div class="k">Milk 30d</div><div class="v">$18,250</div><div class="d">to the herd</div></div>
+    <div class="stat"><div class="k">Trailing</div><div class="v">8.95%</div><div class="d">not a promise</div></div>
+  </div>
+  <div class="note risk"><b>Risks.</b> Returns vary and can be zero. Principal is not protected. Withdrawals queue behind capital mid-settlement. This is not a deposit and is not insured.</div>
+</section>
+
+<!-- ══════ WORLD ══════ -->
+<section class="screen" id="s-world">
+  <div class="hdr"><h1>Grazing grounds</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="grid2">
+    <div class="stat"><div class="k">Live markets</div><div class="v" id="wLive">15</div><div class="d">modelled</div></div>
+    <div class="stat"><div class="k">Rails</div><div class="v" id="wRails">12</div><div class="d">QR + mobile money</div></div>
+  </div>
+  <div class="sect"><h2>Asia</h2></div><div class="card" style="padding:4px 19px" id="ctyAsia"></div>
+  <div class="sect"><h2>Africa</h2></div><div class="card" style="padding:4px 19px" id="ctyAfr"></div>
+  <div class="sect"><h2>Latin America</h2></div><div class="card" style="padding:4px 19px" id="ctyLat"></div>
+</section>
+
+<!-- ══════ INDIA ══════ -->
+<section class="screen" id="s-india">
+  <div class="hdr"><h1 id="indiaTitle">India</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="note stop"><b>Your exact flow is the hardest version.</b> Holding and trading crypto in India is legal. Using it as a <i>payment instrument</i> is the specific thing the RBI has said should not happen. That distinction is the whole problem — see below.</div>
+
+  <div class="sect"><h2>The flow, hop by hop</h2></div>
+  <div class="segs">
+    <button class="on" id="ar1" onclick="setArch('pooled')">One tap (pooled)</button>
+    <button id="ar2" onclick="setArch('direct')">Two step (direct)</button>
+  </div>
+  <div id="flowOut"></div>
+  <div id="archVerdict"></div>
+
+  <div class="sect"><h2>What you must hold</h2></div>
+  <div class="card" style="padding:4px 19px" id="indiaReq"></div>
+
+  <div class="sect"><h2>TDS impact — live</h2></div>
+  <div class="card cream">
+    <div class="lbl">Model a payment</div>
+    <div class="f"><label>Merchant amount (₹)</label><input class="inp" id="tdsAmt" value="1000" inputmode="decimal" oninput="drawTDS()"></div>
+    <div class="f"><label>Your fee rate (%)</label><input class="inp" id="tdsFee" value="0.4" inputmode="decimal" oninput="drawTDS()"></div>
+    <div class="segs"><button class="on" id="tm1" onclick="setTdsMode('absorb')">You absorb TDS</button><button id="tm2" onclick="setTdsMode('pass')">User pays TDS</button></div>
+    <div id="tdsOut"></div>
+  </div>
+  <div id="tdsVerdict"></div>
+</section>
+
+<!-- ══════ SETTINGS ══════ -->
+<section class="screen" id="s-set">
+  <div class="hdr"><h1>Settings</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="srow" onclick="op('sh-cur')"><div class="ic">💱</div><div class="lb">Currency</div><div class="val" id="setCur">INR</div><div class="ch">›</div></div>
+  <div class="srow" onclick="op('sh-rpc')"><div class="ic">🔗</div><div class="lb">Solana RPC</div><div class="val" id="setRpc">public</div><div class="ch">›</div></div>
+  <div class="srow" onclick="op('sh-cap')"><div class="ic">🛡</div><div class="lb">Send cap</div><div class="val" id="setCap">25 USDC</div><div class="ch">›</div></div>
+  <div class="srow" onclick="tog('tHide')"><div class="ic">👁</div><div class="lb">Hide balances</div><div class="tog" id="tHide"><i></i></div></div>
+  <div class="srow" onclick="tog('tSim')"><div class="ic">🧪</div><div class="lb">Simulate before send</div><div class="tog on" id="tSim"><i></i></div></div>
+  <div class="srow" onclick="exportKey()"><div class="ic">🔑</div><div class="lb">Export secret key</div><div class="val">email wallets</div><div class="ch">›</div></div>
+  <div class="srow" onclick="obReset()"><div class="ic">🌍</div><div class="lb">Change payout region</div><div class="ch">›</div></div>
+  <div class="sect"><h2>Privacy</h2></div>
+  <div class="card cream" style="box-shadow:var(--sh-sm)">
+    <div class="lbl">What the shop sees</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.6">Nothing about you. They receive an ordinary local-currency
+      credit into their existing account, exactly as if a neighbour had paid them.</div>
+    <div class="lbl" style="margin-top:14px">What we need</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.6">An email, up to <b id="capTxt">200 USDC</b> a month. Above that,
+      identity verification is required — that part isn't optional anywhere we operate, and any service telling you
+      otherwise is one enforcement action from disappearing with your balance.</div>
+  </div>
+  <div id="rowIndia" style="display:none">
+    <div class="sect"><h2>India</h2></div>
+    <div class="srow" onclick="go('s-india')"><div class="ic" id="indiaIcon"></div><div class="lb">TDS &amp; compliance</div><div class="ch">›</div></div>
+  </div>
+  <div class="sect"><h2>Not yet live</h2></div>
+  <div class="srow" onclick="op('sh-partners')"><div class="ic">🧩</div><div class="lb">Card, payouts, KYC</div><div class="val">needs partners</div><div class="ch">›</div></div>
+  <div class="fine">moo.cash live build · core logic unit-tested</div>
+</section>
+</div>
+
+<div class="navwrap"><nav class="nav">
+  <button class="on" data-s="s-home" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19z"/></svg>Home</button>
+  <button data-s="s-earn" onclick="go('s-earn')"><svg viewBox="0 0 24 24"><path d="M5 20V13M12 20V7M19 20v-9M5 13c0-3 2-4 3.5-4M12 7c0-3 2-4 3.5-4"/></svg>Graze</button>
+  <button class="payb" onclick="go('s-pay')"><svg viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 015.5 4H8M16 4h2.5A1.5 1.5 0 0120 5.5V8M20 16v2.5a1.5 1.5 0 01-1.5 1.5H16M8 20H5.5A1.5 1.5 0 014 18.5V16M7.5 7.5h3v3h-3zM13.5 7.5h3v3h-3zM7.5 13.5h3v3h-3zM13.5 13.5h3v3h-3z"/></svg></button>
+  <button data-s="s-world" onclick="go('s-world')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.2 2.4 3.4 5.4 3.4 8.5s-1.2 6.1-3.4 8.5c-2.2-2.4-3.4-5.4-3.4-8.5S9.8 5.9 12 3.5z"/></svg>World</button>
+  <button data-s="s-set" onclick="go('s-set')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3"/></svg>Settings</button>
+</nav></div>
+
+<!-- DRAWER -->
+<div id="drawer"><div class="bg" onclick="cl('drawer')"></div><div class="pn">
+  <div class="top">
+    <div class="brand"><svg class="mk" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><path d="M9 17c-3-4-1.5-8 1.5-8s4.5 3 4.5 6" fill="#1C1A17"/><path d="M39 17c3-4 1.5-8-1.5-8s-4.5 3-4.5 6" fill="#1C1A17"/><ellipse cx="24" cy="26" rx="14" ry="12" fill="#FFF" stroke="#1C1A17" stroke-width="2.5"/><ellipse cx="15" cy="19" rx="4.5" ry="3.6" fill="#1C1A17"/><ellipse cx="33.5" cy="20" rx="3.4" ry="2.8" fill="#1C1A17"/><circle cx="18.5" cy="25" r="2" fill="#1C1A17"/><circle cx="29.5" cy="25" r="2" fill="#1C1A17"/><ellipse cx="24" cy="32.5" rx="7.5" ry="5.5" fill="#FFB8C6" stroke="#1C1A17" stroke-width="2.2"/><circle cx="21.3" cy="32" r="1.3" fill="#1C1A17"/><circle cx="26.7" cy="32" r="1.3" fill="#1C1A17"/></svg>
+      <span class="wordmark">moo.cash</span></div>
+    <button class="ib" onclick="cl('drawer')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="dnav">
+    <button onclick="dgo('s-home')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/></svg></span><span class="lb">Wallet</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-pay')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M7.5 7.5h3v3h-3zM13.5 7.5h3v3h-3zM7.5 13.5h3v3h-3zM13.5 13.5h3v3h-3z"/></svg></span><span class="lb">Scan &amp; pay</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-earn')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 20V13M12 20V7M19 20v-9"/></svg></span><span class="lb">Pasture</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-world')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/></svg></span><span class="lb">Grazing grounds</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-india')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span><span class="lb">India &amp; TDS</span><span class="ch">›</span></button>
+    <button onclick="dgo('s-set')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3"/></svg></span><span class="lb">Settings</span><span class="ch">›</span></button>
+  </div>
+  <div class="foot">
+    <div class="daddr"><div class="mid"><div class="k">Logged in via</div><div class="v" id="dEmail" style="font-family:var(--body)">not signed in</div></div></div>
+    <div class="daddr"><div class="mid"><div class="k">Wallet</div><div class="v" id="dAddr">not connected</div></div>
+      <button class="cp" onclick="copyAddr()"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1"/></svg></button></div>
+    <button class="btn" id="discBtn" onclick="disconnect()">Disconnect</button>
+  </div>
+</div></div>
+
+<!-- SHEETS -->
+<div class="sheet" id="sh-send"><div class="bg" onclick="cl('sh-send')"></div><div class="pn"><div class="grab"></div>
+  <h3>Send USDC</h3><div class="lede">Real transfer on Solana mainnet.</div>
+  <div class="note live"><b>Live funds.</b> This moves real money and cannot be undone. Use a burner wallet while you test.</div>
+  <div class="f"><label>Recipient address</label><input class="inp mono" id="sendTo" placeholder="Solana address" oninput="valTo()"><div id="toErr" class="fine" style="text-align:left;color:var(--stop);display:none"></div></div>
+  <div class="f"><label>Amount (USDC)</label><input class="inp" id="sendAmt" value="1" inputmode="decimal" oninput="valAmt()"></div>
+  <div class="brk" id="sendBrk"></div>
+  <div id="simOut"></div>
+  <button class="btn barn" id="sendBtn" onclick="doSend()" disabled>Review &amp; send</button>
+  <div class="fine">You'll approve the exact transaction in your wallet.</div>
+</div></div>
+
+<div class="sheet" id="sh-confirm"><div class="bg" onclick="cl('sh-confirm')"></div><div class="pn"><div class="grab"></div>
+  <h3>Confirm</h3><div class="lede">Last check before this leaves your wallet.</div>
+  <div class="brk" id="confBrk"></div>
+  <div class="note live">Type <b>SEND</b> to enable the button.</div>
+  <div class="f"><input class="inp" id="confWord" placeholder="Type SEND" oninput="valConf()"></div>
+  <button class="btn barn" id="confBtn" onclick="reallySend()" disabled>Send it</button>
+  <button class="btn ghost" style="margin-top:6px" onclick="cl('sh-confirm')">Cancel</button>
+</div></div>
+
+<div class="sheet" id="sh-paste"><div class="bg" onclick="cl('sh-paste')"></div><div class="pn"><div class="grab"></div>
+  <h3>Paste a QR payload</h3><div class="lede">A <b>upi://pay?…</b> link or a raw EMVCo string.</div>
+  <div class="f"><textarea class="inp mono" id="pasteIn" rows="5" placeholder="upi://pay?pa=merchant@bank&am=340" style="resize:vertical"></textarea></div>
+  <button class="btn lime" onclick="handleQR($('pasteIn').value)">Decode</button>
+</div></div>
+
+<div class="sheet" id="sh-qr"><div class="bg" onclick="cl('sh-qr')"></div><div class="pn"><div class="grab"></div>
+  <div id="qrBody"></div></div></div>
+
+<div class="sheet" id="sh-add"><div class="bg" onclick="cl('sh-add')"></div><div class="pn"><div class="grab"></div>
+  <h3>Add USDC</h3><div class="lede">Top up from any exchange or wallet on Solana.</div>
+  <div class="card pale"><div class="lbl">✅ Works now — receive on-chain</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6;margin-bottom:12px">Send USDC on Solana from an exchange or another wallet to your address. In India, users already buy USDC on FIU-registered exchanges with UPI — they just withdraw it here.</div>
+    <button class="btn lime" onclick="cl('sh-add');op('sh-recv')">Show my address</button></div>
+  <div class="note info">No card needed. The product is spending USDC you already hold — not buying it.</div>
+</div></div>
+
+<div class="sheet" id="sh-recv"><div class="bg" onclick="cl('sh-recv')"></div><div class="pn"><div class="grab"></div>
+  <h3>Receive USDC</h3><div class="lede">Solana (SPL) only.</div>
+  <div class="card cream" style="text-align:center;box-shadow:none"><div id="qrRecv" style="width:190px;height:190px;margin:0 auto 12px"></div>
+    <div style="font-family:ui-monospace,monospace;font-size:11.5px;font-weight:700;word-break:break-all;line-height:1.6" id="recvAddr">—</div></div>
+  <div class="note stop">⚠️ <b>Solana SPL USDC only.</b> Tokens sent on Ethereum, Base, Tron or any other chain are unrecoverable.</div>
+  <button class="btn lime" onclick="copyAddr()">📋 Copy address</button>
+</div></div>
+
+<div class="sheet" id="sh-rpc"><div class="bg" onclick="cl('sh-rpc')"></div><div class="pn"><div class="grab"></div>
+  <h3>Solana RPC</h3><div class="lede">The public endpoint is heavily rate-limited and often blocks browsers. A free Helius or QuickNode key makes this reliable.</div>
+  <div class="f"><label>RPC URL</label><input class="inp mono" id="rpcIn" placeholder="https://mainnet.helius-rpc.com/?api-key=…"></div>
+  <button class="btn lime" onclick="saveRpc()">Save &amp; test</button>
+  <div id="rpcOut"></div>
+</div></div>
+
+<div class="sheet" id="sh-cap"><div class="bg" onclick="cl('sh-cap')"></div><div class="pn"><div class="grab"></div>
+  <h3>Send cap</h3><div class="lede">A hard ceiling on any single transfer. A prototype that can send funds is how people lose money — keep this low.</div>
+  <div class="f"><label>Max per transaction (USDC)</label><input class="inp" id="capIn" value="25" inputmode="decimal"></div>
+  <button class="btn lime" onclick="saveCap()">Save cap</button>
+</div></div>
+
+<div class="sheet" id="sh-partners"><div class="bg" onclick="cl('sh-partners')"></div><div class="pn"><div class="grab"></div>
+  <h3>What code can't do</h3>
+  <div class="lede">These three need a counterparty and a signed contract. I've left clean integration points for each.</div>
+  <div id="partnerList"></div>
+  <div class="note info">Every one of these gates on entity + licence first. Nobody will sign until you have both.</div>
+</div></div>
+
+<div class="sheet" id="sh-howpool"><div class="bg" onclick="cl('sh-howpool')"></div><div class="pn"><div class="grab"></div>
+  <h3>How grazing would work</h3><div class="lede">Modelled, not live.</div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">1 · Stake</div><div style="font-size:13.5px;font-weight:700;line-height:1.6">USDC joins a shared pool. You hold a pro-rata claim, tracked by share — not a promised rate.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">2 · It works</div><div style="font-size:13.5px;font-weight:700;line-height:1.6">The pool fronts settlement so ramps clear instantly instead of waiting on bank rails.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">3 · Fees split</div><div style="font-size:13.5px;font-weight:700;line-height:1.6">A defined slice of each ramp fee goes to the pool, divided by share.</div></div>
+  <div class="note risk"><b>Why it isn't switched on.</b> Taking deposits and paying returns is a regulated activity nearly everywhere. Get securities advice before this holds one real dollar.</div>
+  <button class="btn" onclick="cl('sh-howpool')">Got it</button>
+</div></div>
+
+<div class="sheet" id="sh-cur"><div class="bg" onclick="cl('sh-cur')"></div><div class="pn"><div class="grab"></div>
+  <h3>Select currency</h3><div class="lede">Drives the local-value display and payment quotes.</div>
+  <div class="csearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="curQ" placeholder="Search country or currency" oninput="drawCur()"></div>
+  <div id="curList"></div>
+</div></div>
+
+<div class="sheet" id="sh-cty"><div class="bg" onclick="cl('sh-cty')"></div><div class="pn"><div class="grab"></div>
+  <div id="ctyBody"></div><button class="btn" onclick="cl('sh-cty')">Close</button></div></div>
+
+<div class="sheet" id="sh-diag"><div class="bg" onclick="cl('sh-diag')"></div><div class="pn"><div class="grab"></div>
+  <h3>Wallet diagnostics</h3><div class="lede">What this page can and can't see.</div>
+  <div id="diagBody"></div></div></div>
+
+<div class="sheet" id="sh-settle"><div class="bg"></div><div class="pn"><div class="grab"></div>
+  <div id="settleHead"></div>
+  <div class="steps" id="settleSteps"></div>
+  <div id="settleFoot"></div>
+</div></div>
+
+<div class="sheet" id="sh-float"><div class="bg" onclick="cl('sh-float')"></div><div class="pn"><div class="grab"></div>
+  <h3>Why some payments are slower</h3>
+  <div class="lede">Three speeds, and which one you get depends on the amount.</div>
+  <div id="floatBody"></div>
+  <button class="btn" onclick="cl('sh-float')">Got it</button>
+</div></div>
+
+<div class="sheet" id="sh-kyc"><div class="bg" onclick="cl('sh-kyc')"></div><div class="pn"><div class="grab"></div>
+  <h3>Raise your limits</h3>
+  <div class="lede">Pay with just an email up to the first tier. Above that, verification is required.</div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><b>Tier 1</b> <span class="chip ok">current</span>
+        <div style="font-size:13px;font-weight:700;opacity:.65;margin-top:3px">Email only. No documents.</div></div>
+      <div style="text-align:right"><b style="font-size:17px">200</b>
+        <div style="font-size:12px;font-weight:700;opacity:.6">USDC / month</div></div>
+    </div>
+  </div>
+  <div class="card cream" style="box-shadow:var(--sh-sm)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><b>Tier 2</b>
+        <div style="font-size:13px;font-weight:700;opacity:.65;margin-top:3px">ID document and a selfie.</div></div>
+      <div style="text-align:right"><b style="font-size:17px">5,000</b>
+        <div style="font-size:12px;font-weight:700;opacity:.6">USDC / month</div></div>
+    </div>
+  </div>
+  <div class="card butter" style="box-shadow:var(--sh-sm)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div><b>Tier 3</b>
+        <div style="font-size:13px;font-weight:700;opacity:.7;margin-top:3px">Address and source of funds.</div></div>
+      <div style="text-align:right"><b style="font-size:17px">50,000</b>
+        <div style="font-size:12px;font-weight:700;opacity:.7">USDC / month</div></div>
+    </div>
+  </div>
+  <div class="note info">The merchant never sees your identity at any tier — verification is between you and us,
+    and only above the first tier. It isn't optional anywhere we operate.</div>
+  <button class="btn butter" onclick="cl('sh-kyc');tt('Verification flow')">Start verification</button>
+</div></div>
+
+<div class="sheet" id="sh-rate"><div class="bg" onclick="cl('sh-rate')"></div><div class="pn"><div class="grab"></div>
+  <h3>Where this price comes from</h3>
+  <div class="lede">A stablecoin doesn't trade at the forex rate everywhere.</div>
+  <div id="rateBody"></div>
+  <button class="btn" onclick="cl('sh-rate')">Got it</button>
+</div></div>
+
+<!-- EMAIL WALLET -->
+<div class="sheet" id="sh-email"><div class="bg" onclick="cl('sh-email')"></div><div class="pn"><div class="grab"></div>
+  <h3 id="emTitle">Continue with email</h3>
+  <div class="lede" id="emLede">We'll create a Solana wallet on this device and lock it with a passphrase.</div>
+  <div class="f"><label>Email</label><input class="inp" id="emEmail" type="email" inputmode="email" placeholder="you@gmail.com" oninput="emVal()"></div>
+  <div class="srow" onclick="togglePass()" style="margin-bottom:13px">
+    <div class="ic">&#128273;</div>
+    <div class="lb" style="font-size:14px">Add a passphrase<div style="font-size:11.5px;font-weight:700;opacity:.6;margin-top:2px">Optional &mdash; lets you use this wallet on another device</div></div>
+    <div class="tog" id="tPass"><i></i></div>
+  </div>
+  <div id="passFields" style="display:none">
+    <div class="f"><label id="emPassLbl">Passphrase</label>
+      <input class="inp" id="emPass" type="password" placeholder="At least 8 characters" oninput="emVal()"></div>
+    <div class="f" id="emConfirmWrap"><label>Confirm passphrase</label>
+      <input class="inp" id="emPass2" type="password" placeholder="Type it again" oninput="emVal()"></div>
+  </div>
+  <div id="emErr"></div>
+  <div id="emNote"><div class="note info"><b>This device only.</b> Your key is generated here and stays here.
+    Anyone who can open this browser profile can use the wallet, exactly like staying signed in. Add a
+    passphrase to move it to another device.</div></div>
+  <button class="btn butter" id="emBtn" onclick="emSubmit()" disabled>Create wallet</button>
+  <button class="btn ghost" style="margin-top:6px" onclick="emToggleMode()"><span id="emSwitch">I already have one on this device</span></button>
+</div></div>
+
+<div class="sheet" id="sh-payhelp"><div class="bg" onclick="cl('sh-payhelp')"></div><div class="pn"><div class="grab"></div>
+  <h3>How paying works</h3>
+  <div class="lede">Amount first, QR second — and there's a reason for the order.</div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">1 · Ask for the amount</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6">Just the bill total. Don't ask for the QR yet.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">2 · Place the order</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6">This locks your exchange rate and reserves the fiat before you commit. If rates moved between scanning and paying, you'd get a nasty surprise — this removes that.</div></div>
+  <div class="card pale" style="box-shadow:var(--sh-sm)"><div class="lbl">3 · Now scan</div>
+    <div style="font-size:13.5px;font-weight:700;line-height:1.6">Point at the vendor's existing QR. They get local currency in their bank and never touch crypto.</div></div>
+  <div id="helpCompliance"></div>
+  <button class="btn" onclick="cl('sh-payhelp')">Got it</button>
+</div></div>
+
+<div id="toast"></div>
+
+<script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
