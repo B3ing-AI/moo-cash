@@ -114,11 +114,27 @@ function rateInfo(){
 }
 function renderFX(){
   const m=mkBy(SEL), r=rateInfo();
-  if(!r){ $('sellChip').textContent='Sell price: —'; return }
+  if(!r){
+    if($('p2pBuyVal')) $('p2pBuyVal').textContent='—';
+    if($('p2pSellVal')) $('p2pSellVal').textContent='—';
+    if($('sellChip')) $('sellChip').textContent='Sell price: —';
+    if($('p2pConnectPreview')) $('p2pConnectPreview').textContent='Live P2P: —';
+    return;
+  }
 
   const showPrem = r.premiumPct != null && Math.abs(r.premiumPct) >= 1;
-  $('sellChip').innerHTML = 'Sell price: '+m.sym+fmt(r.sell, r.sell>100?2:2)
-    + (showPrem?`<span class="prem">+${r.premiumPct.toFixed(1)}%</span>`:'');
+  const buyTxt = m.sym + fmt(r.buy, r.buy>100?2:2);
+  const sellTxt = m.sym + fmt(r.sell, r.sell>100?2:2);
+
+  /* In-house P2P rates update */
+  if($('p2pBuyVal')) $('p2pBuyVal').textContent = buyTxt;
+  if($('p2pSellVal')) $('p2pSellVal').textContent = sellTxt;
+  if($('p2pPremBadge')) $('p2pPremBadge').textContent = showPrem ? `+${r.premiumPct.toFixed(1)}% Prem` : 'P2P Rates';
+  if($('p2pConnectPreview')) $('p2pConnectPreview').textContent = `Live P2P: Buy ${buyTxt} · Sell ${sellTxt}`;
+
+  if($('sellChip')){
+    $('sellChip').innerHTML = 'Sell price: '+sellTxt + (showPrem?`<span class="prem">+${r.premiumPct.toFixed(1)}%</span>`:'');
+  }
 
   $('fxV').textContent = {orderbook:'Order book', estimated:'Estimated', forex:'Forex'}[r.source];
   $('fxSrc').textContent = r.source==='estimated'
@@ -257,7 +273,7 @@ function disconnect(){
   try{provider&&provider.disconnect&&provider.disconnect()}catch(e){}
   pubkey=null;conn=null;
   $('connectCard').style.display='';$('walletCard').style.display='none';
-  $('liveBar').style.display='none';$('dAddr').textContent='not connected';
+  $('dAddr').textContent='not connected';
   cl('drawer');tt('Disconnected');
 }
 function copyAddr(){
@@ -658,9 +674,7 @@ async function emSubmit(){
 function onConnected(email){
   $('connectCard').style.display='none';
   $('walletCard').style.display='';
-  $('liveBar').style.display='flex';
   const addr=pubkey.toBase58();
-  $('liveTxt').textContent='MAINNET · LIVE FUNDS · '+short(addr);
   $('dAddr').textContent=short(addr);
   $('greetAddr').textContent=short(addr);
   $('recvAddr').textContent=addr;
