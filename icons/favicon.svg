@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="moo.cash">
+  <!-- Simplified for small sizes: heavier shapes, no hairline strokes. -->
+  <rect width="48" height="48" rx="11" fill="#3E9B4F"/>
+  <path d="M18 11.4c-1.2-3.2-3.4-4.8-5-4-1.6.8-1.6 3.4 0 5.9" fill="#F5E6C4" stroke="#1C1A17" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M30 11.4c1.2-3.2 3.4-4.8 5-4 1.6.8 1.6 3.4 0 5.9" fill="#F5E6C4" stroke="#1C1A17" stroke-width="2.4" stroke-linejoin="round"/>
+  <ellipse cx="10.6" cy="21" rx="5.8" ry="4" transform="rotate(-24 10.6 21)" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.8"/>
+  <ellipse cx="11.2" cy="21.1" rx="2.7" ry="1.7" transform="rotate(-24 11.2 21.1)" fill="#FFB8C6"/>
+  <ellipse cx="37.4" cy="21" rx="5.8" ry="4" transform="rotate(24 37.4 21)" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.8"/>
+  <ellipse cx="36.8" cy="21.1" rx="2.7" ry="1.7" transform="rotate(24 36.8 21.1)" fill="#FFB8C6"/>
+  <ellipse cx="24" cy="25.6" rx="14.4" ry="13.2" fill="#FFFDF6" stroke="#1C1A17" stroke-width="3"/>
+  <ellipse cx="18.6" cy="23" rx="2.4" ry="2.9" fill="#1C1A17"/>
+  <ellipse cx="29.4" cy="23" rx="2.4" ry="2.9" fill="#1C1A17"/>
+  <ellipse cx="24" cy="32" rx="8.6" ry="6.3" fill="#FFB8C6" stroke="#1C1A17" stroke-width="2.6"/>
+  <ellipse cx="20.8" cy="31.4" rx="1.5" ry="1.9" fill="#1C1A17"/>
+  <ellipse cx="27.2" cy="31.4" rx="1.5" ry="1.9" fill="#1C1A17"/>
+</svg>
