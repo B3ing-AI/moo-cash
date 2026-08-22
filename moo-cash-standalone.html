@@ -697,23 +697,26 @@ input,select{font-family:inherit}
 
   <div style="margin:4px 0 16px">
     <h1 style="font-size:28px;display:flex;align-items:center;gap:8px">The Pasture 🌿</h1>
-    <div style="font-size:14.5px;font-weight:700;opacity:.7;margin-top:3px">Earn yield on your idle USDC</div>
+    <div style="font-size:14.5px;font-weight:700;opacity:.7;margin-top:3px">Put idle USDC to work settling ramps</div>
   </div>
 
-  <!-- Hero APY Card -->
+  <div class="note warn" style="margin-bottom:14px"><b>Preview — not accepting deposits.</b>
+    The numbers below are modelled from real volume so you can see the economics.</div>
+
+  <!-- Hero rate card -->
   <div class="card grass" style="box-shadow:var(--sh-lg);text-align:left;padding:22px">
-    <div class="lbl" style="color:rgba(255,255,255,.8);font-size:13px">Current APY</div>
-    <div style="font-family:var(--disp);font-size:62px;font-weight:800;color:var(--lime);line-height:.95;margin:4px 0 10px">4.85%</div>
-    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.85)">Paid daily · No lock-up</div>
+    <div class="lbl" style="color:rgba(255,255,255,.8);font-size:13px">Trailing 30-day rate</div>
+    <div style="font-family:var(--disp);font-size:62px;font-weight:800;color:var(--lime);line-height:.95;margin:4px 0 10px">8.95%</div>
+    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.85)">Variable &middot; Not a promise &middot; Capital at risk</div>
   </div>
 
   <!-- Staked Card -->
   <div class="card" style="background:#FFFDF6;box-shadow:var(--sh);padding:18px;margin-bottom:14px">
-    <div class="lbl" style="font-size:12px;font-weight:700;margin-bottom:4px">Your staked:</div>
+    <div class="lbl" style="font-size:12px;font-weight:700;margin-bottom:4px">Your position:</div>
     <div style="font-family:var(--disp);font-size:26px;font-weight:800;color:var(--hide);margin-bottom:14px">$0.00 <span style="font-size:17px;opacity:.65;font-weight:700">≈ ₹0</span></div>
     <div class="row">
-      <button class="btn lime" style="font-weight:800" onclick="op('sh-howpool')">+ Stake</button>
-      <button class="btn" style="font-weight:800;background:#FFFDF6" onclick="op('sh-howpool')">Unstake</button>
+      <button class="btn lime" style="font-weight:800" onclick="op('sh-howpool')">How it works</button>
+      <button class="btn" style="font-weight:800;background:#FFFDF6" onclick="op('sh-howpool')">Risks</button>
     </div>
   </div>
 
@@ -1230,8 +1233,7 @@ input,select{font-family:inherit}
 
 <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
 <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
-<script>
-/* ══════════════════════════════════════════════════════════════
+<script>/* ══════════════════════════════════════════════════════════════
    moo.cash — core engine
    Pure, dependency-free logic: QR parsing, fee/TDS math, FX.
    Kept separate so it can be unit-tested without a browser.
@@ -1782,16 +1784,19 @@ return {
   TDS_RATE, EMV_COUNTRY, CUR_NUM, FLOWS, COMPLIANCE, ISSUERS
 };
 }));
-
 </script>
-<script>
-/* ══════════════════════════════════════════════════════════════
+<script>/* ══════════════════════════════════════════════════════════════
    moo.cash — app layer (real Solana, real QR, real FX)
    ══════════════════════════════════════════════════════════════ */
 'use strict';
 const C = MooCore;
 const W3 = window.solanaWeb3;
 const $ = id => document.getElementById(id);
+/* Writing to an element the markup no longer has used to throw and kill the
+   rest of the boot sequence. These no-op instead, so a design change can drop
+   an element without silently disabling unrelated features. */
+const setTxt   = (id, v)    => { const e = $(id); if (e) e.textContent = v; return !!e };
+const setStyle = (id, k, v) => { const e = $(id); if (e) e.style[k] = v; };
 
 /* ── on-chain constants ── */
 const USDC_MINT   = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -1844,10 +1849,7 @@ const MK=[
  {n:'Indonesia',cc:'ID',cur:'IDR',sym:'Rp ',fx:16250,reg:'asia',r:'QRIS',s:'live',w:'Huge QRIS merchant base; supervision moved to the OJK.'},
  {n:'Philippines',cc:'PH',cur:'PHP',sym:'₱',fx:58.4,reg:'asia',r:'QR Ph',s:'live',alpha:1,w:'BSP-licensed VASP regime and enormous remittance flow.'},
  {n:'Vietnam',cc:'VN',cur:'VND',sym:'₫',fx:26100,reg:'asia',r:'VietQR',s:'pilot',isNew:1,w:'High grassroots adoption; framework still being finalised.'},
- {n:'Singapore',cc:'SG',cur:'SGD',sym:'S
-</body>
-</html>
-,fx:1.29,reg:'asia',r:'PayNow',s:'live',isNew:1,w:'Clear MAS stablecoin framework. Sensible place to domicile.'},
+ {n:'Singapore',cc:'SG',cur:'SGD',sym:'S$',fx:1.29,reg:'asia',r:'PayNow',s:'live',isNew:1,w:'Clear MAS stablecoin framework. Sensible place to domicile.'},
  {n:'Malaysia',cc:'MY',cur:'MYR',sym:'RM',fx:4.21,reg:'asia',r:'DuitNow',s:'live',isNew:1,w:'Securities Commission licenses digital asset exchanges.'},
  {n:'Thailand',cc:'TH',cur:'THB',sym:'฿',fx:36.2,reg:'asia',r:'PromptPay',s:'tourist',isNew:1,
   w:'Crypto payment to merchants is banned. The only legal route is the TouristDigiPay sandbox — foreign visitors, licensed operator, baht to the merchant. Not available to Thai residents.'},
@@ -1858,23 +1860,11 @@ const MK=[
  {n:'Ghana',cc:'GH',cur:'GHS',sym:'₵',fx:15.4,reg:'africa',r:'MTN MoMo',s:'live',isNew:1,w:'The VASP Act created VARO — among the clearest frameworks in Africa.'},
  {n:'South Africa',cc:'ZA',cur:'ZAR',sym:'R',fx:17.8,reg:'africa',r:'PayShap',s:'live',isNew:1,w:'FSCA licenses crypto asset service providers.'},
  {n:'Tanzania',cc:'TZ',cur:'TZS',sym:'TSh ',fx:2490,reg:'africa',r:'Airtel Money',s:'pilot',isNew:1,w:'Growing mobile money base, framework emerging.'},
- {n:'Brazil',cc:'BR',cur:'BRL',sym:'R
-</body>
-</html>
-,fx:5.42,reg:'latam',r:'PIX',s:'live',w:'PIX is universal and the central bank is comparatively tolerant.'},
- {n:'Argentina',cc:'AR',cur:'ARS',sym:'
-</body>
-</html>
-,fx:1465,reg:'latam',r:'Transferencias 3.0',s:'live',w:'Inflation makes dollar stablecoins a real savings product.'},
+ {n:'Brazil',cc:'BR',cur:'BRL',sym:'R$',fx:5.42,reg:'latam',r:'PIX',s:'live',w:'PIX is universal and the central bank is comparatively tolerant.'},
+ {n:'Argentina',cc:'AR',cur:'ARS',sym:'$',fx:1465,reg:'latam',r:'Transferencias 3.0',s:'live',w:'Inflation makes dollar stablecoins a real savings product.'},
  {n:'Venezuela',cc:'VE',cur:'VES',sym:'Bs',fx:238,reg:'latam',r:'Pago Móvil',s:'live',w:'Deep organic stablecoin usage.'},
- {n:'Colombia',cc:'CO',cur:'COP',sym:'
-</body>
-</html>
-,fx:3920,reg:'latam',r:'Bre-B',s:'live',alpha:1,w:'Bre-B is the new instant rail.'},
- {n:'Ecuador',cc:'EC',cur:'USD',sym:'
-</body>
-</html>
-,fx:1,reg:'latam',r:'Bank transfer',s:'live',alpha:1,label:'Ecuador USD',w:'Dollarised — no FX step at all.'},
+ {n:'Colombia',cc:'CO',cur:'COP',sym:'$',fx:3920,reg:'latam',r:'Bre-B',s:'live',alpha:1,w:'Bre-B is the new instant rail.'},
+ {n:'Ecuador',cc:'EC',cur:'USD',sym:'$',fx:1,reg:'latam',r:'Bank transfer',s:'live',alpha:1,label:'Ecuador USD',w:'Dollarised — no FX step at all.'},
  {n:'Peru',cc:'PE',cur:'PEN',sym:'S/',fx:3.52,reg:'latam',r:'Yape · Plin',s:'live',alpha:1,w:'Yape and Plin dominate consumer payments.'}
 ];
 const SB={live:['ok','Live'],pilot:['warn','Pilot'],tourist:['warn','Tourists only'],restricted:['warn','Restricted'],blocked:['stop','Not available']};
@@ -1939,10 +1929,10 @@ function renderFX(){
   }
 
   $('fxV').textContent = {orderbook:'Order book', estimated:'Estimated', forex:'Forex'}[r.source];
-  $('fxSrc').textContent = r.source==='estimated'
+  setTxt('fxSrc', r.source==='estimated'
     ? 'spot + assumed premium'
-    : (fxSource ? fxSource+' · '+new Date(fxAt).toLocaleTimeString() : 'offline — fallback');
-  $('fxSrc').style.color = r.source==='estimated' ? 'var(--warn)' : (fxSource?'':'var(--stop)');
+    : (fxSource ? fxSource+' · '+new Date(fxAt).toLocaleTimeString() : 'offline — fallback'));
+  setStyle('fxSrc','color', r.source==='estimated' ? 'var(--warn)' : (fxSource?'':'var(--stop)'));
   renderRateSheet(r,m);
 }
 function renderRateSheet(r,m){
@@ -2096,9 +2086,9 @@ async function refresh(){
   try{
     sol=(await conn.getBalance(pubkey))/1e9;
     $('solBal').textContent=sol.toFixed(4);
-    $('solWarn').textContent = sol<0.001 ? '⚠ too low to send' : 'ok for fees';
-    $('solWarn').style.color = sol<0.001 ? 'var(--stop)' : '';
-  }catch(e){ $('solBal').textContent='?';$('solWarn').textContent='RPC error' }
+    setTxt('solWarn', sol<0.001 ? '⚠ too low to send' : 'ok for fees');
+    setStyle('solWarn','color', sol<0.001 ? 'var(--stop)' : '');
+  }catch(e){ setTxt('solBal','?'); setTxt('solWarn','RPC error') }
   try{
     const r=await conn.getParsedTokenAccountsByOwner(pubkey,{mint:new W3.PublicKey(USDC_MINT)});
     usdc = r.value.length ? Number(r.value[0].account.data.parsed.info.tokenAmount.uiAmount||0) : 0;
@@ -2644,10 +2634,7 @@ function flipUnit(){
 function renderPad(){
   const m=mkBy(SEL), r=rate(m), n=parseFloat(padVal||'0')||0;
   const isFiat=padUnit==='fiat';
-  $('payAmtBig').querySelector('.cur').textContent = isFiat ? m.sym.trim() : '
-</body>
-</html>
-;
+  $('payAmtBig').querySelector('.cur').textContent = isFiat ? m.sym.trim() : '$';
   $('payAmtTxt').textContent = padVal===''?'0':padVal;
   $('payAmtBig').classList.toggle('zero', n<=0);
   $('payAlt').textContent = isFiat
@@ -2707,7 +2694,7 @@ function syncPayModes(){
   $('payModes').style.display = showTabs?'':'none';
   if(!showTabs && payMode!=='scan') setPayMode('scan');
   const m=mkBy(SEL);
-  $('hintTxt').textContent = `Ask the vendor for the bill amount only. Don't ask for a QR yet.`;
+  setTxt('hintTxt', `Ask the vendor for the bill amount only. Don't ask for a QR yet.`);
   $('camCap').textContent = `Now scan the ${m.r==='—'?'':m.r.split(' · ')[0]+' '}QR`;
   padVal=''; renderPad();
 }
@@ -2846,10 +2833,7 @@ function renderFloat(){
                         : 'Instant payments available';
     t.style.color = low ? 'var(--stop)' : '';
   }
-  const v=$('floatVal'); if(v) v.textContent = '
-</body>
-</html>
-+fmt(FLOAT_AVAIL,0);
+  const v=$('floatVal'); if(v) v.textContent = '$'+fmt(FLOAT_AVAIL,0);
 }
 function drawFloatSheet(){
   const m=mkBy(SEL);
@@ -3039,7 +3023,7 @@ function applyCompliance(){
   /* labels that follow the selected market */
   $('setCur').textContent = m.label||m.cur;
   $('ctyChip').innerHTML = flag(m.cc,16)+'<span>'+m.n+' · '+(m.r==='—'?m.cur:m.r.split(' · ')[0])+'</span>';
-  $('capTxt').textContent = UNVERIFIED_CAP+' USDC';
+  setTxt('capTxt', UNVERIFIED_CAP+' USDC');
   $('limitNum').textContent = UNVERIFIED_CAP;
   const ind=mkBy('IN');
   $('indiaIcon').innerHTML = flag('IN',30);
@@ -3154,7 +3138,6 @@ $('capIn').value=CAP; $('rpcIn').value=RPC===DEFAULT_RPC?'':RPC;
 
 drawCur(); drawTDS(); drawFlow(); applyCompliance(); renderPad(); renderFloat(); drawFloatSheet(); renderFX(); loadFX();
 setInterval(loadFX, 120000);
-
 </script>
 </body>
 </html>

@@ -5,6 +5,11 @@
 const C = MooCore;
 const W3 = window.solanaWeb3;
 const $ = id => document.getElementById(id);
+/* Writing to an element the markup no longer has used to throw and kill the
+   rest of the boot sequence. These no-op instead, so a design change can drop
+   an element without silently disabling unrelated features. */
+const setTxt   = (id, v)    => { const e = $(id); if (e) e.textContent = v; return !!e };
+const setStyle = (id, k, v) => { const e = $(id); if (e) e.style[k] = v; };
 
 /* ── on-chain constants ── */
 const USDC_MINT   = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -137,10 +142,10 @@ function renderFX(){
   }
 
   $('fxV').textContent = {orderbook:'Order book', estimated:'Estimated', forex:'Forex'}[r.source];
-  $('fxSrc').textContent = r.source==='estimated'
+  setTxt('fxSrc', r.source==='estimated'
     ? 'spot + assumed premium'
-    : (fxSource ? fxSource+' · '+new Date(fxAt).toLocaleTimeString() : 'offline — fallback');
-  $('fxSrc').style.color = r.source==='estimated' ? 'var(--warn)' : (fxSource?'':'var(--stop)');
+    : (fxSource ? fxSource+' · '+new Date(fxAt).toLocaleTimeString() : 'offline — fallback'));
+  setStyle('fxSrc','color', r.source==='estimated' ? 'var(--warn)' : (fxSource?'':'var(--stop)'));
   renderRateSheet(r,m);
 }
 function renderRateSheet(r,m){
@@ -294,9 +299,9 @@ async function refresh(){
   try{
     sol=(await conn.getBalance(pubkey))/1e9;
     $('solBal').textContent=sol.toFixed(4);
-    $('solWarn').textContent = sol<0.001 ? '⚠ too low to send' : 'ok for fees';
-    $('solWarn').style.color = sol<0.001 ? 'var(--stop)' : '';
-  }catch(e){ $('solBal').textContent='?';$('solWarn').textContent='RPC error' }
+    setTxt('solWarn', sol<0.001 ? '⚠ too low to send' : 'ok for fees');
+    setStyle('solWarn','color', sol<0.001 ? 'var(--stop)' : '');
+  }catch(e){ setTxt('solBal','?'); setTxt('solWarn','RPC error') }
   try{
     const r=await conn.getParsedTokenAccountsByOwner(pubkey,{mint:new W3.PublicKey(USDC_MINT)});
     usdc = r.value.length ? Number(r.value[0].account.data.parsed.info.tokenAmount.uiAmount||0) : 0;
@@ -902,7 +907,7 @@ function syncPayModes(){
   $('payModes').style.display = showTabs?'':'none';
   if(!showTabs && payMode!=='scan') setPayMode('scan');
   const m=mkBy(SEL);
-  $('hintTxt').textContent = `Ask the vendor for the bill amount only. Don't ask for a QR yet.`;
+  setTxt('hintTxt', `Ask the vendor for the bill amount only. Don't ask for a QR yet.`);
   $('camCap').textContent = `Now scan the ${m.r==='—'?'':m.r.split(' · ')[0]+' '}QR`;
   padVal=''; renderPad();
 }
@@ -1231,7 +1236,7 @@ function applyCompliance(){
   /* labels that follow the selected market */
   $('setCur').textContent = m.label||m.cur;
   $('ctyChip').innerHTML = flag(m.cc,16)+'<span>'+m.n+' · '+(m.r==='—'?m.cur:m.r.split(' · ')[0])+'</span>';
-  $('capTxt').textContent = UNVERIFIED_CAP+' USDC';
+  setTxt('capTxt', UNVERIFIED_CAP+' USDC');
   $('limitNum').textContent = UNVERIFIED_CAP;
   const ind=mkBy('IN');
   $('indiaIcon').innerHTML = flag('IN',30);

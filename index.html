@@ -697,23 +697,26 @@ input,select{font-family:inherit}
 
   <div style="margin:4px 0 16px">
     <h1 style="font-size:28px;display:flex;align-items:center;gap:8px">The Pasture 🌿</h1>
-    <div style="font-size:14.5px;font-weight:700;opacity:.7;margin-top:3px">Earn yield on your idle USDC</div>
+    <div style="font-size:14.5px;font-weight:700;opacity:.7;margin-top:3px">Put idle USDC to work settling ramps</div>
   </div>
 
-  <!-- Hero APY Card -->
+  <div class="note warn" style="margin-bottom:14px"><b>Preview — not accepting deposits.</b>
+    The numbers below are modelled from real volume so you can see the economics.</div>
+
+  <!-- Hero rate card -->
   <div class="card grass" style="box-shadow:var(--sh-lg);text-align:left;padding:22px">
-    <div class="lbl" style="color:rgba(255,255,255,.8);font-size:13px">Current APY</div>
-    <div style="font-family:var(--disp);font-size:62px;font-weight:800;color:var(--lime);line-height:.95;margin:4px 0 10px">4.85%</div>
-    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.85)">Paid daily · No lock-up</div>
+    <div class="lbl" style="color:rgba(255,255,255,.8);font-size:13px">Trailing 30-day rate</div>
+    <div style="font-family:var(--disp);font-size:62px;font-weight:800;color:var(--lime);line-height:.95;margin:4px 0 10px">8.95%</div>
+    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.85)">Variable &middot; Not a promise &middot; Capital at risk</div>
   </div>
 
   <!-- Staked Card -->
   <div class="card" style="background:#FFFDF6;box-shadow:var(--sh);padding:18px;margin-bottom:14px">
-    <div class="lbl" style="font-size:12px;font-weight:700;margin-bottom:4px">Your staked:</div>
+    <div class="lbl" style="font-size:12px;font-weight:700;margin-bottom:4px">Your position:</div>
     <div style="font-family:var(--disp);font-size:26px;font-weight:800;color:var(--hide);margin-bottom:14px">$0.00 <span style="font-size:17px;opacity:.65;font-weight:700">≈ ₹0</span></div>
     <div class="row">
-      <button class="btn lime" style="font-weight:800" onclick="op('sh-howpool')">+ Stake</button>
-      <button class="btn" style="font-weight:800;background:#FFFDF6" onclick="op('sh-howpool')">Unstake</button>
+      <button class="btn lime" style="font-weight:800" onclick="op('sh-howpool')">How it works</button>
+      <button class="btn" style="font-weight:800;background:#FFFDF6" onclick="op('sh-howpool')">Risks</button>
     </div>
   </div>
 
