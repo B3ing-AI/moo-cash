@@ -187,8 +187,8 @@ input,select{font-family:inherit}
 #reader video{width:100%;height:100%;object-fit:cover;display:block}
 #reader canvas{display:none}
 #reader .ov{position:absolute;inset:0;pointer-events:none}
-#reader .fr{position:absolute;inset:17%}
-#reader .c{position:absolute;width:34px;height:34px;border:4px solid var(--lime)}
+#reader .fr{position:absolute;inset:16%;border:2px solid rgba(255,255,255,.45);border-radius:18px}
+#reader .c{position:absolute;width:24px;height:24px;border:4.5px solid var(--lime)}
 #reader .c1{top:0;left:0;border-right:none;border-bottom:none;border-radius:13px 0 0 0}
 #reader .c2{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 13px 0 0}
 #reader .c3{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 13px}
@@ -310,35 +310,28 @@ input,select{font-family:inherit}
 #ctyChip{display:inline-flex;align-items:center;gap:6px}
 #ctyChip .flagwrap{border-width:1.5px}
 
-/* ── ONBOARDING HERO & DESIGN ── */
-#onboard{position:fixed;inset:0;z-index:100;overflow-y:auto;display:none}
+/* ── ONBOARDING HERO & DESIGN (Screen 6) ── */
+#onboard{position:fixed;inset:0;z-index:100;overflow-y:auto;display:none;background:var(--milk)}
 #onboard.on{display:block}
-.ob{min-height:100vh;display:none;flex-direction:column;padding:34px 20px 30px}
+.ob{min-height:100vh;display:none;flex-direction:column}
 .ob.on{display:flex}
-#obLogin{background:linear-gradient(175deg, #2E8540 0%, #20632F 60%, #164621 100%)}
-#obRegion{background:var(--milk)}
-.ob .inner{max-width:440px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column}
-.hero{font-family:var(--disp);font-weight:800;font-size:48px;line-height:.93;letter-spacing:-.045em;color:var(--hide)}
-#obLogin .hero{color:#FFFDF6}
-.hero .it{font-style:italic;font-size:36px;letter-spacing:-.03em;display:block;margin-top:2px;color:var(--lime)}
-.hero .pop{display:inline-block;color:var(--butter);text-shadow:3px 3px 0 var(--hide);margin-top:4px}
-.herosub{font-size:15px;font-weight:700;line-height:1.5;color:rgba(255,255,255,.85);margin-top:14px;max-width:340px}
-.heroart{flex:1;display:grid;place-items:center;padding:18px 0;min-height:210px}
-.heroart svg{width:100%;max-width:310px;height:auto;animation:heroFloat 4.5s ease-in-out infinite alternate}
-@keyframes heroFloat{0%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(1.2deg)}100%{transform:translateY(4px) rotate(-1deg)}}
+.ob-top{background:linear-gradient(175deg, #2E8540 0%, #20632F 60%, #164621 100%);padding:36px 20px 28px;text-align:center;color:#fff;border-bottom:3px solid var(--hide);box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.ob-trust{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.ob-trust .chip{background:rgba(255,255,255,.15);border:1.8px solid rgba(255,255,255,.45);color:#fff;font-size:11.5px;padding:5px 10px;box-shadow:none}
+.ob-mascot{width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.18);border:2.5px solid rgba(255,255,255,.5);display:grid;place-items:center;margin:0 auto 16px;box-shadow:0 0 24px rgba(158,227,68,.35)}
+.ob-mascot svg{width:82px;height:82px}
+.ob-title{font-family:var(--disp);font-weight:800;font-size:44px;line-height:.92;letter-spacing:-.03em;color:#fff;margin-bottom:2px}
+.ob-title .pop{color:var(--lime);display:block;margin-top:2px}
+.ob-desc{font-size:14.5px;font-weight:700;line-height:1.55;color:rgba(255,255,255,.9);max-width:330px;margin:12px auto 0}
+.ob-bottom{padding:26px 20px 36px;max-width:440px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:11px}
 
-.hero-sparkle{animation:sparkleTwinkle 2.5s ease-in-out infinite alternate}
-.hero-sparkle.d2{animation-delay:.8s}
-.hero-sparkle.d3{animation-delay:1.6s}
-@keyframes sparkleTwinkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}
+/* Corridor & Settings row styling */
+.corridor-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:2px dashed rgba(28,26,23,.13);cursor:pointer;transition:transform .12s}
+.corridor-row:hover{transform:translateX(3px)}
+.corridor-row:last-child{border-bottom:none}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:2px dashed rgba(28,26,23,.13);cursor:pointer;transition:background .15s}
+.settings-row:last-child{border-bottom:none}
 
-.flame-anim{animation:flameFlicker .4s ease-in-out infinite alternate}
-@keyframes flameFlicker{0%{transform:scaleY(1)}100%{transform:scaleY(1.2) scaleX(.9)}}
-
-.trustrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.trustrow .chip{background:rgba(255,255,255,.9);border-color:var(--hide);color:var(--hide)}
-.ob .cta{margin-top:auto;padding-top:18px}
-.regionlist{margin:16px 0 4px;max-height:none}
 .rgrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border:var(--bd);border-radius:var(--r-sm);
   box-shadow:var(--sh);background:var(--white);margin-bottom:11px;cursor:pointer;transition:transform .12s}
 .rgrow:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--hide)}
@@ -352,37 +345,27 @@ input,select{font-family:inherit}
   display:grid;place-items:center;background:var(--white)}
 .rgrow.sel .rd{background:var(--hide)}
 .rgrow.sel .rd svg{width:14px;height:14px;stroke:var(--lime);fill:none;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
-.tnc{font-size:12px;font-weight:700;opacity:.75;text-align:center;margin-top:12px;line-height:1.5}
+.tnc{font-size:12px;font-weight:700;opacity:.75;text-align:center;margin-top:10px;line-height:1.5}
 .tnc a{color:inherit;text-decoration:underline;font-weight:800}
 
 /* ── Keypad pay ── */
-.hintbar{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--white);border:var(--bd);
-  border-radius:var(--r-sm);box-shadow:var(--sh-sm);cursor:pointer;font-size:13px;font-weight:700;line-height:1.45;transition:transform .12s}
-.hintbar:hover{transform:translate(-1px,-1px);box-shadow:3.5px 3.5px 0 var(--hide)}
-.hintbar .dot{width:20px;height:20px;border-radius:50%;background:var(--barn);border:2.5px solid var(--hide);flex:none;
-  box-shadow:inset 0 0 0 3px var(--milk)}
-.hintbar span:nth-child(2){flex:1;opacity:.8}
-.hintbar .ch{opacity:.35;font-size:17px}
-.payamt{text-align:center;font-family:var(--disp);font-weight:800;font-size:64px;line-height:1;letter-spacing:-.04em;
-  color:var(--grass);display:flex;align-items:baseline;justify-content:center;gap:2px;transition:color .2s}
-.payamt.zero{color:#A9C4A2}
-.payamt .cur{font-size:38px;opacity:.85}
+.payamt{text-align:center;font-family:var(--disp);font-weight:800;font-size:62px;line-height:1;letter-spacing:-.04em;
+  color:var(--hide);display:flex;align-items:baseline;justify-content:center;gap:4px;margin:8px 0 6px}
+.payamt .cur{font-size:40px;opacity:.9}
 .flipchip{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border:var(--bd);border-radius:var(--pill);
   background:var(--white);box-shadow:var(--sh-sm);font-weight:800;font-size:13.5px;transition:transform .12s}
 .flipchip:hover{transform:translate(-1px,-1px);box-shadow:3.5px 3.5px 0 var(--hide)}
 .flipchip:active{transform:translate(2.5px,2.5px);box-shadow:0 0 0 var(--hide)}
 .flipchip svg{width:16px;height:16px;stroke:var(--hide);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pad button{padding:17px 0;border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh);background:var(--white);
-  font-family:var(--disp);font-weight:700;font-size:23px;transition:transform .1s, box-shadow .1s}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pad button{padding:16px 0;border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh);background:var(--white);
+  font-family:var(--disp);font-weight:800;font-size:24px;transition:transform .1s, box-shadow .1s}
 .pad button:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--hide)}
 .pad button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hide)}
-.pad button.back{background:#C9BDF5}
-.pad button svg{width:22px;height:22px;stroke:var(--hide);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
-.btn.pale2{background:var(--grass-pale)}
+.pad button.back{background:var(--muzzle)}
+.pad button svg{width:22px;height:22px;stroke:var(--hide);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 .orderchip{display:flex;align-items:center;gap:9px;padding:12px 15px;background:var(--butter);border:var(--bd);
   border-radius:var(--r-sm);box-shadow:var(--sh-sm);margin-bottom:14px;font-weight:800;font-size:14px}
-
 </style>
 </head>
 <body>
@@ -393,106 +376,75 @@ input,select{font-family:inherit}
   <path d="M0 120 V102 q12-16 24 0 q12-20 24 0 q12-15 24 0 q12-22 24 0 q12-17 24 0 q12-19 24 0 q12-16 24 0 q12-21 24 0 q12-15 24 0 q12-20 24 0 q12-16 24 0 q12-22 24 0 q12-17 24 0 q12-19 24 0 q12-16 24 0 q12-21 24 0 q12-15 24 0 q12-20 24 0 V120z" fill="#2C7A3E"/>
 </svg>
 
-<!-- ══════════ ONBOARDING ══════════ -->
+<!-- ══════════ ONBOARDING (Screen 6) ══════════ -->
 <div id="onboard" class="on">
 
   <!-- login -->
-  <section class="ob on" id="obLogin"><div class="inner">
-    <div class="hero">SCAN.<br>PAY.<span class="it">ANONYMOUSLY.</span><span class="pop">LEGENDAIRY.</span></div>
-    <div class="herosub">Scan any local payment QR and pay instantly in USDC. No account, no paperwork — the shop just gets paid.</div>
-    <div class="trustrow">
-      <span class="chip">🔒 No signup</span>
-      <span class="chip">🛡️ Shop never sees you</span>
-      <span class="chip">🌍 19+ countries</span>
-    </div>
-
-    <div class="heroart">
-      <svg viewBox="0 0 320 240" aria-label="Cute cow riding a rocket into space">
-        <g stroke="#1C1A17" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-          <!-- background stars / sparkles -->
-          <path class="hero-sparkle" d="M40 50 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 z" fill="#FFCC4D"/>
-          <path class="hero-sparkle d2" d="M280 40 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4 z" fill="#FFCC4D"/>
-          <path class="hero-sparkle d3" d="M290 150 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 z" fill="#FFAEC0"/>
-          <path class="hero-sparkle d2" d="M30 160 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 z" fill="#9EE344"/>
-          
-          <!-- Clouds -->
-          <path d="M25 80 c0-9 8-15 17-12 3-9 17-10 21-1 8-1 13 4 13 10 0 7-5 11-12 11 H38 c-8 0-13-4-13-8 z" fill="#FFFDF6" opacity=".95"/>
-          <path d="M245 190 c0-8 7-13 15-10 3-8 15-9 19-1 7-1 12 4 12 9 0 6-5 10-11 10 H256 c-7 0-11-3-11-8 z" fill="#FFFDF6" opacity=".95"/>
-
-          <!-- Rocket Flames with animation -->
-          <g class="flame-anim">
-            <path d="M96 174 c-18 6 -28 16 -34 30 16 3 30 0 40 -9 z" fill="#E8613C"/>
-            <path d="M108 188 c-12 8 -20 18 -20 32 14 -2 24 -10 30 -22 z" fill="#FFCC4D"/>
-          </g>
-
-          <!-- Rocket Body -->
-          <path d="M115 180 c-8-36 12-76 54-100 36-22 76-26 102-22 5 26 0 66-22 102 -24 42 -64 62 -100 54 -17-4-30-17-34-34 z" fill="#9EE344"/>
-          <!-- Rocket Fins -->
-          <path d="M118 146 c-20-6 -38 3 -48 20 15 10 33 13 48 7 z" fill="#FFAEC0"/>
-          <path d="M172 210 c-5 20 3 38 20 48 10-15 13-33 8-48 z" fill="#FFAEC0"/>
-          <!-- Rocket Window / Porthole -->
-          <circle cx="172" cy="148" r="20" fill="#FFFDF6" stroke-width="3.5"/>
-          <circle cx="172" cy="148" r="14" fill="#CBE9A9"/>
-
-          <!-- Cute Cow Mascot (Upper Body) -->
-          <!-- Cow Ears -->
-          <path d="M170 72 c-9-10 -4-20 4-19 8 1 11 8 11 15 z" fill="#FFFDF6"/>
-          <path d="M172 70 c-4-5 -2-10 2-9 4 1 5 4 5 8 z" fill="#FFAEC0"/>
-          <path d="M226 62 c9-9 18-3 15 6 -3 8 -11 11 -17 9 z" fill="#FFFDF6"/>
-          <path d="M224 63 c4-4 9-1 7 4 -1 4 -5 5 -8 4 z" fill="#FFAEC0"/>
-
-          <!-- Cow Horns -->
-          <path d="M185 58 c-3-8 -8-10 -13-8 2 4 5 9 8 10 z" fill="#FFCC4D"/>
-          <path d="M216 52 c4-7 9-8 13-6 -2 4 -5 9 -8 10 z" fill="#FFCC4D"/>
-
-          <!-- Cow Head -->
-          <ellipse cx="202" cy="85" rx="34" ry="30" fill="#FFFDF6"/>
-          <!-- Cow Spots -->
-          <path d="M180 72 c-11 0 -17 8 -16 16 7 5 18 3 20 -4 1-5 -1-12 -4-12 z" fill="#1C1A17" stroke="none"/>
-          <path d="M224 74 c6-1 12 3 11 10 -4 4 -11 2 -13-3 0-4 1-7 2-7 z" fill="#1C1A17" stroke="none"/>
-
-          <!-- Cow Eyes with Highlights -->
-          <circle cx="190" cy="84" r="4.2" fill="#1C1A17" stroke="none"/>
-          <circle cx="191.5" cy="82.5" r="1.4" fill="#FFFDF6" stroke="none"/>
-          <circle cx="216" cy="84" r="4.2" fill="#1C1A17" stroke="none"/>
-          <circle cx="217.5" cy="82.5" r="1.4" fill="#FFFDF6" stroke="none"/>
-
-          <!-- Pink Snout & Smile -->
-          <ellipse cx="204" cy="102" rx="18" ry="12" fill="#FFAEC0"/>
-          <circle cx="198" cy="100" r="2.6" fill="#1C1A17" stroke="none"/>
-          <circle cx="210" cy="100" r="2.6" fill="#1C1A17" stroke="none"/>
-          <path d="M200 106 Q204 109 208 106" stroke="#1C1A17" stroke-width="2" stroke-linecap="round" fill="none"/>
-
-          <!-- Cow Body & Hero Scarf -->
-          <path d="M186 114 c-10 12 -12 28 -5 40 16 10 38 8 50 -6 8-10 8-24 0-34 z" fill="#FFFDF6"/>
-          <!-- Scarf waving -->
-          <path d="M182 120 c12 10 34 12 50 3" fill="none" stroke="#E8613C" stroke-width="8"/>
-        </g>
+  <section class="ob on" id="obLogin">
+    <div class="ob-top">
+      <div class="ob-trust">
+        <span class="chip">🔒 No signup</span>
+        <span class="chip">🛡️ Shop never sees you</span>
+        <span class="chip">🌍 19+ countries</span>
+      </div>
+      <div class="ob-mascot">
+        <svg viewBox="0 0 48 48" style="width:100%;height:100%">
+        <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
+        <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M14 19 C8 17, 4 21, 6 26 C10 27, 13 24, 15 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M12 21 C8 20, 6 23, 8 25 C10 25, 12 24, 13 22 Z" fill="#FFAEC0"/>
+        <path d="M34 19 C40 17, 44 21, 42 26 C38 27, 35 24, 33 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M36 21 C40 20, 42 23, 40 25 C38 25, 36 24, 35 22 Z" fill="#FFAEC0"/>
+        <path d="M14 20 C14 13, 34 13, 34 20 C35 26, 36 32, 34 36 C30 40, 18 40, 14 36 C12 32, 13 26, 14 20 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M26 14 C30 14, 33 16, 34 20 C31 22, 28 21, 26 18 Z" fill="#1C1A17"/>
+        <path d="M13 22 C12 26, 15 31, 19 30 C21 27, 20 22, 18 21 C15 20, 13 20, 13 22 Z" fill="#1C1A17"/>
+        <path d="M32 28 C34 29, 35 32, 34 34 C33 34, 32 32, 31 30 Z" fill="#1C1A17"/>
+        <circle cx="17.5" cy="25" r="2.2" fill="#FFFDF6"/>
+        <circle cx="17.5" cy="25" r="1.6" fill="#1C1A17"/>
+        <circle cx="18.1" cy="24.4" r="0.6" fill="#FFFDF6"/>
+        <circle cx="30.5" cy="25" r="2.2" fill="#1C1A17"/>
+        <circle cx="31.2" cy="24.4" r="0.7" fill="#FFFDF6"/>
+        <ellipse cx="24" cy="33" rx="8.5" ry="5.5" fill="#FFAEC0" stroke="#1C1A17" stroke-width="2.2"/>
+        <circle cx="21.2" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <circle cx="26.8" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <path d="M21.5 35 Q24 37 26.5 35" stroke="#1C1A17" stroke-width="1.6" stroke-linecap="round" fill="none"/>
       </svg>
+      </div>
+      <div class="ob-title">
+        Scan. Pay.
+        <span class="pop">Legendairy.</span>
+      </div>
+      <div class="ob-desc">
+        Scan any local QR code and pay instantly in USDC. Merchants get local cash.
+      </div>
     </div>
 
-    <div class="cta">
-      <button class="btn" style="background:var(--milk)" onclick="obNext()">Log in →</button>
-      <div class="tnc" style="opacity:.75">Non-custodial. Your key never leaves your device.</div>
+    <div class="ob-bottom">
+      <button class="btn butter" style="padding:15px;font-size:17px;box-shadow:var(--sh)" onclick="obFinish();op('sh-email')">✉️ Continue with email</button>
+      <button class="btn" style="padding:14px;font-size:16px;box-shadow:var(--sh);background:#FFFDF6" onclick="obFinish();connect()">Connect existing wallet</button>
+      <div class="tnc">Non-custodial. Your key never leaves your device.</div>
     </div>
-  </div></section>
+  </section>
 
   <!-- region -->
-  <section class="ob" id="obRegion"><div class="inner">
-    <h1 style="font-size:32px;letter-spacing:-.03em">Where do we pay out?</h1>
-    <div style="font-size:14.5px;font-weight:700;opacity:.65;margin-top:7px">Pick where your merchant gets local cash.</div>
-    <div class="regionlist" id="regionList"></div>
-    <div class="cta">
-      <button class="btn dark" id="obGo" onclick="obFinish()">Continue →</button>
-      <div class="tnc">By continuing, you agree to our
-        <a href="https://www.p2p.lol/tnc" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</div>
+  <section class="ob" id="obRegion" style="padding:34px 20px 30px">
+    <div style="max-width:440px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column">
+      <h1 style="font-size:32px;letter-spacing:-.03em">Where do we pay out?</h1>
+      <div style="font-size:14.5px;font-weight:700;opacity:.65;margin-top:7px">Pick where your merchant gets local cash.</div>
+      <div class="regionlist" id="regionList" style="margin:16px 0 4px"></div>
+      <div style="margin-top:auto;padding-top:18px">
+        <button class="btn dark" id="obGo" onclick="obFinish()">Continue →</button>
+        <div class="tnc">By continuing, you agree to our
+          <a href="https://www.p2p.lol/tnc" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</div>
+      </div>
     </div>
-  </div></section>
+  </section>
 </div>
 
 <div id="app">
 
-<!-- ══════ HOME ══════ -->
+<!-- ══════ HOME (Screen 1) ══════ -->
 <section class="screen on" id="s-home">
   <div class="hdr">
     <button class="ib" onclick="op('drawer')" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -527,7 +479,7 @@ input,select{font-family:inherit}
   <!-- not connected -->
   <div id="connectCard" class="card cream" style="text-align:center">
     <div style="width:72px;height:72px;margin:0 auto 10px;display:grid;place-items:center">
-      <svg viewBox="0 0 48 48" style="width:100%;height:100%;filter:drop-shadow(3px 3px 0 var(--hide))">
+      <svg viewBox="0 0 48 48" style="width:100%;height:100%">
         <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
         <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
         <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
@@ -580,19 +532,19 @@ input,select{font-family:inherit}
       <div class="p2p-bar" onclick="op('sh-rate')" title="In-House P2P Buy & Sell Rates">
         <div class="p2p-col">
           <span class="p2p-lbl buy">BUY</span>
-          <span class="p2p-val" id="p2pBuyVal">&mdash;</span>
+          <span class="p2p-val" id="p2pBuyVal">₹94.20</span>
         </div>
         <div class="p2p-sep"></div>
         <div class="p2p-col">
           <span class="p2p-lbl sell">SELL</span>
-          <span class="p2p-val" id="p2pSellVal">&mdash;</span>
+          <span class="p2p-val" id="p2pSellVal">₹93.50</span>
         </div>
-        <span class="p2p-badge" id="p2pPremBadge">&mdash;</span>
+        <span class="p2p-badge" id="p2pPremBadge">+8.5% Prem</span>
       </div>
 
-      <div class="lbl" style="color:rgba(255,255,255,.8);margin-top:12px">USDC balance</div>
-      <div class="big">$<span id="bW">&mdash;</span><span class="dec">.<span id="bC">--</span></span></div>
-      <div class="sub" id="bLocal">&asymp; &mdash;</div>
+      <div class="lbl" style="color:rgba(255,255,255,.8);margin-top:12px;text-align:center">USDC balance</div>
+      <div class="big" style="text-align:center">$<span id="bW">1,247</span><span class="dec">.<span id="bC">50</span></span></div>
+      <div class="sub" id="bLocal" style="text-align:center">&asymp; &#8377;109,012</div>
       <div class="row" style="margin-top:18px">
         <button class="btn butter" onclick="op('sh-add')">&#8601; Deposit</button>
         <button class="btn pink" onclick="op('sh-send')">&#8599; Withdraw</button>
@@ -618,7 +570,7 @@ input,select{font-family:inherit}
       <div style="display:grid;grid-template-columns:1fr 1fr;divide-x:2.5px solid var(--hide)">
         <div style="padding:14px 16px;border-right:2.5px solid var(--hide)">
           <div class="lbl" style="margin-bottom:3px;font-size:11.5px;font-weight:700">SOL for gas:</div>
-          <div style="font-family:var(--disp);font-size:24px;font-weight:800;line-height:1" id="solBal">&mdash;</div>
+          <div style="font-family:var(--disp);font-size:24px;font-weight:800;line-height:1" id="solBal">0.0234</div>
         </div>
         <div style="padding:14px 16px" onclick="op('sh-rate')" style="cursor:pointer">
           <div class="lbl" style="margin-bottom:3px;font-size:11.5px;font-weight:700">Rate source:</div>
@@ -644,7 +596,7 @@ input,select{font-family:inherit}
   </div>
 </section>
 
-<!-- ══════ PAY ══════ -->
+<!-- ══════ PAY (Screen 2) ══════ -->
 <section class="screen" id="s-pay">
   <div class="hdr">
     <button class="ib" onclick="stopCam();go('s-home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -660,24 +612,23 @@ input,select{font-family:inherit}
 
   <!-- ── amount keypad ── -->
   <div id="payKeypad">
-    <div class="hintbar" onclick="op('sh-payhelp')">
-      <span class="dot"></span>
-      <span id="hintTxt">Ask the vendor for the bill amount only. Don't ask for a QR yet.</span>
-      <span class="ch">›</span>
+    <div class="note info" style="background:var(--lime);border:var(--bd);border-radius:var(--r-sm);box-shadow:var(--sh-sm);font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:18px;color:var(--hide)" onclick="op('sh-payhelp')">
+      <span style="font-size:18px">🔔</span>
+      <span>Ask the vendor for the bill amount first.</span>
     </div>
-    <div style="text-align:center;margin:18px 0 4px;font-weight:800;font-size:14.5px">You're paying</div>
-    <div class="payamt" id="payAmtBig"><span class="cur">₹</span><span id="payAmtTxt">0</span></div>
-    <div style="text-align:center;margin-bottom:16px">
+
+    <div class="payamt" id="payAmtBig"><span class="cur">₹</span><span id="payAmtTxt">500</span></div>
+    <div style="text-align:center;margin-bottom:18px">
       <button class="flipchip" onclick="flipUnit()">
         <svg viewBox="0 0 24 24"><path d="M7 4v13m0 0l-3-3m3 3l3-3M17 20V7m0 0l3 3m-3-3l-3 3"/></svg>
-        <span id="payAlt">≈ 0 USDC</span></button>
+        <span id="payAlt">≈ 5.30 USDC at ₹94.20</span></button>
     </div>
     <div class="pad" id="pad"></div>
-    <div class="row" style="margin:10px 0 14px">
-      <button class="btn barn" onclick="padMax()">Max</button>
-      <button class="btn pale2" onclick="padKey('clear')">Clear</button>
+    
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+      <button class="btn dark" id="placeBtn" style="padding:15px;font-size:16.5px" onclick="placeOrder()">Place Order →</button>
+      <button class="btn" style="padding:14px;font-size:16px;background:var(--white)" onclick="toggleCam()">📷 Scan QR</button>
     </div>
-    <button class="btn dark" id="placeBtn" onclick="placeOrder()" disabled>Place Order →</button>
     <div id="payQuote"></div>
   </div>
 
@@ -712,15 +663,77 @@ input,select{font-family:inherit}
   </div>
 </section>
 
-<!-- ══════ EARN ══════ -->
+<!-- ══════ EARN / THE PASTURE (Screen 3) ══════ -->
 <section class="screen" id="s-earn">
-  <div class="hdr"><h1>The pasture</h1><button class="ib" onclick="op('sh-howpool')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-5M12 8.2v.01"/></svg></button></div>
-  <div class="note live"><b>Not live.</b> Staking moves other people's money and is almost certainly a regulated product where you'd operate. The screen below is a model, wired to real numbers, so you can see the economics — it does not accept deposits.</div>
-  <div class="card grass">
-    <div class="lbl" style="color:rgba(255,255,255,.7)">Modelled position</div>
-    <div class="big">$<span id="pStake">10,200</span><span class="dec">.00</span></div>
-    <div class="sub">= <span id="pShare">0.4113</span>% of the pasture</div>
+  <div class="hdr">
+    <button class="ib" onclick="op('drawer')" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="brand" onclick="go('s-home')">
+      <svg class="mk" viewBox="0 0 48 48" aria-label="moo.cash logo">
+        <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
+        <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M14 19 C8 17, 4 21, 6 26 C10 27, 13 24, 15 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M12 21 C8 20, 6 23, 8 25 C10 25, 12 24, 13 22 Z" fill="#FFAEC0"/>
+        <path d="M34 19 C40 17, 44 21, 42 26 C38 27, 35 24, 33 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M36 21 C40 20, 42 23, 40 25 C38 25, 36 24, 35 22 Z" fill="#FFAEC0"/>
+        <path d="M14 20 C14 13, 34 13, 34 20 C35 26, 36 32, 34 36 C30 40, 18 40, 14 36 C12 32, 13 26, 14 20 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M26 14 C30 14, 33 16, 34 20 C31 22, 28 21, 26 18 Z" fill="#1C1A17"/>
+        <path d="M13 22 C12 26, 15 31, 19 30 C21 27, 20 22, 18 21 C15 20, 13 20, 13 22 Z" fill="#1C1A17"/>
+        <path d="M32 28 C34 29, 35 32, 34 34 C33 34, 32 32, 31 30 Z" fill="#1C1A17"/>
+        <circle cx="17.5" cy="25" r="2.2" fill="#FFFDF6"/>
+        <circle cx="17.5" cy="25" r="1.6" fill="#1C1A17"/>
+        <circle cx="18.1" cy="24.4" r="0.6" fill="#FFFDF6"/>
+        <circle cx="30.5" cy="25" r="2.2" fill="#1C1A17"/>
+        <circle cx="31.2" cy="24.4" r="0.7" fill="#FFFDF6"/>
+        <ellipse cx="24" cy="33" rx="8.5" ry="5.5" fill="#FFAEC0" stroke="#1C1A17" stroke-width="2.2"/>
+        <circle cx="21.2" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <circle cx="26.8" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <path d="M21.5 35 Q24 37 26.5 35" stroke="#1C1A17" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="wordmark">moo.cash</span>
+    </div>
+    <button class="btn grass sm" style="width:auto;padding:8px 16px;font-size:13.5px;box-shadow:var(--sh-sm);font-weight:800;border-radius:var(--pill)" onclick="op('sh-recv')">Receive &darr;</button>
   </div>
+
+  <div style="margin:4px 0 16px">
+    <h1 style="font-size:28px;display:flex;align-items:center;gap:8px">The Pasture 🌿</h1>
+    <div style="font-size:14.5px;font-weight:700;opacity:.7;margin-top:3px">Earn yield on your idle USDC</div>
+  </div>
+
+  <!-- Hero APY Card -->
+  <div class="card grass" style="box-shadow:var(--sh-lg);text-align:left;padding:22px">
+    <div class="lbl" style="color:rgba(255,255,255,.8);font-size:13px">Current APY</div>
+    <div style="font-family:var(--disp);font-size:62px;font-weight:800;color:var(--lime);line-height:.95;margin:4px 0 10px">4.85%</div>
+    <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.85)">Paid daily · No lock-up</div>
+  </div>
+
+  <!-- Staked Card -->
+  <div class="card" style="background:#FFFDF6;box-shadow:var(--sh);padding:18px;margin-bottom:14px">
+    <div class="lbl" style="font-size:12px;font-weight:700;margin-bottom:4px">Your staked:</div>
+    <div style="font-family:var(--disp);font-size:26px;font-weight:800;color:var(--hide);margin-bottom:14px">$0.00 <span style="font-size:17px;opacity:.65;font-weight:700">≈ ₹0</span></div>
+    <div class="row">
+      <button class="btn lime" style="font-weight:800" onclick="op('sh-howpool')">+ Stake</button>
+      <button class="btn" style="font-weight:800;background:#FFFDF6" onclick="op('sh-howpool')">Unstake</button>
+    </div>
+  </div>
+
+  <!-- Earnings Card -->
+  <div class="card cream" style="box-shadow:var(--sh);padding:16px 18px;margin-bottom:16px">
+    <div class="lbl" style="font-size:12px;font-weight:800;margin-bottom:10px">Earnings</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:2px dashed rgba(28,26,23,.15)">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800">
+        <span style="font-size:18px">🪙</span> Today
+      </div>
+      <div style="font-family:var(--disp);font-size:18px;font-weight:800">$0.00</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 2px">
+      <div style="display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800">
+        <span style="font-size:18px">🏆</span> All-time
+      </div>
+      <div style="font-family:var(--disp);font-size:18px;font-weight:800">$0.00</div>
+    </div>
+  </div>
+
   <div class="grid2">
     <div class="stat"><div class="k">Pasture size</div><div class="v">$2.48M</div><div class="d">total staked</div></div>
     <div class="stat"><div class="k">30d volume</div><div class="v">$14.6M</div><div class="d">ramped</div></div>
@@ -730,9 +743,113 @@ input,select{font-family:inherit}
   <div class="note risk"><b>Risks.</b> Returns vary and can be zero. Principal is not protected. Withdrawals queue behind capital mid-settlement. This is not a deposit and is not insured.</div>
 </section>
 
-<!-- ══════ WORLD ══════ -->
+<!-- ══════ WORLD / GRAZING GROUNDS (Screen 4) ══════ -->
 <section class="screen" id="s-world">
-  <div class="hdr"><h1>Grazing grounds</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="hdr">
+    <button class="ib" onclick="op('drawer')" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="brand" onclick="go('s-home')">
+      <svg class="mk" viewBox="0 0 48 48" aria-label="moo.cash logo">
+        <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
+        <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M14 19 C8 17, 4 21, 6 26 C10 27, 13 24, 15 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M12 21 C8 20, 6 23, 8 25 C10 25, 12 24, 13 22 Z" fill="#FFAEC0"/>
+        <path d="M34 19 C40 17, 44 21, 42 26 C38 27, 35 24, 33 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M36 21 C40 20, 42 23, 40 25 C38 25, 36 24, 35 22 Z" fill="#FFAEC0"/>
+        <path d="M14 20 C14 13, 34 13, 34 20 C35 26, 36 32, 34 36 C30 40, 18 40, 14 36 C12 32, 13 26, 14 20 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M26 14 C30 14, 33 16, 34 20 C31 22, 28 21, 26 18 Z" fill="#1C1A17"/>
+        <path d="M13 22 C12 26, 15 31, 19 30 C21 27, 20 22, 18 21 C15 20, 13 20, 13 22 Z" fill="#1C1A17"/>
+        <path d="M32 28 C34 29, 35 32, 34 34 C33 34, 32 32, 31 30 Z" fill="#1C1A17"/>
+        <circle cx="17.5" cy="25" r="2.2" fill="#FFFDF6"/>
+        <circle cx="17.5" cy="25" r="1.6" fill="#1C1A17"/>
+        <circle cx="18.1" cy="24.4" r="0.6" fill="#FFFDF6"/>
+        <circle cx="30.5" cy="25" r="2.2" fill="#1C1A17"/>
+        <circle cx="31.2" cy="24.4" r="0.7" fill="#FFFDF6"/>
+        <ellipse cx="24" cy="33" rx="8.5" ry="5.5" fill="#FFAEC0" stroke="#1C1A17" stroke-width="2.2"/>
+        <circle cx="21.2" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <circle cx="26.8" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <path d="M21.5 35 Q24 37 26.5 35" stroke="#1C1A17" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="wordmark">moo.cash</span>
+    </div>
+    <button class="btn grass sm" style="width:auto;padding:8px 16px;font-size:13.5px;box-shadow:var(--sh-sm);font-weight:800;border-radius:var(--pill)" onclick="op('sh-recv')">Receive &darr;</button>
+  </div>
+
+  <div style="margin:4px 0 16px">
+    <h1 style="font-size:28px;display:flex;align-items:center;gap:8px">Grazing Grounds 🌍</h1>
+    <div style="font-size:14.5px;font-weight:700;opacity:.7;margin-top:3px">Live P2P rates by corridor</div>
+  </div>
+
+  <!-- Corridor Rates Card -->
+  <div class="card" style="background:#FFFDF6;box-shadow:var(--sh);padding:8px 18px;margin-bottom:14px">
+    <!-- India -->
+    <div class="corridor-row" onclick="setMk('IN');go('s-home')">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="font-size:22px">🇮🇳</span>
+        <span style="font-weight:800;font-size:15px">India · UPI</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--disp);font-size:17px;font-weight:800">₹94.20</div>
+        <div class="chip ok" style="font-size:10.5px;padding:2px 7px">+8.5% prem</div>
+      </div>
+    </div>
+    <!-- Brazil -->
+    <div class="corridor-row" onclick="setMk('BR');go('s-home')">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="font-size:22px">🇧🇷</span>
+        <span style="font-weight:800;font-size:15px">Brazil · Pix</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--disp);font-size:17px;font-weight:800">R$5.72</div>
+        <div class="chip ok" style="font-size:10.5px;padding:2px 7px">+3.2%</div>
+      </div>
+    </div>
+    <!-- Cambodia -->
+    <div class="corridor-row" onclick="setMk('KH');go('s-home')">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="font-size:22px">🇰🇭</span>
+        <span style="font-weight:800;font-size:15px">Cambodia · KHQR</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--disp);font-size:17px;font-weight:800">$1.00</div>
+        <div class="chip" style="font-size:10.5px;padding:2px 7px">par</div>
+      </div>
+    </div>
+    <!-- Indonesia -->
+    <div class="corridor-row" onclick="setMk('ID');go('s-home')">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="font-size:22px">🇮🇩</span>
+        <span style="font-weight:800;font-size:15px">Indonesia · QRIS</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--disp);font-size:17px;font-weight:800">Rp15,920</div>
+        <div class="chip warn" style="font-size:10.5px;padding:2px 7px">+1.1%</div>
+      </div>
+    </div>
+    <!-- Philippines -->
+    <div class="corridor-row" onclick="setMk('PH');go('s-home')">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="font-size:22px">🇵🇭</span>
+        <span style="font-weight:800;font-size:15px">Philippines · QR Ph</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--disp);font-size:17px;font-weight:800">₱58.40</div>
+        <div class="chip ok" style="font-size:10.5px;padding:2px 7px">+2.8%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payout destination card -->
+  <div class="card pale" style="box-shadow:var(--sh-sm);display:flex;align-items:center;justify-content:space-between;padding:14px 18px;margin-bottom:16px">
+    <div>
+      <div class="lbl" style="margin:0 0 2px">Currently paying out to:</div>
+      <div style="font-weight:800;font-size:15px;display:flex;align-items:center;gap:7px">
+        <span>🇮🇳</span> <span>India · UPI</span>
+      </div>
+    </div>
+    <button class="btn sm" style="background:#FFFDF6;box-shadow:var(--sh-sm);font-weight:800" onclick="op('sh-cur')">Change</button>
+  </div>
+
   <div class="grid2">
     <div class="stat"><div class="k">Live markets</div><div class="v" id="wLive">15</div><div class="d">modelled</div></div>
     <div class="stat"><div class="k">Rails</div><div class="v" id="wRails">12</div><div class="d">QR + mobile money</div></div>
@@ -769,39 +886,119 @@ input,select{font-family:inherit}
   <div id="tdsVerdict"></div>
 </section>
 
-<!-- ══════ SETTINGS ══════ -->
+<!-- ══════ SETTINGS (Screen 5) ══════ -->
 <section class="screen" id="s-set">
-  <div class="hdr"><h1>Settings</h1><button class="ib" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+  <div class="hdr">
+    <button class="ib" onclick="op('drawer')" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="brand" onclick="go('s-home')">
+      <svg class="mk" viewBox="0 0 48 48" aria-label="moo.cash logo">
+        <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
+        <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M14 19 C8 17, 4 21, 6 26 C10 27, 13 24, 15 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M12 21 C8 20, 6 23, 8 25 C10 25, 12 24, 13 22 Z" fill="#FFAEC0"/>
+        <path d="M34 19 C40 17, 44 21, 42 26 C38 27, 35 24, 33 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M36 21 C40 20, 42 23, 40 25 C38 25, 36 24, 35 22 Z" fill="#FFAEC0"/>
+        <path d="M14 20 C14 13, 34 13, 34 20 C35 26, 36 32, 34 36 C30 40, 18 40, 14 36 C12 32, 13 26, 14 20 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M26 14 C30 14, 33 16, 34 20 C31 22, 28 21, 26 18 Z" fill="#1C1A17"/>
+        <path d="M13 22 C12 26, 15 31, 19 30 C21 27, 20 22, 18 21 C15 20, 13 20, 13 22 Z" fill="#1C1A17"/>
+        <path d="M32 28 C34 29, 35 32, 34 34 C33 34, 32 32, 31 30 Z" fill="#1C1A17"/>
+        <circle cx="17.5" cy="25" r="2.2" fill="#FFFDF6"/>
+        <circle cx="17.5" cy="25" r="1.6" fill="#1C1A17"/>
+        <circle cx="18.1" cy="24.4" r="0.6" fill="#FFFDF6"/>
+        <circle cx="30.5" cy="25" r="2.2" fill="#1C1A17"/>
+        <circle cx="31.2" cy="24.4" r="0.7" fill="#FFFDF6"/>
+        <ellipse cx="24" cy="33" rx="8.5" ry="5.5" fill="#FFAEC0" stroke="#1C1A17" stroke-width="2.2"/>
+        <circle cx="21.2" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <circle cx="26.8" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <path d="M21.5 35 Q24 37 26.5 35" stroke="#1C1A17" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="wordmark">moo.cash</span>
+    </div>
+    <button class="btn grass sm" style="width:auto;padding:8px 16px;font-size:13.5px;box-shadow:var(--sh-sm);font-weight:800;border-radius:var(--pill)" onclick="op('sh-recv')">Receive &darr;</button>
+  </div>
+
+  <div style="margin:4px 0 16px">
+    <h1 style="font-size:28px;display:flex;align-items:center;gap:8px">Settings ⚙️</h1>
+  </div>
+
+  <!-- Settings rows card -->
+  <div class="card" style="background:#FFFDF6;box-shadow:var(--sh);padding:6px 18px;margin-bottom:14px">
+    <!-- Wallet address -->
+    <div class="settings-row" onclick="copyAddr()">
+      <div>
+        <div class="lbl" style="margin:0 0 2px">Wallet address</div>
+        <div class="mono" style="font-size:14px;font-weight:800" id="setWalletAddr">Abc1d7...9xY42</div>
+      </div>
+      <button class="btn lime sm" style="padding:6px 14px;font-weight:800">Copy</button>
+    </div>
+
+    <!-- Payout region -->
+    <div class="settings-row" onclick="op('sh-cur')">
+      <div>
+        <div class="lbl" style="margin:0 0 2px">Payout region</div>
+        <div style="font-size:14.5px;font-weight:800" id="setRegionName">🇮🇳 India · UPI</div>
+      </div>
+      <button class="btn butter sm" style="padding:6px 14px;font-weight:800">Change &rarr;</button>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-row" onclick="tog('tNotif')">
+      <div>
+        <div class="lbl" style="margin:0 0 2px">Notifications</div>
+        <div style="font-size:14.5px;font-weight:800">Payment alerts</div>
+      </div>
+      <div class="tog on" id="tNotif"><i></i></div>
+    </div>
+
+    <!-- KYC / Limits -->
+    <div class="settings-row" onclick="op('sh-kyc')">
+      <div>
+        <div class="lbl" style="margin:0 0 2px">KYC / Limits</div>
+        <div style="font-size:14.5px;font-weight:800"><span id="setCap">200 USDC</span> · Unverified</div>
+      </div>
+      <button class="btn butter sm" style="padding:6px 14px;font-weight:800">Verify &rarr;</button>
+    </div>
+
+    <!-- Export private key -->
+    <div class="settings-row" onclick="exportKey()">
+      <div>
+        <div class="lbl" style="margin:0 0 2px">Export private key</div>
+        <div style="font-size:14.5px;font-weight:800">Encrypted backup</div>
+      </div>
+      <button class="btn pink sm" style="padding:6px 14px;font-weight:800">Export</button>
+    </div>
+
+    <!-- Disconnect -->
+    <div class="settings-row" style="border-bottom:none" onclick="disconnect()">
+      <div>
+        <div class="lbl" style="margin:0 0 2px">Disconnect</div>
+        <div style="font-size:14.5px;font-weight:800">Clear session</div>
+      </div>
+      <button class="btn sm" style="padding:6px 14px;font-weight:800;background:#FFFDF6">Log out</button>
+    </div>
+  </div>
+
+  <!-- Version Card -->
+  <div class="card cream" style="text-align:center;box-shadow:var(--sh-sm);padding:14px;margin-bottom:14px">
+    <div style="font-size:13px;font-weight:800;opacity:.85">moo.cash v1.0 · Non-custodial · Solana Mainnet</div>
+  </div>
+
   <div class="srow" onclick="op('sh-cur')"><div class="ic">💱</div><div class="lb">Currency</div><div class="val" id="setCur">INR</div><div class="ch">›</div></div>
   <div class="srow" onclick="op('sh-rpc')"><div class="ic">🔗</div><div class="lb">Solana RPC</div><div class="val" id="setRpc">public</div><div class="ch">›</div></div>
-  <div class="srow" onclick="op('sh-cap')"><div class="ic">🛡</div><div class="lb">Send cap</div><div class="val" id="setCap">25 USDC</div><div class="ch">›</div></div>
   <div class="srow" onclick="tog('tHide')"><div class="ic">👁</div><div class="lb">Hide balances</div><div class="tog" id="tHide"><i></i></div></div>
   <div class="srow" onclick="tog('tSim')"><div class="ic">🧪</div><div class="lb">Simulate before send</div><div class="tog on" id="tSim"><i></i></div></div>
-  <div class="srow" onclick="exportKey()"><div class="ic">🔑</div><div class="lb">Export secret key</div><div class="val">email wallets</div><div class="ch">›</div></div>
-  <div class="srow" onclick="obReset()"><div class="ic">🌍</div><div class="lb">Change payout region</div><div class="ch">›</div></div>
-  <div class="sect"><h2>Privacy</h2></div>
-  <div class="card cream" style="box-shadow:var(--sh-sm)">
-    <div class="lbl">What the shop sees</div>
-    <div style="font-size:13px;font-weight:700;line-height:1.6">Nothing about you. They receive an ordinary local-currency
-      credit into their existing account, exactly as if a neighbour had paid them.</div>
-    <div class="lbl" style="margin-top:14px">What we need</div>
-    <div style="font-size:13px;font-weight:700;line-height:1.6">An email, up to <b id="capTxt">200 USDC</b> a month. Above that,
-      identity verification is required — that part isn't optional anywhere we operate, and any service telling you
-      otherwise is one enforcement action from disappearing with your balance.</div>
-  </div>
   <div id="rowIndia" style="display:none">
     <div class="sect"><h2>India</h2></div>
     <div class="srow" onclick="go('s-india')"><div class="ic" id="indiaIcon"></div><div class="lb">TDS &amp; compliance</div><div class="ch">›</div></div>
   </div>
-  <div class="sect"><h2>Not yet live</h2></div>
-  <div class="srow" onclick="op('sh-partners')"><div class="ic">🧩</div><div class="lb">Card, payouts, KYC</div><div class="val">needs partners</div><div class="ch">›</div></div>
   <div class="fine">moo.cash live build · core logic unit-tested</div>
 </section>
 </div>
 
 <div class="navwrap"><nav class="nav">
   <button class="on" data-s="s-home" onclick="go('s-home')"><svg viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19z"/></svg>Home</button>
-  <button data-s="s-earn" onclick="go('s-earn')"><svg viewBox="0 0 24 24"><path d="M5 20V13M12 20V7M19 20v-9M5 13c0-3 2-4 3.5-4M12 7c0-3 2-4 3.5-4"/></svg>Graze</button>
+  <button data-s="s-earn" onclick="go('s-earn')"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4v1h3a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h3V6a4 4 0 014-4zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>Graze</button>
   <button class="payb" onclick="go('s-pay')"><svg viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 015.5 4H8M16 4h2.5A1.5 1.5 0 0120 5.5V8M20 16v2.5a1.5 1.5 0 01-1.5 1.5H16M8 20H5.5A1.5 1.5 0 014 18.5V16M7.5 7.5h3v3h-3zM13.5 7.5h3v3h-3zM7.5 13.5h3v3h-3zM13.5 13.5h3v3h-3z"/></svg></button>
   <button data-s="s-world" onclick="go('s-world')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.2 2.4 3.4 5.4 3.4 8.5s-1.2 6.1-3.4 8.5c-2.2-2.4-3.4-5.4-3.4-8.5S9.8 5.9 12 3.5z"/></svg>World</button>
   <button data-s="s-set" onclick="go('s-set')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3"/></svg>Settings</button>
@@ -811,27 +1008,27 @@ input,select{font-family:inherit}
 <div id="drawer"><div class="bg" onclick="cl('drawer')"></div><div class="pn">
   <div class="top">
     <div class="brand"><svg class="mk" viewBox="0 0 48 48" aria-label="moo.cash logo">
-      <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
-      <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M14 19 C8 17, 4 21, 6 26 C10 27, 13 24, 15 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
-      <path d="M12 21 C8 20, 6 23, 8 25 C10 25, 12 24, 13 22 Z" fill="#FFAEC0"/>
-      <path d="M34 19 C40 17, 44 21, 42 26 C38 27, 35 24, 33 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
-      <path d="M36 21 C40 20, 42 23, 40 25 C38 25, 36 24, 35 22 Z" fill="#FFAEC0"/>
-      <path d="M14 20 C14 13, 34 13, 34 20 C35 26, 36 32, 34 36 C30 40, 18 40, 14 36 C12 32, 13 26, 14 20 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5" stroke-linejoin="round"/>
-      <path d="M26 14 C30 14, 33 16, 34 20 C31 22, 28 21, 26 18 Z" fill="#1C1A17"/>
-      <path d="M13 22 C12 26, 15 31, 19 30 C21 27, 20 22, 18 21 C15 20, 13 20, 13 22 Z" fill="#1C1A17"/>
-      <path d="M32 28 C34 29, 35 32, 34 34 C33 34, 32 32, 31 30 Z" fill="#1C1A17"/>
-      <circle cx="17.5" cy="25" r="2.2" fill="#FFFDF6"/>
-      <circle cx="17.5" cy="25" r="1.6" fill="#1C1A17"/>
-      <circle cx="18.1" cy="24.4" r="0.6" fill="#FFFDF6"/>
-      <circle cx="30.5" cy="25" r="2.2" fill="#1C1A17"/>
-      <circle cx="31.2" cy="24.4" r="0.7" fill="#FFFDF6"/>
-      <ellipse cx="24" cy="33" rx="8.5" ry="5.5" fill="#FFAEC0" stroke="#1C1A17" stroke-width="2.2"/>
-      <circle cx="21.2" cy="32.2" r="1.2" fill="#1C1A17"/>
-      <circle cx="26.8" cy="32.2" r="1.2" fill="#1C1A17"/>
-      <path d="M21.5 35 Q24 37 26.5 35" stroke="#1C1A17" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-    </svg>
+        <circle cx="24" cy="24" r="22" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5"/>
+        <path d="M15 15 C13 10, 10 9, 7 11 C8 14, 11 17, 14 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M33 15 C35 10, 38 9, 41 11 C40 14, 37 17, 34 18 Z" fill="#FFCC4D" stroke="#1C1A17" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M14 19 C8 17, 4 21, 6 26 C10 27, 13 24, 15 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M12 21 C8 20, 6 23, 8 25 C10 25, 12 24, 13 22 Z" fill="#FFAEC0"/>
+        <path d="M34 19 C40 17, 44 21, 42 26 C38 27, 35 24, 33 21 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M36 21 C40 20, 42 23, 40 25 C38 25, 36 24, 35 22 Z" fill="#FFAEC0"/>
+        <path d="M14 20 C14 13, 34 13, 34 20 C35 26, 36 32, 34 36 C30 40, 18 40, 14 36 C12 32, 13 26, 14 20 Z" fill="#FFFDF6" stroke="#1C1A17" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M26 14 C30 14, 33 16, 34 20 C31 22, 28 21, 26 18 Z" fill="#1C1A17"/>
+        <path d="M13 22 C12 26, 15 31, 19 30 C21 27, 20 22, 18 21 C15 20, 13 20, 13 22 Z" fill="#1C1A17"/>
+        <path d="M32 28 C34 29, 35 32, 34 34 C33 34, 32 32, 31 30 Z" fill="#1C1A17"/>
+        <circle cx="17.5" cy="25" r="2.2" fill="#FFFDF6"/>
+        <circle cx="17.5" cy="25" r="1.6" fill="#1C1A17"/>
+        <circle cx="18.1" cy="24.4" r="0.6" fill="#FFFDF6"/>
+        <circle cx="30.5" cy="25" r="2.2" fill="#1C1A17"/>
+        <circle cx="31.2" cy="24.4" r="0.7" fill="#FFFDF6"/>
+        <ellipse cx="24" cy="33" rx="8.5" ry="5.5" fill="#FFAEC0" stroke="#1C1A17" stroke-width="2.2"/>
+        <circle cx="21.2" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <circle cx="26.8" cy="32.2" r="1.2" fill="#1C1A17"/>
+        <path d="M21.5 35 Q24 37 26.5 35" stroke="#1C1A17" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
       <span class="wordmark">moo.cash</span></div>
     <button class="ib" onclick="cl('drawer')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
