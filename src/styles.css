@@ -204,6 +204,20 @@ a { color: inherit; }
 .amount-big.zero { color: #B9C9AE; }
 .amount-conv { text-align: center; font-size: 15px; font-weight: 700; opacity: .7; margin-top: 6px; }
 
+/* ── base icon sizing ──────────────────────────────────────────────
+   Every Icon.* is a bare <svg viewBox="0 0 24 24"> with no width and no
+   stroke of its own. Container rules (.iconbtn svg, .nav button svg,
+   .pad button svg) size them where they exist — but an icon placed
+   anywhere without such a rule (.hint, .btn) has no intrinsic width, so
+   it stretches to fill its flex parent and paints as a filled
+   silhouette. This is the fallback. Every container rule is more
+   specific than .ico, so all of them still override it. */
+.ico {
+  width: 18px; height: 18px; flex: none;
+  stroke: currentColor; fill: none;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+
 /* ── notice / hint ── */
 .hint {
   display: flex; align-items: center; gap: 11px; padding: 13px 15px;
