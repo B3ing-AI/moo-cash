@@ -42,6 +42,23 @@ export function apiUrl() {
 
 export const hasBackend = () => apiUrl() !== null;
 
+/**
+ * Point the app at a moo.cash service (backend). Setting this is what enables
+ * Telegram / Google / X sign-in and fiat settlement — those need the service's
+ * server-side verification, so on the plain static site they stay off until a
+ * URL is configured here. Pass '' to clear.
+ */
+export function setApiBase(url) {
+  const clean = String(url || '').trim().replace(/\/$/, '');
+  if (!clean) { store.set('moo.api', ''); return null; }
+  store.set('moo.api', clean);
+  return clean;
+}
+export function getApiBase() {
+  const s = store.get('moo.api');
+  return s && s !== 'off' ? s : '';
+}
+
 /* ── session ── */
 
 export function session() {

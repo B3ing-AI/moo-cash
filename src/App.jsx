@@ -69,6 +69,31 @@ export default function App() {
 
   useEffect(() => { refreshLedger(); }, [refreshLedger, bkSession]);
 
+  // On boot: STAY SIGNED IN. If a wallet was created/imported on this device,
+  // restore it silently — the vault is device-encrypted, so we can unlock it
+  // with the device secret. Without this, a returning user lands signed-out
+  // with a $0 balance even though their wallet is right there in storage,
+  // which reads as "my wallet vanished / I can't log back in".
+  //
+  // A passphrase-protected wallet can't be auto-unlocked (we don't have the
+  // passphrase), so unlock throws and we leave them to sign in with it.
+  useEffect(() => {
+    const v = vault();
+    if (!v || keypair) return;
+    (async () => {
+      try {
+        const kp = await unlockWallet(deviceSecret());
+        setKeypair(kp);
+        setAddress(kp.publicKey.toBase58());
+        setEmail(v.email || '');
+        refresh(kp.publicKey.toBase58());
+      } catch {
+        /* passphrase wallet — user unlocks it manually via sign-in */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // On boot: finish an X OAuth redirect, OR auto-sign-in if we're running
   // INSIDE Telegram (a Mini App) — same identity, same recoverable wallet, so
   // opening moo.cash from the Telegram bot lands straight on your funds.
@@ -541,7 +566,7 @@ function ExportKeys({ keypair, toast }) {
  * that the backend actually has credentials for — an unconfigured provider
  * simply doesn't appear, so nothing here is a dead button.
  */
-function SocialSignIn({ onSession, onError }) {
+function SocialSignIn({ onSession, onError, onConnectService }) {
   const [providers, setProviders] = useState(null);
   const googleRef = useRef(null);
   const tgRef = useRef(null);
@@ -565,7 +590,26 @@ function SocialSignIn({ onSession, onError }) {
 
   if (!providers) return null;
   const any = providers.google || providers.telegram || providers.x;
-  if (!any) return null;
+
+  // No service connected → social sign-in can't verify. Be honest and give a
+  // way to enable it rather than silently showing nothing.
+  if (!any) {
+    if (backend.hasBackend()) return null; // service present but no providers configured
+    return (
+      <div style={{ marginTop: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '4px 0 12px', opacity: .5 }}>
+          <div style={{ flex: 1, height: 1, background: 'currentColor' }} />
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em' }}>OR</span>
+          <div style={{ flex: 1, height: 1, background: 'currentColor' }} />
+        </div>
+        <div className="note info" style={{ marginBottom: 8 }}>
+          <b>Google, Telegram & X sign-in</b> verify your identity through the moo.cash
+          service. Connect it to switch them on — your email wallet above works right now.
+        </div>
+        <button className="btn" onClick={onConnectService}>Connect a service</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ marginTop: 12 }}>
@@ -650,6 +694,7 @@ function Sheets({
         <SocialSignIn
           onSession={onSocialSession}
           onError={m => setErr(m)}
+          onConnectService={() => setSheet('service')}
         />
 
         <button className="btn ghost" style={{ marginTop: 6 }} onClick={onConnectExtension}>
@@ -681,6 +726,35 @@ function Sheets({
         }}>
           {busy ? <><span className="spinner" /> Importing…</> : 'Import wallet'}
         </button>
+      </Sheet>
+
+      <Sheet open={sheet === 'service'} onClose={close}
+        title="Connect the moo.cash service"
+        lede="Telegram, Google & X sign-in and fiat settlement run through the service. Paste its URL to switch them on.">
+        <div className="field">
+          <label>Service URL</label>
+          <input className="input mono" inputMode="url" placeholder="https://your-moo-backend.example.com"
+            defaultValue={backend.getApiBase()} onChange={e => { setPasted(e.target.value); setErr(''); }} />
+        </div>
+        {err && <div className="note stop">{err}</div>}
+        <div className="note info">
+          Don’t have one yet? Run the backend from the moo-cash-backend folder (START-PRODUCT),
+          or host it, then paste its address here. Your keys stay on this device either way.
+        </div>
+        <button className="btn butter" onClick={() => {
+          const url = (pasted || backend.getApiBase()).trim();
+          if (url && !/^https?:\/\//.test(url)) { setErr('Enter a full http(s) URL.'); return; }
+          backend.setApiBase(url);
+          setPasted('');
+          toast(url ? 'Service connected — social sign-in enabled' : 'Service cleared');
+          setSheet('signin');
+        }}>Save</button>
+        {backend.getApiBase() && (
+          <button className="btn ghost" style={{ marginTop: 6 }}
+            onClick={() => { backend.setApiBase(''); toast('Service disconnected'); setSheet('signin'); }}>
+            Disconnect service
+          </button>
+        )}
       </Sheet>
 
       <Sheet open={sheet === 'walletpin'} onClose={pinPending ? undefined : close}
