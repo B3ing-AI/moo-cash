@@ -8,6 +8,7 @@ import {
   detectProvider, diagnose, makeConnection, fetchBalances, DEFAULT_RPC,
 } from './wallet.js';
 import { importWallet as parseImport, toBase58, keypairFromServerSeed, mnemonicFromServerSeed } from './hd.js';
+import * as evm from './evm.js';
 
 import * as backend from './backend.js';
 import * as social from './social.js';
@@ -54,6 +55,8 @@ export default function App() {
   const [marketCur, setMarketCur] = useState(null);
   // Recovery material awaiting a PIN to unwrap (null = none pending).
   const [pinPending, setPinPending] = useState(null);
+  // Connected external EVM wallet: { address, name, balances[], loading }.
+  const [evmWallet, setEvmWallet] = useState(null);
 
   /* ── backend (real settlement service) ── */
   const [bkSession, setBkSession] = useState(() => (backend.hasBackend() ? backend.session() : null));
@@ -305,10 +308,46 @@ export default function App() {
     }
   };
 
+  /**
+   * Connect an external EVM wallet (MetaMask, Robinhood, Coinbase, Rabby…) and
+   * read its balances across Ethereum, Polygon and BNB Chain — the same
+   * address on every chain, so the user sees all their holdings at once.
+   */
+  const connectEvmWallet = async () => {
+    const found = evm.detectEvmProviders();
+    if (!found.length) {
+      toast('No EVM wallet found — install MetaMask, Robinhood, or another');
+      return;
+    }
+    try {
+      const { address: addr, name } = await evm.connectEvm(found[0].provider);
+      setEvmWallet({ address: addr, name, balances: [], loading: true });
+      setSheet('wallets');
+      toast(`${name} connected`);
+      const balances = await evm.readAllEvmBalances(addr);
+      setEvmWallet({ address: addr, name, balances, loading: false });
+    } catch (e) {
+      if (/reject|declined|4001/i.test(e?.message || '')) toast('You declined the connection');
+      else toast(e.message || 'Could not connect the wallet');
+    }
+  };
+
+  const refreshEvm = async () => {
+    if (!evmWallet?.address) return;
+    setEvmWallet(w => ({ ...w, loading: true }));
+    try {
+      const balances = await evm.readAllEvmBalances(evmWallet.address);
+      setEvmWallet(w => ({ ...w, balances, loading: false }));
+    } catch { setEvmWallet(w => ({ ...w, loading: false })); }
+  };
+
+  const disconnectEvm = () => { setEvmWallet(null); toast('EVM wallet disconnected'); };
+
   const disconnect = () => {
     try { provider?.disconnect?.(); } catch { /* ignore */ }
     setKeypair(null); setProvider(null); setAddress(null);
     setUsdc(0); setSol(0);
+    setEvmWallet(null);
     backend.clearSession(); setBkSession(null); setLedger({ available: 0, held: 0 });
     toast('Signed out');
   };
@@ -483,6 +522,7 @@ export default function App() {
             onVerify={() => setSheet('limits')}
             onExport={() => setSheet('export')}
             onProtectPin={() => setSheet('setpin')} bkSession={bkSession}
+            onWallets={() => setSheet('wallets')} evmWallet={evmWallet}
             onDisconnect={disconnect}
             onRpc={() => setSheet('rpc')}
           />
@@ -503,6 +543,8 @@ export default function App() {
         mooOrder={mooOrder} payBusy={payBusy} onPayMoo={payMoo}
         onSocialSession={adoptBackendSession} onImportWallet={importWallet}
         onUnlockPin={unlockWithPin} onProtectPin={protectWithPin} pinPending={!!pinPending}
+        evmWallet={evmWallet} onConnectEvm={connectEvmWallet} onRefreshEvm={refreshEvm} onDisconnectEvm={disconnectEvm}
+        usdc={usdc} sol={sol} ledger={ledger}
       />
     </>
   );
@@ -602,11 +644,19 @@ function SocialSignIn({ onSession, onError, onConnectService }) {
           <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em' }}>OR</span>
           <div style={{ flex: 1, height: 1, background: 'currentColor' }} />
         </div>
-        <div className="note info" style={{ marginBottom: 8 }}>
-          <b>Google, Telegram & X sign-in</b> verify your identity through the moo.cash
-          service. Connect it to switch them on — your email wallet above works right now.
+        <button className="btn" style={{ background: '#fff', border: '1px solid rgba(0,0,0,.15)', color: '#111' }} onClick={onConnectService}>
+          <span style={{ fontWeight: 800, color: '#4285F4' }}>G</span>&nbsp; Continue with Google
+        </button>
+        <button className="btn" style={{ marginTop: 6, background: '#229ED9', color: '#fff' }} onClick={onConnectService}>
+          ✈ Continue with Telegram
+        </button>
+        <button className="btn dark" style={{ marginTop: 6 }} onClick={onConnectService}>
+          𝕏 Continue with X
+        </button>
+        <div className="note info" style={{ marginTop: 8 }}>
+          These verify your identity through the moo.cash service. Tap any to connect it —
+          your email or wallet options above work right now.
         </div>
-        <button className="btn" onClick={onConnectService}>Connect a service</button>
       </div>
     );
   }
@@ -637,6 +687,7 @@ function Sheets({
   decoded, order, plan, onSignInEmail, onConnectExtension, rpc, setRpc,
   bkSession, region, mooQr, setMooQr, onMintQr, mooOrder, payBusy, onPayMoo,
   onSocialSession, onImportWallet, onUnlockPin, onProtectPin, pinPending,
+  evmWallet, onConnectEvm, onRefreshEvm, onDisconnectEvm, usdc, sol, ledger,
 }) {
   const close = () => setSheet(null);
   const [mail, setMail] = useState('');
@@ -697,12 +748,85 @@ function Sheets({
           onConnectService={() => setSheet('service')}
         />
 
-        <button className="btn ghost" style={{ marginTop: 6 }} onClick={onConnectExtension}>
-          Connect a browser wallet instead
-        </button>
-        <button className="btn ghost" style={{ marginTop: 2 }} onClick={() => setSheet('import')}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+          <button className="btn ghost" style={{ flex: 1 }} onClick={onConnectExtension}>
+            🟣 Solana wallet
+          </button>
+          <button className="btn ghost" style={{ flex: 1 }} onClick={onConnectEvm}>
+            🦊 EVM wallet
+          </button>
+        </div>
+        <div style={{ fontSize: 11, opacity: .55, textAlign: 'center', marginTop: 4 }}>
+          Phantom, Solflare · MetaMask, Robinhood, Coinbase, Rabby
+        </div>
+        <button className="btn ghost" style={{ marginTop: 6 }} onClick={() => setSheet('import')}>
           Import a recovery phrase or key
         </button>
+      </Sheet>
+
+      <Sheet open={sheet === 'wallets'} onClose={close}
+        title="Your wallets"
+        lede="Everything connected, and what's in it.">
+        {/* Embedded moo.cash wallet (Solana) */}
+        {address && (
+          <div className="card pale" style={{ boxShadow: 'var(--sh-sm)', marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 800 }}>🐄 moo.cash wallet</div>
+                <div className="s" style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12 }}>
+                  {address.slice(0, 6)}…{address.slice(-4)} · Solana
+                </div>
+              </div>
+              <span className="chip ok" style={{ fontSize: 10 }}>connected</span>
+            </div>
+            <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 13.5 }}>
+              <span><b>{bkSession ? (ledger?.available ?? 0).toFixed(2) : usdc.toFixed(2)}</b> USDC</span>
+              <span style={{ opacity: .7 }}><b>{sol.toFixed(4)}</b> SOL</span>
+            </div>
+          </div>
+        )}
+
+        {/* Connected external EVM wallet */}
+        {evmWallet ? (
+          <div className="card" style={{ boxShadow: 'var(--sh-sm)', marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 800 }}>🦊 {evmWallet.name}</div>
+                <div className="s" style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12 }}>
+                  {evmWallet.address.slice(0, 6)}…{evmWallet.address.slice(-4)} · EVM
+                </div>
+              </div>
+              <button className="btn ghost sm" style={{ padding: '5px 10px', fontSize: 12 }} onClick={onRefreshEvm}>
+                {evmWallet.loading ? '…' : '↻'}
+              </button>
+            </div>
+            {evmWallet.loading && !evmWallet.balances.length && (
+              <div style={{ fontSize: 12.5, opacity: .55, marginTop: 8 }}>Reading balances across chains…</div>
+            )}
+            {evmWallet.balances.map(c => (
+              <div key={c.chain} style={{ marginTop: 8, borderTop: '1px solid rgba(0,0,0,.06)', paddingTop: 6 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', opacity: .5 }}>{c.name}</div>
+                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 13, marginTop: 3 }}>
+                  <span><b>{c.native == null ? '—' : c.native}</b> {c.symbol}</span>
+                  {Object.entries(c.tokens).map(([sym, v]) => (
+                    <span key={sym} style={{ opacity: .8 }}><b>{v == null ? '—' : v}</b> {sym}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <button className="btn ghost" style={{ marginTop: 10 }} onClick={onDisconnectEvm}>Disconnect</button>
+          </div>
+        ) : (
+          <button className="btn dark" onClick={onConnectEvm}>
+            🦊 Connect EVM wallet (ETH · Polygon · BNB)
+          </button>
+        )}
+
+        <div className="note info" style={{ marginTop: 10 }}>
+          Balances are read live from each chain’s public RPC. moo.cash pays merchants
+          from your USDC — other chains/tokens are shown so you can see everything in one place.
+        </div>
+        <button className="btn" style={{ marginTop: 8 }} onClick={close}>Close</button>
       </Sheet>
 
       <Sheet open={sheet === 'import'} onClose={close}

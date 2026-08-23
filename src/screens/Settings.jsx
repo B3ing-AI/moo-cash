@@ -7,6 +7,7 @@ export default function Settings({
   address, market, email, hideBalances, setHideBalances,
   notifications, setNotifications, rpc,
   onCopy, onChangeRegion, onVerify, onExport, onDisconnect, onRpc, onProtectPin, bkSession,
+  onWallets, evmWallet,
 }) {
   return (
     <div className="screen">
@@ -37,6 +38,12 @@ export default function Settings({
         <Row k="KYC / Limits" s="200 USDC · Unverified">
           <button className="pillbtn butter" onClick={onVerify}>Verify →</button>
         </Row>
+
+        {onWallets && (
+          <Row k="Connected wallets" s={evmWallet ? `Solana · ${evmWallet.name}` : 'Solana · connect EVM'}>
+            <button className="pillbtn lime" onClick={onWallets}>View</button>
+          </Row>
+        )}
 
         <Row k="Export / import keys" s="Recovery phrase · private key">
           <button className="pillbtn pink" onClick={onExport} disabled={!address}>Export</button>
