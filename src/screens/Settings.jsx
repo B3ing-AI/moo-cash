@@ -6,7 +6,7 @@ const short = a => (a ? a.slice(0, 6) + '...' + a.slice(-4) : '—');
 export default function Settings({
   address, market, email, hideBalances, setHideBalances,
   notifications, setNotifications, rpc,
-  onCopy, onChangeRegion, onVerify, onExport, onDisconnect, onRpc,
+  onCopy, onChangeRegion, onVerify, onExport, onDisconnect, onRpc, onProtectPin, bkSession,
 }) {
   return (
     <div className="screen">
@@ -38,9 +38,15 @@ export default function Settings({
           <button className="pillbtn butter" onClick={onVerify}>Verify →</button>
         </Row>
 
-        <Row k="Export private key" s="Encrypted backup">
+        <Row k="Export / import keys" s="Recovery phrase · private key">
           <button className="pillbtn pink" onClick={onExport} disabled={!address}>Export</button>
         </Row>
+
+        {onProtectPin && (
+          <Row k="Protect with a PIN" s="Self-custody · needed on new devices">
+            <button className="pillbtn butter" onClick={onProtectPin} disabled={!bkSession}>Set PIN</button>
+          </Row>
+        )}
 
         <Row k="Disconnect" s="Clear session">
           <button className="pillbtn white" onClick={onDisconnect}>Log out</button>

@@ -1,12 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import MooCore from './core.js';
 import { MARKETS, byCode, fmtLocal, fmtUsd } from './markets.js';
 import { fetchRates, quoteMarket } from './rates.js';
 import {
-  store, vault, deviceSecret, createWallet, unlockWallet,
+  store, vault, deviceSecret, createWallet, unlockWallet, unlockVault, importWalletToVault,
+  wrapSeedWithPin, unwrapSeedWithPin,
   detectProvider, diagnose, makeConnection, fetchBalances, DEFAULT_RPC,
 } from './wallet.js';
+import { importWallet as parseImport, toBase58, keypairFromServerSeed, mnemonicFromServerSeed } from './hd.js';
 
+import * as backend from './backend.js';
+import * as social from './social.js';
 import { Header, Nav, Sheet, Toast, Icon } from './components/ui.jsx';
 import Flag from './components/Flag.jsx';
 import CowLogo from './components/CowLogo.jsx';
@@ -16,6 +20,7 @@ import Home from './screens/Home.jsx';
 import ScanPay from './screens/ScanPay.jsx';
 import Graze from './screens/Graze.jsx';
 import World from './screens/World.jsx';
+import Market from './screens/Market.jsx';
 import Settings from './screens/Settings.jsx';
 
 const INSTANT_THRESHOLD = 200;
@@ -45,6 +50,43 @@ export default function App() {
 
   const [decoded, setDecoded] = useState(null);
   const [order, setOrder] = useState(null);
+  // Which corridor's order market is open (null = the World list).
+  const [marketCur, setMarketCur] = useState(null);
+  // Recovery material awaiting a PIN to unwrap (null = none pending).
+  const [pinPending, setPinPending] = useState(null);
+
+  /* ── backend (real settlement service) ── */
+  const [bkSession, setBkSession] = useState(() => (backend.hasBackend() ? backend.session() : null));
+  const [ledger, setLedger] = useState({ available: 0, held: 0 });
+  const [mooQr, setMooQr] = useState(null);      // { compact, dataUrl, amount }
+  const [mooOrder, setMooOrder] = useState(null); // real order result
+  const [payBusy, setPayBusy] = useState(false);
+
+  const refreshLedger = useCallback(async () => {
+    if (!backend.hasBackend() || !backend.session()) return;
+    try { setLedger(await backend.ledgerBalances()); } catch { /* backend offline */ }
+  }, []);
+
+  useEffect(() => { refreshLedger(); }, [refreshLedger, bkSession]);
+
+  // On boot: finish an X OAuth redirect, OR auto-sign-in if we're running
+  // INSIDE Telegram (a Mini App) — same identity, same recoverable wallet, so
+  // opening moo.cash from the Telegram bot lands straight on your funds.
+  useEffect(() => {
+    if (!backend.hasBackend()) return;
+    const initData = window.Telegram?.WebApp?.initData;
+    if (initData && !backend.session()) {
+      try { window.Telegram.WebApp.ready?.(); } catch { /* not critical */ }
+      backend.loginTelegramMiniApp(initData)
+        .then(adoptBackendSession)
+        .catch(e => toast(e.message || 'Telegram sign-in failed'));
+      return;
+    }
+    social.completeXLoginIfReturning()
+      .then(s => { if (s) adoptBackendSession(s); })
+      .catch(e => toast(e.message || 'X sign-in failed'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toast = useCallback(msg => {
     setToastMsg(msg);
@@ -85,18 +127,140 @@ export default function App() {
 
   /* ── sign in ── */
   const signInEmail = async (mail, pass) => {
-    const useDevice = !pass;
-    const secret = useDevice ? deviceSecret() : pass;
+    setEmail(mail);
+
+    // With the backend up, the wallet is RECOVERABLE: it derives from the
+    // server seed tied to this identity, so the same email reaches the same
+    // wallet on every device. A passphrase forces the classic self-custody
+    // path (local key, portable only via the phrase) instead.
+    if (backend.hasBackend() && !pass) {
+      try {
+        const bk = await backend.openDemoSession(mail);
+        setBkSession(bk);
+        await resolveWallet(bk);
+        setSheet(null);
+        toast('Wallet ready 🐄');
+        return;
+      } catch (e) {
+        toast(e.code === 'UNREACHABLE' ? 'Settlement service offline — using this device' : 'moo account unavailable');
+        // fall through to a local wallet so the user is never locked out
+      }
+    }
+
+    const secret = pass || deviceSecret();
     const existing = vault();
     const kp = existing && existing.email === mail
       ? await unlockWallet(secret)
       : await createWallet(mail, secret);
     setKeypair(kp);
     setAddress(kp.publicKey.toBase58());
-    setEmail(mail);
     setSheet(null);
     toast('Wallet ready 🐄');
     refresh(kp.publicKey.toBase58());
+
+    if (backend.hasBackend() && pass) {
+      // Passphrase wallet still gets a settlement session for payments.
+      try {
+        setBkSession(await backend.openDemoSession(mail));
+      } catch (e) {
+        toast(e.code === 'UNREACHABLE' ? 'Settlement service offline' : 'moo account unavailable');
+      }
+    }
+  };
+
+  /**
+   * Turn a server recovery seed into the live wallet and cache it locally.
+   * This is what makes the SAME identity resolve to the SAME wallet on every
+   * device (the gmgn.ai model): the seed is derived deterministically into a
+   * real BIP39 mnemonic, so device A and device B rebuild the identical
+   * address and reach the same funds.
+   */
+  const applyServerSeed = async (seedB64, mail) => {
+    const seed = Uint8Array.from(atob(seedB64), c => c.charCodeAt(0));
+    const kp = keypairFromServerSeed(seed);
+    const mnemonic = mnemonicFromServerSeed(seed);
+    await importWalletToVault(kp, mnemonic, mail, deviceSecret());
+    setKeypair(kp);
+    setAddress(kp.publicKey.toBase58());
+    refresh(kp.publicKey.toBase58());
+    return kp;
+  };
+
+  /**
+   * A backend session exists (social or email). Resolve the recoverable
+   * wallet from the server seed. If the user protected it with a PIN, the
+   * seed comes back wrapped and we ask for the PIN before deriving.
+   */
+  const resolveWallet = async (bk) => {
+    const mail = bk?.user?.email || email || 'wallet@moo.cash';
+    setEmail(mail);
+    try {
+      const rec = await backend.walletRecovery();
+      if (rec.pinSet) {
+        // Wrapped — hold it and prompt. The wallet appears once unlocked.
+        setPinPending({ ...rec, mail });
+        setSheet('walletpin');
+        return;
+      }
+      await applyServerSeed(rec.seed, mail);
+    } catch {
+      // Backend reachable but recovery failed — fall back to a device wallet
+      // so the user is not locked out; still real, just not cross-device.
+      try {
+        const existing = vault();
+        const kp = existing && existing.email === mail
+          ? await unlockWallet(deviceSecret())
+          : await createWallet(mail, deviceSecret());
+        setKeypair(kp); setAddress(kp.publicKey.toBase58()); refresh(kp.publicKey.toBase58());
+      } catch { /* session-only */ }
+    }
+  };
+
+  const adoptBackendSession = async (bk) => {
+    setBkSession(bk);
+    await resolveWallet(bk);
+    setSheet(null);
+    toast('Signed in 🐄');
+  };
+
+  /** Finish a PIN-protected recovery once the user types the PIN. */
+  const unlockWithPin = async (pin) => {
+    if (!pinPending) return;
+    const seedB64 = await unwrapSeedWithPin(pinPending.seed, pinPending.pinSalt, pin); // throws on wrong PIN
+    await applyServerSeed(seedB64, pinPending.mail);
+    setPinPending(null);
+    setSheet(null);
+    toast('Wallet unlocked 🐄');
+  };
+
+  /**
+   * Turn on a PIN: fetch the raw seed, wrap it locally, and hand the server
+   * only the wrapped blob. After this the backend can no longer reconstruct
+   * the key on its own — recovery needs session + PIN (non-custodial 2-of-2).
+   */
+  const protectWithPin = async (pin) => {
+    const rec = await backend.walletRecovery();
+    if (rec.pinSet) throw new Error('A PIN is already set.');
+    const { wrapped, salt } = await wrapSeedWithPin(rec.seed, pin);
+    await backend.setWalletPin(wrapped, salt);
+    setSheet(null);
+    toast('PIN set — only you can recover this wallet now 🔒');
+  };
+
+  /** Import an existing wallet from a recovery phrase / key the user pastes. */
+  const importWallet = async (raw) => {
+    const { keypair, mnemonic, kind } = parseImport(raw); // throws with a human reason
+    const mail = email || `${keypair.publicKey.toBase58().slice(0, 8).toLowerCase()}@imported.moo`;
+    await importWalletToVault(keypair, mnemonic ?? null, mail, deviceSecret());
+    setKeypair(keypair);
+    setAddress(keypair.publicKey.toBase58());
+    setEmail(mail);
+    setSheet(null);
+    toast(`Wallet imported (${kind}) 🐄`);
+    refresh(keypair.publicKey.toBase58());
+    if (backend.hasBackend()) {
+      try { setBkSession(await backend.openDemoSession(mail)); } catch { /* offline */ }
+    }
   };
 
   const connectExtension = async () => {
@@ -120,6 +284,7 @@ export default function App() {
     try { provider?.disconnect?.(); } catch { /* ignore */ }
     setKeypair(null); setProvider(null); setAddress(null);
     setUsdc(0); setSol(0);
+    backend.clearSession(); setBkSession(null); setLedger({ available: 0, held: 0 });
     toast('Signed out');
   };
 
@@ -131,10 +296,70 @@ export default function App() {
     setSheet('order');
   };
 
-  const handleScanned = (raw, amountHint) => {
-    const parsed = MooCore.parseQR((raw || '').trim());
-    setDecoded({ parsed, raw, amountHint });
+  const handleScanned = async (raw, amountHint) => {
+    const trimmed = (raw || '').trim();
+
+    // moocash:// codes are OUR invoices — verified server-side (HMAC), paid
+    // through the real order lifecycle. Everything else keeps the client-side
+    // decoder and its honest "needs a licensed rail" note.
+    if (backend.isMooQr(trimmed) && backend.hasBackend()) {
+      try {
+        const moo = await backend.decodeQr(trimmed);
+        setDecoded({ moo, raw: trimmed, amountHint });
+      } catch (e) {
+        setDecoded({ mooError: e.message, raw: trimmed });
+      }
+      setSheet('decoded');
+      return;
+    }
+
+    const parsed = MooCore.parseQR(trimmed);
+    setDecoded({ parsed, raw: trimmed, amountHint });
     setSheet('decoded');
+  };
+
+  /** Pay a decoded moocash invoice for real: hold → broadcast → settle. */
+  const payMoo = async () => {
+    if (!decoded?.moo || payBusy) return;
+    const inv = decoded.moo;
+    const fiatMinor = inv.openAmount
+      ? Math.round((decoded.amountHint || 0) * 100)
+      : Number(inv.fiatAmount.value);
+    if (!fiatMinor || fiatMinor <= 0) { toast('Enter the amount on the keypad first'); return; }
+
+    setPayBusy(true);
+    try {
+      const created = await backend.createOrder({ invoiceId: inv.invoiceId, fiatAmountMinor: fiatMinor });
+      const final = ['SETTLED', 'TIMEOUT', 'CANCELLED', 'FAILED'].includes(created.status)
+        ? created
+        : await backend.waitForOrder(created.id);
+      setMooOrder(final);
+      setSheet('mooOrder');
+      refreshLedger();
+    } catch (e) {
+      toast(e.message || 'Payment failed');
+    } finally {
+      setPayBusy(false);
+    }
+  };
+
+  /** Mint a merchant QR so this account can BE paid. */
+  const mintReceiveQr = async (localAmount) => {
+    const mk = byCode(region);
+    try {
+      await backend.ensureMerchant({
+        name: (email || 'moo user').split('@')[0],
+        fiatCurrency: mk.cur,
+        countryCode: mk.cc,
+      });
+      const minor = localAmount ? Math.round(localAmount * 100) : null;
+      const out = await backend.mintQr({ fiatAmountMinor: minor, memo: null });
+      const { default: QRCode } = await import('qrcode');
+      const dataUrl = await QRCode.toDataURL(out.compact, { margin: 1, width: 440 });
+      setMooQr({ compact: out.compact, dataUrl, amount: localAmount, cur: mk.cur });
+    } catch (e) {
+      toast(e.message || 'Could not create QR');
+    }
   };
 
   const plan = order
@@ -175,7 +400,8 @@ export default function App() {
 
         {tab === 'home' && (
           <Home
-            quote={quote} usdc={usdc} sol={sol} connected={connected}
+            quote={quote} usdc={bkSession ? ledger.available : usdc} sol={sol}
+            connected={connected || !!bkSession}
             hideBalances={hideBalances} rateSource={rateSource}
             onDeposit={() => setSheet('deposit')}
             onWithdraw={() => setSheet('withdraw')}
@@ -187,7 +413,8 @@ export default function App() {
 
         {tab === 'pay' && (
           <ScanPay
-            quote={quote} usdc={usdc} connected={connected}
+            quote={quote} usdc={bkSession ? ledger.available : usdc}
+            connected={connected || !!bkSession}
             onPlaceOrder={placeOrder}
             onScanned={handleScanned}
             onHelp={() => setSheet('howpay')}
@@ -199,13 +426,27 @@ export default function App() {
           <Graze onHowItWorks={() => setSheet('pool')} onRisks={() => setSheet('pool')} />
         )}
 
-        {tab === 'world' && (
+        {tab === 'world' && (marketCur ? (
+          <Market
+            cc={marketCur} market={byCode(marketCur)}
+            quote={quoteMarket(marketCur, rates)}
+            bkSession={bkSession} email={email}
+            onBack={() => setMarketCur(null)}
+            onSignIn={() => setSheet('signin')}
+            toast={toast}
+          />
+        ) : (
           <World
             rates={rates} region={region}
-            onPick={cc => { setRegion(cc); setTab('home'); toast(byCode(cc).name + ' selected'); }}
+            onPick={cc => {
+              // Picking a corridor selects it AND opens its order market.
+              setRegion(cc);
+              setMarketCur(cc);
+              toast(byCode(cc).name + ' selected');
+            }}
             onRate={() => setSheet('rate')}
           />
-        )}
+        ))}
 
         {tab === 'settings' && (
           <Settings
@@ -216,6 +457,7 @@ export default function App() {
             onChangeRegion={() => setTab('world')}
             onVerify={() => setSheet('limits')}
             onExport={() => setSheet('export')}
+            onProtectPin={() => setSheet('setpin')} bkSession={bkSession}
             onDisconnect={disconnect}
             onRpc={() => setSheet('rpc')}
           />
@@ -231,8 +473,115 @@ export default function App() {
         decoded={decoded} order={order} plan={plan}
         onSignInEmail={signInEmail} onConnectExtension={connectExtension}
         rpc={rpc} setRpc={setRpc}
+        bkSession={bkSession} region={region}
+        mooQr={mooQr} setMooQr={setMooQr} onMintQr={mintReceiveQr}
+        mooOrder={mooOrder} payBusy={payBusy} onPayMoo={payMoo}
+        onSocialSession={adoptBackendSession} onImportWallet={importWallet}
+        onUnlockPin={unlockWithPin} onProtectPin={protectWithPin} pinPending={!!pinPending}
       />
     </>
+  );
+}
+
+/**
+ * Export the wallet in all three ecosystem-standard formats. The recovery
+ * phrase is only present for wallets created here (or imported FROM a phrase);
+ * a wallet imported from a raw key has no phrase to show, and we say so
+ * rather than inventing one.
+ */
+function ExportKeys({ keypair, toast }) {
+  const [reveal, setReveal] = useState(false);
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    if (!reveal) return;
+    (async () => {
+      let mnemonic = null;
+      try { mnemonic = (await unlockVault(deviceSecret())).mnemonic; } catch { /* v1 / imported */ }
+      setData({
+        mnemonic,
+        base58: toBase58(keypair.secretKey),
+        json: JSON.stringify([...keypair.secretKey]),
+      });
+    })();
+  }, [reveal, keypair]);
+
+  const copy = (text, label) => { navigator.clipboard?.writeText(text); toast(`${label} copied — store it safely`); };
+
+  if (!reveal) {
+    return <button className="btn dark" onClick={() => setReveal(true)}>Reveal my keys</button>;
+  }
+  if (!data) return <div className="note info">Decrypting…</div>;
+
+  return (
+    <>
+      {data.mnemonic ? (
+        <div className="field">
+          <label>Recovery phrase (works in Phantom, Solflare, Backpack)</label>
+          <div className="input mono" style={{ whiteSpace: 'normal', lineHeight: 1.7, userSelect: 'all' }}>{data.mnemonic}</div>
+          <button className="btn lime" style={{ marginTop: 8 }} onClick={() => copy(data.mnemonic, 'Recovery phrase')}>Copy phrase</button>
+        </div>
+      ) : (
+        <div className="note info">This wallet was imported from a raw key, so it has no recovery phrase.</div>
+      )}
+      <div className="field" style={{ marginTop: 12 }}>
+        <label>Private key (base58 — Phantom import)</label>
+        <button className="btn" onClick={() => copy(data.base58, 'Private key')}>Copy base58 key</button>
+      </div>
+      <div className="field">
+        <label>Keypair JSON (solana-keygen)</label>
+        <button className="btn ghost" onClick={() => copy(data.json, 'Keypair JSON')}>Copy JSON array</button>
+      </div>
+    </>
+  );
+}
+
+/**
+ * Social sign-in block. Reads GET /auth/providers and only renders a method
+ * that the backend actually has credentials for — an unconfigured provider
+ * simply doesn't appear, so nothing here is a dead button.
+ */
+function SocialSignIn({ onSession, onError }) {
+  const [providers, setProviders] = useState(null);
+  const googleRef = useRef(null);
+  const tgRef = useRef(null);
+
+  useEffect(() => {
+    if (!backend.hasBackend()) { setProviders({}); return; }
+    social.getProviders().then(setProviders).catch(() => setProviders({}));
+  }, []);
+
+  useEffect(() => {
+    if (!providers) return;
+    if (providers.google && googleRef.current) {
+      social.mountGoogleButton(googleRef.current, providers.google.clientId, onSession,
+        e => onError(e.message || 'Google sign-in failed')).catch(() => {});
+    }
+    if (providers.telegram && tgRef.current && !tgRef.current.childElementCount) {
+      social.mountTelegramWidget(tgRef.current, providers.telegram.botUsername, onSession,
+        e => onError(e.message || 'Telegram sign-in failed'));
+    }
+  }, [providers, onSession, onError]);
+
+  if (!providers) return null;
+  const any = providers.google || providers.telegram || providers.x;
+  if (!any) return null;
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '4px 0 12px', opacity: .5 }}>
+        <div style={{ flex: 1, height: 1, background: 'currentColor' }} />
+        <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em' }}>OR</span>
+        <div style={{ flex: 1, height: 1, background: 'currentColor' }} />
+      </div>
+      {providers.google && <div ref={googleRef} style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }} />}
+      {providers.telegram && <div ref={tgRef} style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }} />}
+      {providers.x && (
+        <button className="btn dark" onClick={() => social.startXLogin(providers.x.clientId)}>
+          𝕏&nbsp;&nbsp;Continue with X
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -242,6 +591,8 @@ export default function App() {
 function Sheets({
   sheet, setSheet, toast, quote, market, address, keypair,
   decoded, order, plan, onSignInEmail, onConnectExtension, rpc, setRpc,
+  bkSession, region, mooQr, setMooQr, onMintQr, mooOrder, payBusy, onPayMoo,
+  onSocialSession, onImportWallet, onUnlockPin, onProtectPin, pinPending,
 }) {
   const close = () => setSheet(null);
   const [mail, setMail] = useState('');
@@ -295,13 +646,115 @@ function Sheets({
         <button className="btn butter" disabled={!canSubmit || busy} onClick={submit}>
           {busy ? <><span className="spinner" /> Working…</> : 'Create wallet'}
         </button>
+
+        <SocialSignIn
+          onSession={onSocialSession}
+          onError={m => setErr(m)}
+        />
+
         <button className="btn ghost" style={{ marginTop: 6 }} onClick={onConnectExtension}>
           Connect a browser wallet instead
+        </button>
+        <button className="btn ghost" style={{ marginTop: 2 }} onClick={() => setSheet('import')}>
+          Import a recovery phrase or key
+        </button>
+      </Sheet>
+
+      <Sheet open={sheet === 'import'} onClose={close}
+        title="Import a wallet"
+        lede="Paste a 12/24-word recovery phrase, a private key, or a keypair JSON.">
+        <div className="field">
+          <label>Recovery phrase or private key</label>
+          <textarea className="input mono" rows={3} placeholder="word1 word2 word3 … / base58 key / [12,34,…]"
+            value={pasted} onChange={e => { setPasted(e.target.value); setErr(''); }} />
+        </div>
+        {err && <div className="note stop">{err}</div>}
+        <div className="note warn">
+          <b>Only paste keys you own.</b> Whoever holds this phrase controls the funds.
+          It's encrypted on this device and never sent to any server.
+        </div>
+        <button className="btn butter" disabled={busy || !pasted.trim()} onClick={async () => {
+          setBusy(true); setErr('');
+          try { await onImportWallet(pasted.trim()); setPasted(''); }
+          catch (e) { setErr(e.message || 'Could not import that.'); }
+          finally { setBusy(false); }
+        }}>
+          {busy ? <><span className="spinner" /> Importing…</> : 'Import wallet'}
+        </button>
+      </Sheet>
+
+      <Sheet open={sheet === 'walletpin'} onClose={pinPending ? undefined : close}
+        title="Enter your wallet PIN"
+        lede="This wallet is PIN-protected. Your PIN unwraps it on this device — we never see it.">
+        <div className="field">
+          <label>PIN</label>
+          <input className="input" type="password" inputMode="numeric" placeholder="Your PIN"
+            value={pass} onChange={e => { setPass(e.target.value); setErr(''); }} />
+        </div>
+        {err && <div className="note stop">{err}</div>}
+        <button className="btn butter" disabled={busy || pass.length < 4} onClick={async () => {
+          setBusy(true); setErr('');
+          try { await onUnlockPin(pass); setPass(''); }
+          catch { setErr('Wrong PIN — try again.'); }
+          finally { setBusy(false); }
+        }}>
+          {busy ? <><span className="spinner" /> Unlocking…</> : 'Unlock wallet'}
+        </button>
+      </Sheet>
+
+      <Sheet open={sheet === 'setpin'} onClose={close}
+        title="Protect with a PIN"
+        lede="Adds a PIN only you know. After this, even we can't recover your wallet without it — true self-custody, still usable on any device.">
+        <div className="field">
+          <label>Choose a PIN (min 4 digits)</label>
+          <input className="input" type="password" inputMode="numeric" placeholder="New PIN"
+            value={pass} onChange={e => { setPass(e.target.value); setErr(''); }} />
+        </div>
+        {err && <div className="note stop">{err}</div>}
+        <div className="note warn">
+          <b>No PIN reset.</b> If you forget it, recover with your saved recovery
+          phrase instead. Export it first from Settings if you haven't.
+        </div>
+        <button className="btn grass" disabled={busy || pass.length < 4} onClick={async () => {
+          setBusy(true); setErr('');
+          try { await onProtectPin(pass); setPass(''); }
+          catch (e) { setErr(e.message || 'Could not set the PIN.'); }
+          finally { setBusy(false); }
+        }}>
+          {busy ? <><span className="spinner" /> Setting…</> : 'Set PIN'}
         </button>
       </Sheet>
 
       <Sheet open={sheet === 'receive'} onClose={close}
-        title="Receive USDC" lede="On Solana. Near-instant, near-free.">
+        title="Receive" lede={bkSession ? 'Get paid at your counter, or receive USDC on-chain.' : 'On Solana. Near-instant, near-free.'}>
+        {bkSession && (
+          <div className="card pale" style={{ boxShadow: 'var(--sh-sm)' }}>
+            <div className="lbl">Payment QR — customers scan this</div>
+            {mooQr ? (
+              <>
+                <div style={{ textAlign: 'center', margin: '10px 0' }}>
+                  <img src={mooQr.dataUrl} alt="moo.cash payment QR"
+                       style={{ width: 220, height: 220, borderRadius: 12, border: '2.5px solid var(--hide)' }} />
+                </div>
+                <div style={{ textAlign: 'center', fontSize: 13.5, fontWeight: 800, marginBottom: 10 }}>
+                  {mooQr.amount ? `${fmtLocal(byCode(region), mooQr.amount)} · fixed` : 'Open amount'}
+                </div>
+                <div className="row">
+                  <button className="btn" onClick={() => { navigator.clipboard?.writeText(mooQr.compact); toast('Code copied 🐄'); }}>
+                    Copy code
+                  </button>
+                  <button className="btn" onClick={() => setMooQr(null)}>New QR</button>
+                </div>
+              </>
+            ) : (
+              <MintQrForm onMint={onMintQr} market={byCode(region)} />
+            )}
+            <div className="note info" style={{ marginTop: 10 }}>
+              Signed by the settlement service — a tampered copy is refused at scan time.
+              Paying it moves real balance between moo accounts.
+            </div>
+          </div>
+        )}
         <div className="card cream" style={{ textAlign: 'center', boxShadow: 'none' }}>
           <CowLogo size={64} />
           <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 700, wordBreak: 'break-all', marginTop: 12, lineHeight: 1.6 }}>
@@ -433,8 +886,71 @@ function Sheets({
         <button className="btn" onClick={close}>Close</button>
       </Sheet>
 
+      <Sheet open={sheet === 'mooOrder'} onClose={close}
+        title={mooOrder?.status === 'SETTLED' ? 'Paid 🐄' : 'Order ' + (mooOrder?.status || '').toLowerCase()}
+        lede={mooOrder?.status === 'SETTLED' ? 'Settled through the real order lifecycle.' : ''}>
+        {mooOrder && (
+          <>
+            <div className="brk">
+              <div className="brw"><span className="k">Reference</span><span className="v">{mooOrder.reference}</span></div>
+              <div className="brw"><span className="k">Merchant got</span>
+                <span className="v">{fmtLocal(market, Number(mooOrder.fiatAmount.value) / 100)}</span></div>
+              <div className="brw"><span className="k">You paid</span>
+                <span className="v">{fmtUsd(Number(BigInt(mooOrder.cryptoAmount.value)) / 1e6)} USDC</span></div>
+              <div className="brw"><span className="k">Fee</span>
+                <span className="v">{fmtUsd((Number(BigInt(mooOrder.fees.platform.value)) + Number(BigInt(mooOrder.fees.staker.value)) + Number(BigInt(mooOrder.fees.merchantRebate.value))) / 1e6)} USDC</span></div>
+              <div className="brw"><span className="k">Fill</span>
+                <span className="v">{mooOrder.matchType === 'INTERNAL' ? 'instant (internal float)' : mooOrder.matchType || '—'}</span></div>
+              <div className="brw tot"><span>Status</span>
+                <span className="v">{mooOrder.status === 'SETTLED' ? '✅ SETTLED' : mooOrder.status}</span></div>
+            </div>
+            {mooOrder.settlement?.payoutRef && (
+              <div className="note info">
+                Payout ref <b>{mooOrder.settlement.payoutRef}</b> · adapter <b>{mooOrder.settlement.payoutAdapter}</b>.
+                The fiat leg is the mock rail — a licensed PSP replaces exactly this one adapter.
+              </div>
+            )}
+            {mooOrder.status === 'TIMEOUT' && (
+              <div className="note warn">
+                <b>No fill within 60s.</b> Your hold was released automatically — nothing left your balance.
+              </div>
+            )}
+          </>
+        )}
+        <button className="btn" onClick={close}>Close</button>
+      </Sheet>
+
       <Sheet open={sheet === 'decoded'} onClose={close} title="QR decoded">
-        {decoded && !decoded.parsed && (
+        {decoded?.mooError && (
+          <div className="note stop">
+            <b>Refused.</b> {decoded.mooError} — a failed signature means the code was
+            tampered with or did not come from this service. Do not pay it.
+          </div>
+        )}
+        {decoded?.moo && (
+          <>
+            <div className="brk">
+              <div className="brw"><span className="k">Scheme</span><span className="v">moo.cash 🐄</span></div>
+              <div className="brw"><span className="k">Merchant</span><span className="v">{decoded.moo.merchantName}</span></div>
+              <div className="brw"><span className="k">Signature</span><span className="v">✅ verified by server</span></div>
+              <div className="brw"><span className="k">Amount</span>
+                <span className="v">
+                  {decoded.moo.openAmount
+                    ? (decoded.amountHint ? fmtLocal(market, decoded.amountHint) + ' (from keypad)' : 'open — enter on keypad')
+                    : fmtLocal(market, Number(decoded.moo.fiatAmount.value) / 100)}
+                </span>
+              </div>
+            </div>
+            <button className="btn lime" disabled={payBusy} onClick={onPayMoo}>
+              {payBusy ? <><span className="spinner" /> Settling…</> : 'Pay now →'}
+            </button>
+            <div className="note info">
+              Real settlement: your balance is held, the order broadcasts with a 60s TTL,
+              and internal liquidity fills it instantly when it can.
+            </div>
+          </>
+        )}
+        {decoded && !decoded.parsed && !decoded.moo && !decoded.mooError && (
           <>
             <div className="note stop"><b>Not a payment code.</b> It didn't match a UPI link or an EMVCo payload.</div>
             <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, wordBreak: 'break-all', opacity: .6 }}>
@@ -500,18 +1016,15 @@ function Sheets({
       </Sheet>
 
       <Sheet open={sheet === 'export'} onClose={close}
-        title="Export your key" lede="Anyone with this can spend your funds.">
+        title="Export your wallet" lede="Anyone with any of these can spend your funds.">
         <div className="note stop">
-          <b>Save it offline now.</b> If you lose your passphrase this is the only way back in.
-          Never paste it into a website.
+          <b>Save it offline now.</b> Never paste it into a website. moo.cash will
+          never ask for it.
         </div>
         {keypair ? (
-          <button className="btn lime" onClick={() => {
-            navigator.clipboard?.writeText(JSON.stringify([...keypair.secretKey]));
-            toast('Copied — store it safely');
-          }}>Copy secret key</button>
+          <ExportKeys keypair={keypair} toast={toast} />
         ) : (
-          <div className="note info">Only available for email wallets created on this device.</div>
+          <div className="note info">Only available for wallets created or imported on this device.</div>
         )}
       </Sheet>
 
@@ -583,3 +1096,27 @@ function Diagnostics() {
 }
 
 const DEFAULT_RPC_LOCAL = DEFAULT_RPC;
+
+
+/* ── small form: amount for a merchant receive-QR ── */
+function MintQrForm({ onMint, market }) {
+  const [amt, setAmt] = useState('');
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    try { await onMint(amt ? parseFloat(amt) : null); } finally { setBusy(false); }
+  };
+  return (
+    <>
+      <input
+        className="input" inputMode="decimal" placeholder={`Amount in ${market.cur} (blank = open)`}
+        value={amt}
+        onChange={e => setAmt(e.target.value.replace(/[^0-9.]/g, ''))}
+        style={{ marginBottom: 10 }}
+      />
+      <button className="btn butter" disabled={busy} onClick={go}>
+        {busy ? <><span className="spinner" /> Signing…</> : 'Create payment QR'}
+      </button>
+    </>
+  );
+}

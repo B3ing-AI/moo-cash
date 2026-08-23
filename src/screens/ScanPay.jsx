@@ -9,6 +9,7 @@ export default function ScanPay({ quote, usdc, connected, onPlaceOrder, onScanne
   const m = quote.market;
   const rate = quote.sell || m.fx;
   const [amount, setAmount] = useState('');
+  const [paste, setPaste] = useState('');
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -130,9 +131,23 @@ export default function ScanPay({ quote, usdc, connected, onPlaceOrder, onScanne
         </div>
       </div>
 
+      <div className="row" style={{ marginTop: 11 }}>
+        <input
+          className="input" placeholder="…or paste a payment code"
+          value={paste} onChange={e => setPaste(e.target.value)}
+          style={{ flex: 1, minWidth: 0 }}
+        />
+        <button
+          className="btn" style={{ flex: 'none', width: 'auto', padding: '0 18px' }}
+          disabled={!paste.trim()}
+          onClick={() => { onScanned(paste, value); setPaste(''); }}
+        >Go</button>
+      </div>
+
       <div className="note info" style={{ marginTop: 14 }}>
-        Real decoder — it parses genuine <b>upi://pay</b> links and EMVCo payloads
-        (KHQR, QRIS, PromptPay, QR Ph, PIX), checks the CRC, and refuses tampered codes.
+        Real decoder — it parses <b>moocash://</b> invoices (server-verified signature),
+        genuine <b>upi://pay</b> links and EMVCo payloads (KHQR, QRIS, PromptPay, QR Ph, PIX),
+        checks the CRC, and refuses tampered codes.
       </div>
     </div>
   );

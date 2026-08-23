@@ -128,6 +128,32 @@ async function deriveKey(pass, salt) {
   );
 }
 
+/**
+ * PIN-wrap the recoverable server seed so the backend can't reconstruct the
+ * key alone (non-custodial 2-of-2). Reuses the same PBKDF2→AES-GCM as the
+ * vault; a wrong PIN fails the GCM tag on unwrap rather than silently
+ * producing a junk wallet.
+ */
+export async function wrapSeedWithPin(seedB64, pin) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pin, salt);
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, unb64(seedB64));
+  // wrapped blob = iv || ciphertext, base64 — the salt travels alongside.
+  const blob = new Uint8Array(iv.length + ct.byteLength);
+  blob.set(iv, 0); blob.set(new Uint8Array(ct), iv.length);
+  return { wrapped: b64(blob), salt: b64(salt) };
+}
+
+export async function unwrapSeedWithPin(wrappedB64, saltB64, pin) {
+  const blob = unb64(wrappedB64);
+  const iv = blob.slice(0, 12);
+  const ct = blob.slice(12);
+  const key = await deriveKey(pin, unb64(saltB64));
+  const seed = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct); // throws on wrong PIN
+  return b64(new Uint8Array(seed));
+}
+
 export function deviceSecret() {
   let k = store.get('moo.dk', '');
   if (!k) { k = b64(crypto.getRandomValues(new Uint8Array(32))); store.set('moo.dk', k); }
@@ -138,24 +164,56 @@ export function vault() {
   try { return JSON.parse(store.get('moo.vault', 'null')); } catch { return null; }
 }
 
-export async function createWallet(email, pass) {
-  const kp = Keypair.generate();
+/**
+ * v2 vault: the ciphertext is JSON { sk: [64 bytes], mnemonic } so the
+ * recovery phrase is exportable later — encrypted with the same key as the
+ * secret, never stored in the clear. v1 vaults (raw 64-byte ciphertext,
+ * no mnemonic) still unlock; they simply have no phrase to show.
+ */
+async function sealVault(kp, mnemonic, email, pass) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveKey(pass, salt);
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, kp.secretKey);
+  const payload = enc.encode(JSON.stringify({ sk: [...kp.secretKey], mnemonic: mnemonic || null }));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, payload);
   store.set('moo.vault', JSON.stringify({
-    v: 1, salt: b64(salt), iv: b64(iv), ct: b64(ct), email, pk: kp.publicKey.toBase58(),
+    v: 2, salt: b64(salt), iv: b64(iv), ct: b64(ct), email, pk: kp.publicKey.toBase58(),
+    hasMnemonic: !!mnemonic,
   }));
+}
+
+export async function createWallet(email, pass) {
+  // Real BIP39 words + Phantom-compatible derivation (m/44'/501'/0'/0') —
+  // the phrase shown at export restores this exact address anywhere.
+  const { createHdWallet } = await import('./hd.js');
+  const { mnemonic, keypair } = createHdWallet();
+  await sealVault(keypair, mnemonic, email, pass);
+  return keypair;
+}
+
+/** Import an external wallet (words / base58 / JSON) into the local vault. */
+export async function importWalletToVault(kp, mnemonic, email, pass) {
+  await sealVault(kp, mnemonic, email, pass);
   return kp;
 }
 
-export async function unlockWallet(pass) {
+/** Unlock, returning the phrase too (null for v1 vaults and raw-key imports). */
+export async function unlockVault(pass) {
   const v = vault();
   if (!v) throw new Error('No wallet saved on this device.');
   const key = await deriveKey(pass, unb64(v.salt));
-  const secret = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(v.iv) }, key, unb64(v.ct));
-  return Keypair.fromSecretKey(new Uint8Array(secret));
+  const plain = new Uint8Array(
+    await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(v.iv) }, key, unb64(v.ct)),
+  );
+  if (v.v >= 2) {
+    const { sk, mnemonic } = JSON.parse(new TextDecoder().decode(plain));
+    return { keypair: Keypair.fromSecretKey(new Uint8Array(sk)), mnemonic: mnemonic || null };
+  }
+  return { keypair: Keypair.fromSecretKey(plain), mnemonic: null };
+}
+
+export async function unlockWallet(pass) {
+  return (await unlockVault(pass)).keypair;
 }
 
 /** Detect an injected browser wallet. */
