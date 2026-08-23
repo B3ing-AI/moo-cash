@@ -915,6 +915,28 @@ function Sheets({
                 <b>No fill within 60s.</b> Your hold was released automatically — nothing left your balance.
               </div>
             )}
+            {mooOrder.status === 'FAILED' && (
+              <div className="note warn">
+                <b>Declined — no P2P match found.</b> {mooOrder.failureReason ? `Reason: ${mooOrder.failureReason}. ` : ''}
+                Your USDC was not taken.
+              </div>
+            )}
+            {mooOrder.status === 'LOCKED' && (
+              <div className="note stop">
+                <b>Payment couldn’t be confirmed.</b> Your USDC is safely held while we
+                reconcile{typeof mooOrder.lockRemainingMs === 'number' ? ` (auto-returns in ~${Math.ceil(mooOrder.lockRemainingMs / 3_600_000)}h)` : ''}.
+                {mooOrder.ticket
+                  ? <> A ticket is open — our team is reviewing it.</>
+                  : <> If you don’t get your funds, raise a ticket and a human will resolve it.</>}
+                {!mooOrder.ticket && (
+                  <button className="btn dark" style={{ marginTop: 10 }}
+                    onClick={async () => {
+                      try { await backend.raiseTicket(mooOrder.id, 'Funds held — please reconcile'); toast('Ticket raised — funds frozen for review'); }
+                      catch (e) { toast(e.message || 'Could not raise ticket'); }
+                    }}>Raise a ticket</button>
+                )}
+              </div>
+            )}
           </>
         )}
         <button className="btn" onClick={close}>Close</button>

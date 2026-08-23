@@ -245,8 +245,15 @@ export async function getOrder(id) {
  * peer-book path. (Socket.IO is the production answer; polling keeps the
  * frontend dependency-free.)
  */
+/** Raise a support ticket on a LOCKED order (ambiguous payout, funds held). */
+export async function raiseTicket(orderId, message) {
+  return call('POST', `/orders/${orderId}/ticket`, { message: message || '' });
+}
+
 export async function waitForOrder(id, { timeoutMs = 65_000, intervalMs = 900 } = {}) {
-  const terminal = new Set(['SETTLED', 'TIMEOUT', 'CANCELLED', 'FAILED']);
+  // LOCKED is terminal for the wait: the payment couldn't be confirmed and the
+  // funds are held for reconciliation — stop polling and show the state.
+  const terminal = new Set(['SETTLED', 'TIMEOUT', 'CANCELLED', 'FAILED', 'LOCKED']);
   const deadline = Date.now() + timeoutMs;
   let last = await getOrder(id);
   while (!terminal.has(last.status) && Date.now() < deadline) {
