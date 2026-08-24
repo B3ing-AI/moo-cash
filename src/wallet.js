@@ -109,6 +109,25 @@ export async function buildTransfer(conn, from, to, units) {
   return { tx, lastValidBlockHeight, createsAta: !dstInfo, simError: sim.value.err, simLogs: sim.value.logs || [] };
 }
 
+/**
+ * REAL same-chain USDC send on Solana: build → sign with the embedded keypair
+ * → broadcast → confirm. `uiAmount` is human USDC (e.g. 2.5). Returns the
+ * signature. This is a genuine on-chain transfer, not a simulation.
+ */
+export async function sendUsdc(conn, keypair, toAddress, uiAmount) {
+  const units = Math.round(Number(uiAmount) * 10 ** USDC_DECIMALS);
+  if (!units || units <= 0) throw new Error('Enter a valid amount');
+  const built = await buildTransfer(conn, keypair.publicKey, toAddress, units);
+  if (built.simError) throw new Error('Transfer would fail — check the address and your balance.');
+  built.tx.sign(keypair);
+  const sig = await conn.sendRawTransaction(built.tx.serialize());
+  await conn.confirmTransaction(
+    { signature: sig, blockhash: built.tx.recentBlockhash, lastValidBlockHeight: built.lastValidBlockHeight },
+    'confirmed',
+  );
+  return sig;
+}
+
 /* ══════════════════════════════════════════════════════════════
    Embedded wallet — a real keypair generated in the browser and
    encrypted at rest with PBKDF2-SHA256 → AES-GCM.

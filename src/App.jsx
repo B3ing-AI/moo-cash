@@ -4,7 +4,7 @@ import { MARKETS, byCode, fmtLocal, fmtUsd } from './markets.js';
 import { fetchRates, quoteMarket } from './rates.js';
 import {
   store, vault, deviceSecret, createWallet, unlockWallet, unlockVault, importWalletToVault,
-  wrapSeedWithPin, unwrapSeedWithPin,
+  wrapSeedWithPin, unwrapSeedWithPin, sendUsdc,
   detectProvider, diagnose, makeConnection, fetchBalances, DEFAULT_RPC,
 } from './wallet.js';
 import { importWallet as parseImport, toBase58, keypairFromServerSeed, mnemonicFromServerSeed } from './hd.js';
@@ -22,6 +22,7 @@ import ScanPay from './screens/ScanPay.jsx';
 import Graze from './screens/Graze.jsx';
 import World from './screens/World.jsx';
 import Market from './screens/Market.jsx';
+import Bridge from './screens/Bridge.jsx';
 import Settings from './screens/Settings.jsx';
 
 const INSTANT_THRESHOLD = 200;
@@ -686,6 +687,56 @@ function SocialSignIn({ onSession, onError, onConnectService }) {
   );
 }
 
+/** Real same-chain USDC send on Solana from the embedded wallet. */
+function SolWithdraw({ keypair, rpc, balance, toast, onDone }) {
+  const [amount, setAmount] = useState('');
+  const [to, setTo] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [sig, setSig] = useState('');
+
+  const send = async () => {
+    setErr(''); setSig('');
+    if (!keypair) { setErr('This needs an embedded wallet (email sign-in), not a connected extension.'); return; }
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) { setErr('Enter an amount'); return; }
+    if (!to || to.length < 32) { setErr('Enter a valid Solana address'); return; }
+    setBusy(true);
+    try {
+      const conn = makeConnection(rpc);
+      const signature = await sendUsdc(conn, keypair, to.trim(), amt);
+      setSig(signature);
+      toast('Sent on Solana ✅');
+    } catch (e) { setErr(e.message || 'Send failed'); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <>
+      <div className="note warn" style={{ fontSize: 12 }}>Send USDC only to <b>Solana</b> addresses.</div>
+      <div className="card pale" style={{ background: 'var(--grass-lt)', boxShadow: 'var(--sh-sm)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', opacity: .55 }}>Amount</span>
+          <span style={{ fontSize: 12, opacity: .7 }}>Balance {Number(balance || 0).toFixed(2)}
+            <button className="btn ghost sm" style={{ padding: '2px 8px', marginLeft: 6, fontSize: 11 }}
+              onClick={() => setAmount(String(balance || 0))}>Max</button></span>
+        </div>
+        <input className="input" inputMode="decimal" placeholder="0.00" value={amount}
+          onChange={e => { setAmount(e.target.value); setErr(''); }} style={{ marginTop: 6, fontSize: 20, fontWeight: 800 }} />
+      </div>
+      <div className="field" style={{ marginTop: 10 }}>
+        <label>Recipient (Solana address)</label>
+        <input className="input mono" placeholder="Address…" value={to} onChange={e => { setTo(e.target.value); setErr(''); }} />
+      </div>
+      {err && <div className="note stop">{err}</div>}
+      {sig && <div className="note info">Sent. Signature <b>{sig.slice(0, 10)}…</b></div>}
+      <button className="btn grass" disabled={busy} onClick={send}>
+        {busy ? <><span className="spinner" /> Sending…</> : 'Withdraw USDC'}
+      </button>
+    </>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════
    Sheets kept together so App stays readable.
    ══════════════════════════════════════════════════════════════ */
@@ -704,6 +755,10 @@ function Sheets({
   const [err, setErr] = useState('');
   const [pasted, setPasted] = useState('');
   const [rpcDraft, setRpcDraft] = useState(rpc === DEFAULT_RPC ? '' : rpc);
+  // goat-style two-step deposit/withdraw: null = choose method.
+  const [depositMode, setDepositMode] = useState(null);
+  const [withdrawMode, setWithdrawMode] = useState(null);
+  useEffect(() => { if (sheet !== 'deposit') setDepositMode(null); if (sheet !== 'withdraw') setWithdrawMode(null); }, [sheet]);
 
   const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(mail);
   const canSubmit = emailValid && (!usePass || pass.length >= 8);
@@ -1219,27 +1274,51 @@ function Sheets({
       </Sheet>
 
       <Sheet open={sheet === 'deposit'} onClose={close}
-        title="Add USDC" lede="Top up from any exchange or wallet on Solana.">
-        <div className="card pale">
-          <div className="lbl">✅ Works now — receive on-chain</div>
-          <div style={{ fontSize: 13.5, fontWeight: 700, lineHeight: 1.6, marginBottom: 12 }}>
-            Send USDC on Solana from an exchange or another wallet. In India people already
-            buy USDC on FIU-registered exchanges with UPI — they just withdraw it here.
-          </div>
-          <button className="btn lime" onClick={() => setSheet('receive')}>Show my address</button>
-        </div>
-        <div className="note info">
-          No card needed. The product is spending USDC you already hold — not buying it.
-        </div>
+        title="Deposit USDC" lede="Receive on Solana, or bridge in from any chain.">
+        {depositMode === null ? (
+          <>
+            <button className="btn lime" onClick={() => setSheet('receive')}>
+              ⬇ Receive USDC on Solana <span style={{ opacity: .6, fontWeight: 700 }}>· show address & QR</span>
+            </button>
+            <button className="btn dark" style={{ marginTop: 8 }} onClick={() => setDepositMode('bridge')}>
+              🔀 Deposit from another chain
+            </button>
+            <div style={{ display: 'flex', gap: 5, justifyContent: 'center', flexWrap: 'wrap', marginTop: 10, opacity: .7, fontSize: 12 }}>
+              {['Solana', 'Base', 'Ethereum', 'Polygon', 'BNB', 'Arbitrum'].map(n => (
+                <span key={n} style={{ padding: '2px 8px', border: 'var(--bd)', borderRadius: 999 }}>{n}</span>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <button className="btn ghost sm" style={{ marginBottom: 8, padding: '5px 10px' }} onClick={() => setDepositMode(null)}>← Back</button>
+            <Bridge direction="in" solAddress={address} evmWallet={evmWallet} onConnectEvm={onConnectEvm} toast={toast} />
+          </>
+        )}
       </Sheet>
 
       <Sheet open={sheet === 'withdraw'} onClose={close}
-        title="Withdraw" lede="Cash out to a local account, or send on-chain.">
-        <div className="note warn">
-          <b>The payout leg needs a partner.</b> Converting to local currency and pushing it
-          to a bank requires a licensed provider in each market. On-chain sends work today.
-        </div>
-        <button className="btn" onClick={() => setSheet('receive')}>Show my address</button>
+        title="Withdraw USDC" lede="Send on Solana, or bridge out to any chain.">
+        {withdrawMode === null ? (
+          <>
+            <button className="btn lime" onClick={() => setWithdrawMode('solana')}>
+              ⬆ Withdraw on Solana <span style={{ opacity: .6, fontWeight: 700 }}>· to a Solana address</span>
+            </button>
+            <button className="btn dark" style={{ marginTop: 8 }} onClick={() => setWithdrawMode('bridge')}>
+              🔀 Withdraw to another chain
+            </button>
+          </>
+        ) : withdrawMode === 'solana' ? (
+          <>
+            <button className="btn ghost sm" style={{ marginBottom: 8, padding: '5px 10px' }} onClick={() => setWithdrawMode(null)}>← Back</button>
+            <SolWithdraw keypair={keypair} rpc={rpc} balance={bkSession ? ledger?.available : usdc} toast={toast} onDone={close} />
+          </>
+        ) : (
+          <>
+            <button className="btn ghost sm" style={{ marginBottom: 8, padding: '5px 10px' }} onClick={() => setWithdrawMode(null)}>← Back</button>
+            <Bridge direction="out" solAddress={address} evmWallet={evmWallet} onConnectEvm={onConnectEvm} toast={toast} />
+          </>
+        )}
       </Sheet>
 
       <Sheet open={sheet === 'export'} onClose={close}
