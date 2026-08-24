@@ -20,7 +20,15 @@ export const Icon = {
 };
 
 /* ── header used on every in-app screen ── */
-export function Header({ onMenu, onReceive, onHome }) {
+/** Deterministic pastel avatar from an address — cheap on-brand identicon. */
+function addrColor(addr) {
+  let h = 0;
+  for (let i = 0; i < addr.length; i++) h = (h * 31 + addr.charCodeAt(i)) >>> 0;
+  return `hsl(${h % 360} 70% 62%)`;
+}
+
+export function Header({ onMenu, onReceive, onHome, address, walletLabel, onWallet }) {
+  const short = address ? `${address.slice(0, 4)}…${address.slice(-4)}` : null;
   return (
     <header className="hdr">
       <button className="iconbtn" onClick={onMenu} aria-label="Menu"><Icon.menu /></button>
@@ -28,7 +36,22 @@ export function Header({ onMenu, onReceive, onHome }) {
         <CowLogo size={38} />
         <span className="wordmark">moo.cash</span>
       </div>
-      <button className="receive-btn" onClick={onReceive}>Receive ↓</button>
+      {short ? (
+        // Connected-wallet chip, like the goat.cash header: label + address + avatar.
+        <button className="wallet-chip" onClick={onWallet} title={address}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--white)',
+            border: 'var(--bd)', borderRadius: 999, boxShadow: 'var(--sh-sm)', padding: '5px 6px 5px 12px',
+            fontWeight: 800, fontSize: 13.5, cursor: 'pointer', maxWidth: 168 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', whiteSpace: 'nowrap' }}>
+            {walletLabel ? `${walletLabel} ` : ''}{short}
+          </span>
+          <span aria-hidden style={{ width: 24, height: 24, borderRadius: '50%',
+            background: `radial-gradient(circle at 30% 30%, #fff6, transparent), ${addrColor(address)}`,
+            border: '2px solid var(--hide)', flex: '0 0 auto' }} />
+        </button>
+      ) : (
+        <button className="receive-btn" onClick={onReceive}>Receive ↓</button>
+      )}
     </header>
   );
 }

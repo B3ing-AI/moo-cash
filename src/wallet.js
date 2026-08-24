@@ -6,7 +6,10 @@ export const USDC_DECIMALS = 6;
 const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ATA_PROGRAM = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 const SYSTEM_PROGRAM = '11111111111111111111111111111111';
-export const DEFAULT_RPC = 'https://api.mainnet-beta.solana.com';
+// api.mainnet-beta.solana.com returns HTTP 403 to browser origins, so the
+// embedded wallet could never read its balance from it. publicnode's Solana
+// RPC is CORS-enabled and keyless — verified from the deployed origin.
+export const DEFAULT_RPC = 'https://solana-rpc.publicnode.com';
 
 /**
  * localStorage throws a SecurityError on opaque origins (file:// among them).

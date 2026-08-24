@@ -11,12 +11,18 @@
  * happens to be on.
  */
 
-/** Chains we read. Public RPCs — rate-limited but keyless; swap for a paid
- *  endpoint in production. Stable-coin decimals differ per chain (BSC = 18). */
+/**
+ * Chains we read. RPCs are BROWSER-USABLE (CORS-enabled, keyless) and each has
+ * fallbacks — verified from the deployed origin. The obvious public endpoints
+ * do NOT work from a browser: eth.llamarpc.com blocks CORS, polygon-rpc.com is
+ * dead ("API key disabled"), so those are deliberately not here. Stablecoin
+ * decimals differ per chain (BSC = 18, the rest 6). Swap in a paid RPC
+ * (Alchemy/Infura) for production reliability.
+ */
 export const EVM_CHAINS = {
   ethereum: {
     key: 'ethereum', name: 'Ethereum', chainId: 1, symbol: 'ETH',
-    rpc: 'https://eth.llamarpc.com',
+    rpcs: ['https://ethereum-rpc.publicnode.com', 'https://eth.drpc.org', 'https://rpc.mevblocker.io'],
     tokens: [
       { symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6 },
       { symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
@@ -24,7 +30,7 @@ export const EVM_CHAINS = {
   },
   polygon: {
     key: 'polygon', name: 'Polygon', chainId: 137, symbol: 'POL',
-    rpc: 'https://polygon-rpc.com',
+    rpcs: ['https://polygon-bor-rpc.publicnode.com', 'https://polygon.drpc.org'],
     tokens: [
       { symbol: 'USDC', address: '0x3c499c542cEF5E3811e1192cE70d8cC03d5c3359', decimals: 6 },
       { symbol: 'USDT', address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', decimals: 6 },
@@ -32,10 +38,17 @@ export const EVM_CHAINS = {
   },
   bnb: {
     key: 'bnb', name: 'BNB Chain', chainId: 56, symbol: 'BNB',
-    rpc: 'https://bsc-dataseed.binance.org',
+    rpcs: ['https://bsc-rpc.publicnode.com', 'https://bsc-dataseed.binance.org'],
     tokens: [
       { symbol: 'USDC', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580D', decimals: 18 },
       { symbol: 'USDT', address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18 },
+    ],
+  },
+  base: {
+    key: 'base', name: 'Base', chainId: 8453, symbol: 'ETH',
+    rpcs: ['https://base-rpc.publicnode.com', 'https://mainnet.base.org', 'https://base.drpc.org'],
+    tokens: [
+      { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
     ],
   },
 };
@@ -82,7 +95,7 @@ export async function connectEvm(provider) {
 /* ── balance reading (raw JSON-RPC, no libs) ── */
 
 let rpcId = 0;
-async function rpc(url, method, params, timeoutMs = 8000) {
+async function rpcOnce(url, method, params, timeoutMs = 8000) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
@@ -98,6 +111,16 @@ async function rpc(url, method, params, timeoutMs = 8000) {
   } finally {
     clearTimeout(t);
   }
+}
+
+/** Try each RPC in turn; a dead/CORS-blocked endpoint falls through to the next. */
+async function rpc(chain, method, params) {
+  let lastErr;
+  for (const url of chain.rpcs) {
+    try { return await rpcOnce(url, method, params); }
+    catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('all RPCs failed');
 }
 
 /** hex wei string → human number with `decimals` places. */
@@ -120,12 +143,12 @@ export function erc20BalanceOfData(address) {
 }
 
 async function nativeBalance(chain, address) {
-  const hex = await rpc(chain.rpc, 'eth_getBalance', [address, 'latest']);
+  const hex = await rpc(chain, 'eth_getBalance', [address, 'latest']);
   return formatUnits(hex, 18);
 }
 
 async function tokenBalance(chain, token, address) {
-  const hex = await rpc(chain.rpc, 'eth_call', [
+  const hex = await rpc(chain, 'eth_call', [
     { to: token.address, data: erc20BalanceOfData(address) },
     'latest',
   ]);

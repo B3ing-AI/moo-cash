@@ -31,7 +31,11 @@ export default function App() {
   /* ── persisted preferences ── */
   const [onboarded, setOnboarded] = useState(() => store.get('moo.onboarded') === '1');
   const [region, setRegion] = useState(() => store.get('moo.region', 'IN'));
-  const [rpc, setRpc] = useState(() => store.get('moo.rpc', DEFAULT_RPC));
+  const [rpc, setRpc] = useState(() => {
+    const saved = store.get('moo.rpc', DEFAULT_RPC);
+    // Migrate returning users off the 403-blocked mainnet-beta endpoint.
+    return /api\.mainnet-beta\.solana\.com/.test(saved) ? DEFAULT_RPC : saved;
+  });
   const [hideBalances, setHideBalances] = useState(false);
   const [notifications, setNotifications] = useState(true);
 
@@ -460,6 +464,9 @@ export default function App() {
           onMenu={() => setSheet('menu')}
           onReceive={() => setSheet('receive')}
           onHome={() => setTab('home')}
+          address={evmWallet?.address || address}
+          walletLabel={evmWallet ? evmWallet.name : (address ? '🐄' : '')}
+          onWallet={() => setSheet('wallets')}
         />
 
         {tab === 'home' && (
